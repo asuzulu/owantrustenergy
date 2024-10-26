@@ -2,8 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\AuthController; // Import AuthController for handling sign-in
-use App\Http\Controllers\PasswordController; // Import for handling password reset
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PasswordController;
 
 // Home page
 Route::get('/', function () {
@@ -30,31 +31,23 @@ Route::get('/products', function () {
     return view('products');
 })->name('products');
 
-// Register page - Show form
+// Register page and routes
 Route::get('/register', [UserController::class, 'showRegisterForm'])->name('register');
-
-// Handle form submission and store in the database
 Route::post('/register', [UserController::class, 'store'])->name('register.store');
-
-// Registered confirmation page (show registered.blade.php view after registration)
 Route::get('/register/success', function () {
-    return view('registered'); // Show the registered.blade.php view
+    return view('registered');
 })->name('register.success');
 
-// Thanks page
-Route::get('/thanks', function () {
-    return view('thanks');
-})->name('thanks');
-
-// Sign In page
+// Sign In routes
 Route::get('/signin', function () {
     return view('signin');
 })->name('signin');
-
-// Handle sign-in form submission
 Route::post('/signin', [AuthController::class, 'authenticate'])->name('signin.store');
 
-// Password reset routes
+// Dashboard route
+Route::get('/dashboard/home', [DashboardController::class, 'showDashboard'])->middleware('auth')->name('dashboard.home');
+
+// Password reset routes (Assuming you have this set up)
 Route::get('password/reset', [PasswordController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('password/email', [PasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('password/reset/{token}', [PasswordController::class, 'showResetForm'])->name('password.reset');

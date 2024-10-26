@@ -28,9 +28,7 @@
                 <div class="form-group col-md-4">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="remember" name="remember">
-                        <label class="form-check-label" for="remember">
-                            Remember Me
-                        </label>
+                        <label class="form-check-label" for="remember">Remember Me</label>
                     </div>
                 </div>
             </div>
