@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="container" style="margin-top: -7rem;">
+<div class="container" style="margin-top: -6rem;">
     <div class="row tm-content-row tm-mt-big">
         <div class="bg-white tm-block h-100">
             <div class="row">
@@ -17,9 +17,9 @@
                     <thead>
                         <tr class="tm-bg-gray">
                             <th scope="col">&nbsp;</th>
-                            <th scope="col">Cylinder Number</th>
+                            <th scope="col" style="width: 10%;">Cylinder #</th> <!-- Reduced width to one-third -->
                             <th scope="col" class="text-center">Size</th>
-                            <th scope="col" class="text-center">Location</th>
+                            <th scope="col" class="text-center" style="width: 30%;">Location</th> <!-- Increased width by two-thirds -->
                             <th scope="col">Date Allocated</th>
                             <th scope="col">&nbsp;</th>
                         </tr>
@@ -29,9 +29,9 @@
                             <th scope="row">
                                 <input type="checkbox" aria-label="Checkbox">
                             </th>
-                            <td class="tm-product-name">1. In malesuada placerat (hover)</td>
-                            <td class="text-center">145</td>
-                            <td class="text-center">255</td>
+                            <td class="tm-product-name">000000001</td>
+                            <td class="text-center">25kg</td>
+                            <td class="text-center">Ahmed Ohida</td>
                             <td>2018-10-28</td>
                             <td><i class="fas fa-trash-alt tm-trash-icon"></i></td>
                         </tr>
@@ -39,9 +39,9 @@
                             <th scope="row">
                                 <input type="checkbox" aria-label="Checkbox">
                             </th>
-                            <td class="tm-product-name">2. Aenean eget urna enim. Sed enim</td>
-                            <td class="text-center">240</td>
-                            <td class="text-center">260</td>
+                            <td class="tm-product-name">000000002</td>
+                            <td class="text-center">12kg</td>
+                            <td class="text-center">Chibueze Nwakachukwu</td>
                             <td>2018-10-24</td>
                             <td><i class="fas fa-trash-alt tm-trash-icon"></i></td>
                         </tr>
@@ -49,9 +49,9 @@
                             <th scope="row">
                                 <input type="checkbox" aria-label="Checkbox">
                             </th>
-                            <td class="tm-product-name">3. Vivamus convallis tincidunt nisi</td>
-                            <td class="text-center">360</td>
-                            <td class="text-center">440</td>
+                            <td class="tm-product-name">000000003</td>
+                            <td class="text-center">12kg</td>
+                            <td class="text-center">Olamide Adeola</td>
                             <td>2019-02-14</td>
                             <td><i class="fas fa-trash-alt tm-trash-icon"></i></td>
                         </tr>
@@ -59,9 +59,9 @@
                             <th scope="row">
                                 <input type="checkbox" aria-label="Checkbox">
                             </th>
-                            <td class="tm-product-name">4. Donec semper massa eget</td>
-                            <td class="text-center">445</td>
-                            <td class="text-center">655</td>
+                            <td class="tm-product-name">000000004</td>
+                            <td class="text-center">5kg</td>
+                            <td class="text-center">Fatima Abubakar</td>
                             <td>2019-03-22</td>
                             <td><i class="fas fa-trash-alt tm-trash-icon"></i></td>
                         </tr>
@@ -69,9 +69,9 @@
                             <th scope="row">
                                 <input type="checkbox" aria-label="Checkbox">
                             </th>
-                            <td class="tm-product-name">5. Donec semper massa eget</td>
-                            <td class="text-center">445</td>
-                            <td class="text-center">655</td>
+                            <td class="tm-product-name">000000005</td>
+                            <td class="text-center">25kg</td>
+                            <td class="text-center">Chidera Okafor</td>
                             <td>2019-03-22</td>
                             <td><i class="fas fa-trash-alt tm-trash-icon"></i></td>
                         </tr>
@@ -79,9 +79,9 @@
                             <th scope="row">
                                 <input type="checkbox" aria-label="Checkbox">
                             </th>
-                            <td class="tm-product-name">6. Donec semper massa eget</td>
-                            <td class="text-center">445</td>
-                            <td class="text-center">655</td>
+                            <td class="tm-product-name">000000006</td>
+                            <td class="text-center">5kg</td>
+                            <td class="text-center">Toluwa Adebayo</td>
                             <td>2019-03-22</td>
                             <td><i class="fas fa-trash-alt tm-trash-icon"></i></td>
                         </tr>
@@ -89,9 +89,9 @@
                             <th scope="row">
                                 <input type="checkbox" aria-label="Checkbox">
                             </th>
-                            <td class="tm-product-name">7. Donec semper massa eget</td>
-                            <td class="text-center">445</td>
-                            <td class="text-center">655</td>
+                            <td class="tm-product-name">000000007</td>
+                            <td class="text-center">12kg</td>
+                            <td class="text-center">Aminu Bello</td>
                             <td>2019-03-22</td>
                             <td><i class="fas fa-trash-alt tm-trash-icon"></i></td>
                         </tr>
@@ -99,9 +99,9 @@
                             <th scope="row">
                                 <input type="checkbox" aria-label="Checkbox">
                             </th>
-                            <td class="tm-product-name">8. Donec semper massa eget</td>
-                            <td class="text-center">445</td>
-                            <td class="text-center">655</td>
+                            <td class="tm-product-name">000000008</td>
+                            <td class="text-center">25kg</td>
+                            <td class="text-center">Izevbizua Omoregie</td>
                             <td>2019-03-22</td>
                             <td><i class="fas fa-trash-alt tm-trash-icon"></i></td>
                         </tr>
@@ -111,7 +111,7 @@
 
             <div class="tm-table-mt tm-table-actions-row">
                 <div class="tm-table-actions-col-left">
-                    <button class="btn btn-danger">Modify Selected Items</button>
+                    <button class="btn btn-danger">Edit Selected Items</button>
                 </div>
                 <div class="tm-table-actions-col-right">
                     <span class="tm-pagination-label">Page</span>

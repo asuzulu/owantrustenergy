@@ -111,6 +111,11 @@ a:focus {
   margin-right: 0;
 }
 
+.bg-white.tm-block.h-100 {
+  width: 90%;       /* Set width to 90% of the page width */
+  margin: 0 auto;  /* Center the element */
+}
+
 .tm-content-row {
   justify-content: center;
   margin-left: -20px;
