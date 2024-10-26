@@ -8,7 +8,7 @@
             asset('css/fontawesome.min.css'),
             asset('jquery-ui-datepicker/jquery-ui.min.css'),
             asset('css/bootstrap.min.css'),
-            asset('css/tooplate.css'),
+            asset('css/dashboard.css'),
         ]
     ])
 @endsection

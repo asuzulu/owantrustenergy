@@ -5,7 +5,7 @@
 <script src="{{ asset('dashboard/js/Chart.min.js') }}"></script>
 <script src="{{ asset('dashboard/js/fullcalendar.min.js') }}"></script>
 <script src="{{ asset('dashboard/js/bootstrap.min.js') }}"></script>
-<script src="{{ asset('dashboard/js/tooplate-scripts.js') }}"></script>
+<script src="{{ asset('dashboard/js/dashboard-scripts.js') }}"></script>
 <script>
     let ctxLine, ctxBar, ctxPie, optionsLine, optionsBar, optionsPie, configLine, configBar, configPie;
     $(function () {

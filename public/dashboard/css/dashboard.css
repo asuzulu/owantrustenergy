@@ -1,18 +1,3 @@
-/*
-
-Template 2108 Dashboard
-
-http://www.tooplate.com/view/2108-dashboard
-	
-
-COLOR CODES
-
-  Dark Gray: #656565
-  Light Gray: #E6E6E6
-  Blue: #0062BB
-  
-*/
-
 html {
   font-size: 17px;
 }
@@ -33,16 +18,17 @@ body {
 }
 
 .bg02 {
-	background-image: url(../img/dash-bg-02.jpg);
+  background-image: url(../img/dash-bg-02.jpg);
 }
 
 .bg03 {
-	background-image: url(../img/dash-bg-03.jpg);
+  background-image: url(../img/dash-bg-03.jpg);
 }
 
 a {
   transition: all 0.3s ease;
 }
+
 a:hover,
 a:focus {
   text-decoration: none;
@@ -60,10 +46,11 @@ a:focus {
 .tm-site-title {
   display: inline-block;
   text-transform: uppercase;
-  font-size: 2rem;
+  font-size: 1rem;
   margin-left: 1rem;
   color: #656565;
   letter-spacing: 1px;
+  font-weight: 800;
 }
 
 .navbar {
@@ -108,10 +95,10 @@ a:focus {
   padding: 15px 20px;
 }
 
-.navbar-light .navbar-nav .active > .nav-link,
+.navbar-light .navbar-nav .active>.nav-link,
 .navbar-light .navbar-nav .nav-link.active,
 .navbar-light .navbar-nav .nav-link.show,
-.navbar-light .navbar-nav .show > .nav-link,
+.navbar-light .navbar-nav .show>.nav-link,
 .navbar-light .navbar-nav a:hover {
   background-color: #e6e6e6;
 }
@@ -125,9 +112,10 @@ a:focus {
 }
 
 .tm-content-row {
-  justify-content: space-between;
+  justify-content: center;
   margin-left: -20px;
-  margin-right: -20px; /* To offset col padding */
+  margin-right: -20px;
+  display: flex;
 }
 
 .tm-col {
@@ -162,7 +150,7 @@ ol {
   padding-left: 0;
 }
 
-.tm-list-group > li {
+.tm-list-group>li {
   list-style-type: none;
   position: relative;
   cursor: pointer;
@@ -170,19 +158,19 @@ ol {
   padding: 8px;
 }
 
-.tm-list-group-pad-big > li {
+.tm-list-group-pad-big>li {
   padding: 20px;
 }
 
-.tm-list-group > li:hover {
+.tm-list-group>li:hover {
   color: #0266c4;
 }
 
-.tm-list-group-alternate-color > li:nth-child(odd) {
+.tm-list-group-alternate-color>li:nth-child(odd) {
   background-color: #e6e6e6;
 }
 
-.tm-list-group > li:before {
+.tm-list-group>li:before {
   counter-increment: myOrderedListItemsCounter;
   content: counter(myOrderedListItemsCounter) ".";
   margin-right: 0.5em;
@@ -192,7 +180,7 @@ ol {
   padding-left: 30px;
 }
 
-.tm-list > li {
+.tm-list>li {
   margin-bottom: 20px;
 }
 
@@ -228,7 +216,7 @@ label {
 .btn-primary:active,
 .btn-primary:not(:disabled):not(.disabled).active,
 .btn-primary:not(:disabled):not(.disabled):active,
-.show > .btn-primary.dropdown-toggle {
+.show>.btn-primary.dropdown-toggle {
   color: black;
   background-color: #cdd4da;
   border-color: #999999;
@@ -349,9 +337,11 @@ input[type="checkbox"] {
   height: 24px;
   transition: all 0.1s linear;
 }
+
 input[type="checkbox"]:checked {
   background-color: #9f1321;
 }
+
 input[type="checkbox"]:focus {
   outline: 0 none;
   box-shadow: none;
@@ -416,6 +406,7 @@ footer {
   .tm-table-actions-row {
     display: block;
   }
+
   .tm-table-actions-col-right {
     margin-top: 30px;
   }
@@ -428,6 +419,7 @@ footer {
 }
 
 @media (max-width: 1199px) {
+
   .tm-col-big,
   .tm-col-small {
     width: 49.65%;
@@ -455,12 +447,14 @@ footer {
 }
 
 @media (max-width: 991px) {
+
   .tm-col-big,
   .tm-col-small {
     width: 100%;
     min-height: 383px;
     height: auto;
   }
+
   .tm-block {
     padding: 30px;
   }

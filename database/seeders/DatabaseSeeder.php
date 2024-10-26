@@ -15,5 +15,10 @@ class DatabaseSeeder extends Seeder
     {
         // Call the StatesTableSeeder
         $this->call(StatesTableSeeder::class);
+
+        // Call the UsersTableSeeder
+        $this->call([
+            UsersTableSeeder::class,
+        ]);
     }
 }

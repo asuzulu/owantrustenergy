@@ -1,10 +1,12 @@
-<?php
+<?php 
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth; // Import the Auth facade
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\PasswordController;
+use App\Http\Controllers\Auth\PasswordController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 // Home page
 Route::get('/', function () {
@@ -47,8 +49,28 @@ Route::post('/signin', [AuthController::class, 'authenticate'])->name('signin.st
 // Dashboard route
 Route::get('/dashboard/home', [DashboardController::class, 'showDashboard'])->middleware('auth')->name('dashboard.home');
 
-// Password reset routes (Assuming you have this set up)
+// Dashboard additional pages
+Route::get('/dashboard/accounts', function () {
+    return view('dashboard.accounts');
+})->name('dashboard.accounts');
+Route::get('/dashboard/add-product', function () {
+    return view('dashboard.add-product');
+})->name('dashboard.add-product');
+Route::get('/dashboard/edit-product', function () {
+    return view('dashboard.edit-product');
+})->name('dashboard.edit-product');
+Route::get('/dashboard/statistics', function () {
+    return view('dashboard.statistics');
+})->name('dashboard.statistics');
+
+// Password reset routes
 Route::get('password/reset', [PasswordController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('password/email', [PasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('password/reset/{token}', [PasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/reset', [PasswordController::class, 'reset'])->name('password.update');
+
+// Define the logout route with redirection
+Route::post('/logout', function () {
+    Auth::logout(); // Log out the user
+    return redirect('/'); // Redirect to home
+})->name('logout');
