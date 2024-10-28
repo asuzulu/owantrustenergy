@@ -1,7 +1,7 @@
 <?php 
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth; // Import the Auth facade
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
@@ -71,6 +71,16 @@ Route::post('password/reset', [PasswordController::class, 'reset'])->name('passw
 
 // Define the logout route with redirection
 Route::post('/logout', function () {
-    Auth::logout(); // Log out the user
-    return redirect('/'); // Redirect to home
+    Auth::logout();
+    return redirect('/');
 })->name('logout');
+
+// Employee Portal page
+Route::get('/employee-portal', function () {
+    return view('employee-portal');
+})->name('employee.portal');
+
+// Management Portal page
+Route::get('/management-portal', function () {
+    return view('management-portal');
+})->name('management.portal');

@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Sign In - Owan Trust Energy')
+@section('title', 'Management Portal Login - Owan Trust Energy')
 
 @section('content')
-<!-- Sign In form section start -->
-<h1 class="about_text text-center" style="margin-top: 6rem;">Sign In</h1>
+<!-- Management Portal Login form section start -->
+<h1 class="about_text text-center" style="margin-top: 6rem;">Management Portal Login</h1>
 <div class="contact_section layout_padding">
     <div class="container">
         <form action="{{ route('signin.store') }}" method="POST">
@@ -39,8 +39,7 @@
 
             <div class="form-row mt-3 justify-content-center">
                 <div class="col-md-4 text-center">
-                    <a href="{{ route('password.request') }}"><span style="color:blue;">Forgot your password?</span></a>
-                </div>
+                    <a href="{{ route('password.request') }}"><span style="color:blue;">Forgot your password?</span></a>                </div>
             </div>
 
             <div class="form-row mt-2 justify-content-center">
@@ -51,5 +50,5 @@
         </form>
     </div>
 </div>
-<!-- Sign In form section end -->
+<!-- Management Portal Login form section end -->
 @endsection
