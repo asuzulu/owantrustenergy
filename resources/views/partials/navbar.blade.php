@@ -10,18 +10,18 @@
             <a class="nav-item nav-link" href="{{ route('about') }}">About</a>
             <a class="nav-item nav-link" href="{{ route('products') }}">Products</a>
             <a class="nav-item nav-link" href="{{ route('contact') }}">Contact Us</a>
-            
+
             @if(Auth::check())
                 <a class="nav-item nav-link" href="{{ route('dashboard.home') }}">{{ Auth::user()->full_name }}</a>
-                <a class="nav-item nav-link" href="{{ route('logout') }}" 
+                <a class="nav-item nav-link" href="{{ route('logout') }}"
                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Sign Out</a>
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                     @csrf
                 </form>
             @else
                 <a class="nav-item nav-link" href="{{ route('register') }}">Sign Up</a>
-                <a class="nav-item nav-link" href="{{ route('signin') }}">Sign In</a>
+                <a class="nav-item nav-link" href="{{ route('signin.form', ['portal' => 'customer']) }}">Sign In</a>
             @endif
         </div>
-    </div>  
+    </div>
 </nav>

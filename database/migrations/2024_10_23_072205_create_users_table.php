@@ -16,11 +16,14 @@ class CreateUsersTable extends Migration
             $table->string('gender');
             $table->string('street');
             $table->string('city');
-            $table->foreignId('state_id')->constrained()->onDelete('cascade');
+            $table->string('state');
             $table->string('bvn')->unique();
             $table->string('nin')->unique();
             $table->string('email')->unique();
+            $table->date('dob'); // Added dob
             $table->string('password');
+            $table->string('profile_image')->nullable();
+            $table->string('position')->nullable()->default('Customer');  // or set nullable()
             $table->timestamps();
         });
     }

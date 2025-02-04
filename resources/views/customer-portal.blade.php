@@ -8,7 +8,10 @@
 <div class="contact_section layout_padding">
     <div class="container">
         <form action="{{ route('signin.store') }}" method="POST">
-            @csrf <!-- Include CSRF token for form protection -->
+            @csrf
+
+            <!-- Hidden input to identify portal type -->
+            <input type="hidden" name="portal" value="customer">
 
             <div class="form-row justify-content-center">
                 <div class="form-group col-md-4">

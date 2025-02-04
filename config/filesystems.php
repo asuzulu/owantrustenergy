@@ -29,22 +29,24 @@ return [
     */
 
     'disks' => [
-
+        // Private disk - Not publicly accessible
         'local' => [
             'driver' => 'local',
-            'root' => storage_path('app/private'),
-            'serve' => true,
-            'throw' => false,
+            'root' => storage_path('app/private'), // You can keep this if you want private storage
+            'throw' => false, // Do not throw exceptions
         ],
 
+        // Public disk - Publicly accessible files
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
-            'throw' => false,
         ],
 
+
+
+        // Amazon S3 disk
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
@@ -56,22 +58,19 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
         ],
-
     ],
 
     /*
-    |--------------------------------------------------------------------------
-    | Symbolic Links
-    |--------------------------------------------------------------------------
-    |
-    | Here you may configure the symbolic links that will be created when the
-    | `storage:link` Artisan command is executed. The array keys should be
-    | the locations of the links and the values should be their targets.
-    |
-    */
-
+|--------------------------------------------------------------------------
+| Symbolic Links
+|--------------------------------------------------------------------------
+|
+| Here you may configure the symbolic links that will be created when the
+| `storage:link` Artisan command is executed. The array keys should be
+| the locations of the links and the values should be their targets.
+|
+*/
     'links' => [
-        public_path('storage') => storage_path('app/public'),
+        public_path('storage') => storage_path('app/public'), // Symbolic link for public files
     ],
-
 ];

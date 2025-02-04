@@ -9,23 +9,15 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mx-auto">
-            <li class="nav-item"><a class="nav-link active" href="{{ route('dashboard.home') }}">Cylinders</a></li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" data-toggle="dropdown">Reports</a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="#">Daily Report</a>
-                    <a class="dropdown-item" href="#">Weekly Report</a>
-                    <a class="dropdown-item" href="#">Yearly Report</a>
-                </div>
+            <li class="nav-item"><a class="nav-link active" href="{{ route('dashboard.home') }}">Profile</a></li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('dashboard.cylinder', ['userId' => Auth::id()]) }}">Cylinders</a>
             </li>
-            <li class="nav-item"><a class="nav-link" href="{{ route('dashboard.statistics') }}">Statistics</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ route('dashboard.accounts') }}">Accounts</a></li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" data-toggle="dropdown">Settings</a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <a class="dropdown-item" href="#">Profile</a>
                     <a class="dropdown-item" href="#">Billing</a>
-                    <a class="dropdown-item" href="#">Customize</a>
                 </div>
             </li>
         </ul>

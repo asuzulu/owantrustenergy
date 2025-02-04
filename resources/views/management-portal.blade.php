@@ -8,7 +8,10 @@
 <div class="contact_section layout_padding">
     <div class="container">
         <form action="{{ route('signin.store') }}" method="POST">
-            @csrf <!-- Include CSRF token for form protection -->
+            @csrf
+
+            <!-- Hidden input to identify portal type -->
+            <input type="hidden" name="portal" value="management">
 
             <div class="form-row justify-content-center">
                 <div class="form-group col-md-4">
@@ -39,7 +42,8 @@
 
             <div class="form-row mt-3 justify-content-center">
                 <div class="col-md-4 text-center">
-                    <a href="{{ route('password.request') }}"><span style="color:blue;">Forgot your password?</span></a>                </div>
+                    <a href="{{ route('password.request') }}"><span style="color:blue;">Forgot your password?</span></a>
+                </div>
             </div>
 
             <div class="form-row mt-2 justify-content-center">

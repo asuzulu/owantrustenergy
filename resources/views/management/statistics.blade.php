@@ -1,4 +1,4 @@
-@extends('layouts.dashboard')
+@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : 'layouts.employee-dashboard')
 
 @section('content')
     <div class="tm-col tm-col-big">

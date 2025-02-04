@@ -1,4 +1,3 @@
-{{-- resources/views/dashboard.blade.php --}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +7,7 @@
     <div id="home" class="">
         <div class="container">
             {{-- Navbar --}}
-            @include('partials.dashboard.navbar')
+            @include('partials.dashboard.navs.management-navbar')
 
             {{-- Page Content --}}
             <div class="row tm-content-row tm-mt-big">

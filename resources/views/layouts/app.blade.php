@@ -6,10 +6,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>@yield('title', 'Owan Trust Energy')</title>
     <meta name="description" content="@yield('description', 'Owan Trust Energy offers gas cylinders, stoves, burners, and kitchen accessories.')">
-    
+
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('images/fav-icon.png') }}" type="image/x-icon">
-    
+
     <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/responsive.css') }}">
@@ -24,6 +24,7 @@
     <script src="{{ asset('js/plugin.js') }}"></script>
     <script src="{{ asset('js/owl.carousel.js') }}"></script>
     <script src="{{ asset('js/custom.js') }}"></script>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.navbar')
