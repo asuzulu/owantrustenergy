@@ -37,6 +37,12 @@
                 </table>
             </div>
         </div>
+        {{-- Pagination Links --}}
+        @if ($cylinders->hasPages())
+        <div style="text-align: center; margin-top: 20px;">
+        {{ $cylinders->links('pagination::bootstrap-4') }}
+        </div>
+        @endif
     </div>
 </div>
 

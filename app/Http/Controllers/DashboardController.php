@@ -28,7 +28,7 @@ class DashboardController extends Controller
     public function managementHome()
     {
         // Fetch cylinders from the database
-        $cylinders = Cylinder::all();  // You can adjust this as needed (e.g., add filtering, pagination, etc.)
+        $cylinders = Cylinder::orderBy('created_at')->paginate(10); // Ensure pagination is applied
 
         // Pass cylinders to the view
         return view('management.home', compact('cylinders'));

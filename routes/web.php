@@ -160,3 +160,4 @@ Route::resource('warehouses', WarehouseController::class);
 Route::get('/locations/warehouses', [LocationController::class, 'getWarehouses'])->name('locations.getWarehouseLocations');
 Route::get('/locations/getWarehouses', [LocationController::class, 'getWarehouses'])->name('locations.getWarehouses');
 
+Route::get('cylinders/{cylinder}', [CylinderController::class, 'show'])->name('cylinders.show');

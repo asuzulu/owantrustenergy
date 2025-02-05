@@ -88,7 +88,7 @@ class CylinderController extends Controller
             ]);
 
             // Log the creation of the new cylinder
-            Log::channel('cylinder_creators')->info('Cylinder Added', [
+            Log::channel('cylinder_creation')->info('Cylinder Added', [
                 'user' => Auth::user()->first_name . ' ' . Auth::user()->last_name,
                 'cylinder_id' => $cylinderId,
                 'size' => $validated['size'],

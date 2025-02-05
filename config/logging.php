@@ -133,6 +133,12 @@ return [
             'level' => 'info',
         ],
 
+        'cylinder_creation' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/cylinder_creation.log'),
+            'level' => 'info',
+        ],
+
     ],
 
 ];
