@@ -1,5 +1,5 @@
 <div class="custom-file mt-3 mb-3">
-    <form action="{{ route('profile.updateImage') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('users.update-profile-image', ['id' => $user->id]) }}" method="POST" enctype="multipart/form-data">
         @csrf
         <input id="fileInput" name="profile_image" type="file" style="display:none;" />
         <input type="button" class="btn btn-primary d-block mx-xl-auto" value="Upload JPG" onclick="document.getElementById('fileInput').click();" />

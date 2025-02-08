@@ -22,7 +22,7 @@
                     </thead>
                     <tbody>
                         @foreach ($warehouses as $warehouse)
-                        <tr>
+                        <tr onclick="window.location='{{ route('warehouses.show', $warehouse->id) }}';" style="cursor: pointer;">
                             <td>{{ $warehouse->name }}</td>
                             <td>{{ $warehouse->address }}</td>
                             <td>{{ $warehouse->phone_number }}</td>

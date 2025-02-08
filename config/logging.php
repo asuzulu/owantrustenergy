@@ -133,6 +133,12 @@ return [
             'level' => 'info',
         ],
 
+        'warehouse_update' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/warehouse_update.log'),
+            'level' => 'info',
+        ],
+
         'cylinder_creation' => [
             'driver' => 'single',
             'path' => storage_path('logs/cylinder_creation.log'),

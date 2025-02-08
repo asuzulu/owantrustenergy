@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Cylinder;
 use Illuminate\Support\Facades\Log;
+use App\Models\Warehouse;
 
 class UserController extends Controller
 {
@@ -116,28 +117,31 @@ class UserController extends Controller
     }
 
     // Update the profile image
-    public function updateProfileImage(Request $request)
+    public function updateProfileImage(Request $request, $id)
     {
-        $validated = $request->validate([
-            'profile_image' => 'required|file|mimes:jpg,jpeg,png|max:102400', // max file size in KB (100MB)
+        $request->validate([
+            'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $user = Auth::user(); // Get the currently authenticated user
+        $user = User::findOrFail($id);
 
-        // Handle file upload and update logic
-        $filename = strtolower($user->first_name . '-' . $user->last_name . '-' . time() . '.' . $request->file('profile_image')->extension());
+        // Delete old image if it exists
+        if ($user->profile_image) {
+            Storage::disk('public')->delete('profile-images/' . $user->profile_image);
+        }
 
-        $file = $request->file('profile_image');
-        $path = 'user_images/' . $filename;
+        // Create new filename format: firstName_lastName_YYYYMMDD.extension
+        $filename = $user->first_name . '_' . $user->last_name . '_' . now()->format('Ymd') . '.' . $request->file('profile_image')->getClientOriginalExtension();
 
-        // Store the file
-        Storage::disk('public')->put($path, file_get_contents($file));
+        // Store image
+        $imagePath = $request->file('profile_image')->storeAs('profile-images', $filename, 'public');
 
-        // Update user's profile image
-        $user->profile_image = $filename;
-        $user->save();
+        // Update user record
+        $user->update([
+            'profile_image' => $filename,
+        ]);
 
-        return redirect()->route('dashboard.profile')->with('success', 'Profile image updated successfully!');
+        return redirect()->route('profile.view', $user->id)->with('success', 'Profile image updated successfully.');
     }
 
     // Show the profile for a specific user
@@ -153,10 +157,12 @@ class UserController extends Controller
 
         // Fetch warehouse cylinders for managers and employees
         $warehouseCylinders = collect();
+
         if (in_array(Auth::user()->position, ['Manager', 'Employee'])) {
-            $warehouseCylinders = Cylinder::where('location', 'like', '%warehouse%')
-                ->whereNull('user_id') // Only unassigned cylinders
-                ->select(['id', 'size']) // Fetch only needed columns
+            // Fetch cylinders where the location matches warehouse names or are unassigned
+            $warehouseCylinders = Cylinder::whereIn('location', Warehouse::pluck('name')->toArray())
+                ->orWhereNull('user_id') // Include unassigned cylinders
+                ->select(['id', 'size'])
                 ->get();
         }
 
@@ -173,25 +179,23 @@ class UserController extends Controller
     public function edit($id)
     {
         $user = User::findOrFail($id);
-        return view('users.edit', compact('user'));  // Ensure it's users.edit, not users.profile-edit
+        $states = State::all(); // Fetch all states from the database
+        return view('users.edit', compact('user', 'states'));
     }
 
     // Update the user's profile
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'phone_number' => 'required|string|max:15',
-            'position' => 'required|string|max:255',
-            'city' => 'nullable|string|max:255',
-            'state' => 'nullable|string|max:255',
-            'dob' => 'nullable|date',
-        ]);
-
         $user = User::findOrFail($id);
-        $user->update($request->all());
+
+        $updated = $user->update([
+            'first_name'    => $request->first_name,
+            'last_name'     => $request->last_name,
+            'email'         => $request->email,
+            'phone_number'  => $request->phone_number,
+            'city'          => $request->city,
+            'state' => State::where('id', $request->state)->value('name'), // Get the state name
+        ]);
 
         return redirect()->route('users.profile', $id)->with('success', 'User details updated successfully.');
     }

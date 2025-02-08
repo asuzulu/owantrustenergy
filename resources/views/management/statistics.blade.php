@@ -1,70 +1,107 @@
 @extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : 'layouts.employee-dashboard')
 
 @section('content')
-    <div class="tm-col tm-col-big">
-        <div class="bg-white tm-block h-100">
-            <h2 class="tm-block-title">Latest Hits</h2>
-            <canvas id="lineChart"></canvas>
-        </div>
-    </div>
-    <div class="tm-col tm-col-big">
-        <div class="bg-white tm-block h-100">
-            <h2 class="tm-block-title">Performance</h2>
-            <canvas id="barChart"></canvas>
-        </div>
-    </div>
-    <div class="tm-col tm-col-small">
-        <div class="bg-white tm-block h-100">
-            <canvas id="pieChart" class="chartjs-render-monitor"></canvas>
-        </div>
-    </div>
-    <div class="tm-col tm-col-big">
-        <div class="bg-white tm-block h-100">
-            <div class="row">
-                <div class="col-8">
-                    <h2 class="tm-block-title d-inline-block">Top Product List</h2>
-                </div>
-                <div class="col-4 text-right">
-                    <a href="products.html" class="tm-link-black">View All</a>
-                </div>
+<div class="container-fluid">
+    <!-- Statistics Boxes -->
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="bg-white tm-block text-center p-4">
+                <h2 class="tm-block-title">Cylinders Assigned</h2>
+                <p class="tm-value display-4">{{ $cylinders_assigned }}</p>
             </div>
-            <ol class="tm-list-group tm-list-group-alternate-color tm-list-group-pad-big">
-                <li class="tm-list-group-item">Donec eget libero</li>
-                <li class="tm-list-group-item">Nunc luctus suscipit elementum</li>
-                <li class="tm-list-group-item">Maecenas eu justo maximus</li>
-                <li class="tm-list-group-item">Pellentesque auctor urna nunc</li>
-                <li class="tm-list-group-item">Sit amet aliquam lorem efficitur</li>
-                <li class="tm-list-group-item">Pellentesque auctor urna nunc</li>
-                <li class="tm-list-group-item">Sit amet aliquam lorem efficitur</li>
-            </ol>
         </div>
-    </div>
-    <div class="tm-col tm-col-big">
-        <div class="bg-white tm-block h-100">
-            <h2 class="tm-block-title">Calendar</h2>
-            <div id="calendar"></div>
-            <div class="row mt-4">
-                <div class="col-12 text-right">
-                    <a href="#" class="tm-link-black">View Schedules</a>
-                </div>
+        <div class="col-md-4 mb-4">
+            <div class="bg-white tm-block text-center p-4">
+                <h2 class="tm-block-title">Cylinders in Warehouses</h2>
+                <p class="tm-value display-4">{{ $cylinders_in_warehouses }}</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="bg-white tm-block text-center p-4">
+                <h2 class="tm-block-title">Total Cylinders</h2>
+                <p class="tm-value display-4">{{ $total_cylinders }}</p>
             </div>
         </div>
     </div>
-    <div class="tm-col tm-col-small">
-        <div class="bg-white tm-block h-100">
-            <h2 class="tm-block-title">Upcoming Tasks</h2>
-            <ol class="tm-list-group">
-                <li class="tm-list-group-item">List of tasks</li>
-                <li class="tm-list-group-item">Lorem ipsum doloe</li>
-                <li class="tm-list-group-item">Read reports</li>
-                <li class="tm-list-group-item">Write email</li>
-                <li class="tm-list-group-item">Call customers</li>
-                <li class="tm-list-group-item">Go to meeting</li>
-                <li class="tm-list-group-item">Weekly plan</li>
-                <li class="tm-list-group-item">Ask for feedback</li>
-                <li class="tm-list-group-item">Meet Supervisor</li>
-                <li class="tm-list-group-item">Company trip</li>
-            </ol>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="bg-white tm-block text-center p-4">
+                <h2 class="tm-block-title">Total Customers</h2>
+                <p class="tm-value display-4">{{ $total_customers }}</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="bg-white tm-block text-center p-4">
+                <h2 class="tm-block-title">New Customers Last Month</h2>
+                <p class="tm-value display-4">{{ $customers_last_month }}</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="bg-white tm-block text-center p-4">
+                <h2 class="tm-block-title">New Customers Last Week</h2>
+                <p class="tm-value display-4">{{ $customers_last_week }}</p>
+            </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="bg-white tm-block text-center p-4">
+                <h2 class="tm-block-title">New Customers Last Year</h2>
+                <p class="tm-value display-4">{{ $customers_last_year }}</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="bg-white tm-block text-center p-4">
+                <h2 class="tm-block-title">Total Employees</h2>
+                <p class="tm-value display-4">{{ $total_employees }}</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="bg-white tm-block text-center p-4">
+                <h2 class="tm-block-title">Total Warehouses</h2>
+                <p class="tm-value display-4">{{ $total_warehouses }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="bg-white tm-block p-4">
+                <h2 class="tm-block-title">Cylinders Assigned Over Time</h2>
+                <canvas id="cylinderChart" class="chart-canvas"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="bg-white tm-block p-4">
+                <h2 class="tm-block-title">Customer Registrations Over Time</h2>
+                <canvas id="customerChart" class="chart-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart Data -->
+<script>
+    let cylinderData = {!! json_encode($cylinders_assigned_chart) !!};
+    let customerData = {!! json_encode($customer_registration_chart) !!};
+</script>
+
+<!-- Chart Styling -->
+<style>
+    .tm-block {
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .tm-value {
+        font-weight: bold;
+        color: #333;
+    }
+    .chart-canvas {
+        width: 100%;
+        height: 350px;
+    }
+</style>
 @endsection

@@ -104,6 +104,7 @@ class CylinderController extends Controller
         }
     }
 
+    // Assign a cylinder to a user
     public function assignCylinder(Request $request, $userId)
     {
         Log::debug('Assign Cylinder Method Triggered');
@@ -119,10 +120,11 @@ class CylinderController extends Controller
         }
 
         $validated = $request->validate([
-            'cylinder_id' => 'required|exists:cylinders,id|regex:/^0+\d{8}$/',
+            'cylinder_id' => 'required|exists:cylinders,id',
         ]);
 
         $cylinder = Cylinder::findOrFail($validated['cylinder_id']);
+
         if ($user->position !== 'Customer') {
             return redirect()->back()->with('error', 'Only customers can be assigned cylinders.');
         }
@@ -141,11 +143,23 @@ class CylinderController extends Controller
         }
     }
 
+    private function generateUniqueCylinderId()
+    {
+        do {
+            $id = str_pad(rand(1, 999999999), 9, '0', STR_PAD_LEFT);
+        } while (Cylinder::where('id', $id)->exists());
+
+        return $id;
+    }
+
+    //Manager can delete cylinder
     public function destroy($id)
     {
-        Log::debug('Destroy Method triggered');
-
         $cylinder = Cylinder::findOrFail($id);
+
+        if (auth()->user()->position !== 'Manager') {
+            return redirect()->route('cylinders.index')->with('error', 'Unauthorized action.');
+        }
 
         DB::beginTransaction();
         try {
@@ -156,14 +170,5 @@ class CylinderController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', 'Failed to delete cylinder.');
         }
-    }
-
-    private function generateUniqueCylinderId()
-    {
-        do {
-            $id = str_pad(rand(1, 999999999), 9, '0', STR_PAD_LEFT);
-        } while (Cylinder::where('id', $id)->exists());
-
-        return $id;
     }
 }

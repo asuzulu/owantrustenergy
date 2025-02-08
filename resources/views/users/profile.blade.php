@@ -38,36 +38,50 @@
             </div>
         </div>
 
-        <div class="row tm-content-row tm-mt-big">
+        <div class="row tm-content-row tm-mt-small justify-content-center align-items-center"">
             <div class="tm-col tm-col-big">
-                <div class="bg-white tm-block">
+                <div class="bg-white tm-block text-center">
                     <h2 class="tm-block-title">Assign Cylinder</h2>
                     <p>Total Cylinders in Warehouse: {{ $warehouseCylinders->count() }}</p>
-
                     <p>
                         Cylinders Assigned to User:
                         {{ \App\Models\Cylinder::where('user_id', $user->id)->count() }}
                     </p>
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#assignCylinderModal">Assign Cylinder</button>
 
-                    @if (in_array(Auth::user()->position, ['Manager', 'Employee']) && $warehouseCylinders->count() > 0)
-                        <form action="{{ route('management.assign-cylinder', $user->id) }}" method="POST">
-                            @csrf
-                            <div class="form-group">
-                                <label for="cylinder_id">Select Cylinder</label>
-                                <select name="cylinder_id" id="cylinder_id" class="form-control" required>
-                                    <option value="">Select Cylinder</option>
-                                    @foreach ($warehouseCylinders as $cylinder)
-                                        <option value="{{ str_pad($cylinder->id, 9, '0', STR_PAD_LEFT) }}">
-                                            {{ str_pad($cylinder->id, 9, '0', STR_PAD_LEFT) }} - {{ $cylinder->size }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                    <!-- Modal -->
+                    <div class="modal fade" id="assignCylinderModal" tabindex="-1" role="dialog" aria-labelledby="assignCylinderModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="assignCylinderModalLabel">Assign Cylinder</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <form action="{{ route('management.assign-cylinder', $user->id) }}" method="POST">
+                                    @csrf
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <label for="cylinder_id">Select Cylinder</label>
+                                            <select name="cylinder_id" id="cylinder_id" class="form-control" required style="height: 4rem;">
+                                                <option value="">Select Cylinder</option>
+                                                @foreach ($warehouseCylinders as $cylinder)
+                                                    <option value="{{ str_pad($cylinder->id, 9, '0', STR_PAD_LEFT) }}">
+                                                        {{ str_pad($cylinder->id, 9, '0', STR_PAD_LEFT) }} - {{ $cylinder->size }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary">Assign</button>
+                                    </div>
+                                </form>
                             </div>
-                            <button type="submit" class="btn btn-primary mt-3">Assign</button>
-                        </form>
-                    @else
-                        <p>No available cylinders to assign.</p>
-                    @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -76,37 +90,24 @@
 
 @section('scripts')
     @include('partials.dashboard.scripts')
-
-    <!-- Add Input Mask Script -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/inputmask/5.0.7-beta.27/inputmask.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Apply input mask to cylinder_id select option
-            $('#cylinder_id').on('change', function() {
-                var selectedValue = $(this).val();
-                if (selectedValue) {
-                    var formattedId = selectedValue.padStart(9, '0');
-                    $(this).val(formattedId);
-                }
-            });
-        });
-    </script>
 @endsection
 
 @section('styles')
     <style>
-        /* Make select dropdown larger */
-        #cylinder_id {
-            height: 50px !important;   /* Make the select box taller */
-            font-size: 16px !important; /* Increase the font size */
-            padding: 10px !important;   /* Add padding */
-            line-height: 1.5 !important; /* Increase line height for text spacing */
+        /* Center everything in the Assign Cylinder section */
+        .tm-content-row {
+            height: auto; /* Reset the height to auto */
+            margin-bottom: 50px; /* Optional, for spacing */
         }
 
-        /* Style the options */
-        #cylinder_id option {
-            height: 50px;   /* Increase height of each option */
-            padding: 10px 20px; /* Add padding inside each option */
+        .text-center {
+            text-align: center !important; /* Center the content */
+        }
+
+        /* Adjust modal dropdown to 4rem */
+        .modal-body .form-control {
+            height: 4rem !important; /* Make the dropdown 4rem */
+            font-size: 1.25rem; /* Adjust font size inside dropdown */
         }
     </style>
 @endsection

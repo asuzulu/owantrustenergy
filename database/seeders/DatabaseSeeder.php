@@ -20,10 +20,5 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UsersTableSeeder::class,
         ]);
-
-        // Call the CylinderSeeder
-        $this->call([
-            CylinderSeeder::class,
-        ]);
     }
 }

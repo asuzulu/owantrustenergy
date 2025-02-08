@@ -46,13 +46,38 @@
 
                         <div class="form-group">
                             <label for="state">State</label>
-                            <input type="text" class="form-control" id="state" name="state" value="{{ $user->state }}">
-                        </div>
+                            <select class="form-control" id="state" name="state" required style="height: calc(4rem);">
+                                @foreach($states as $state)
+                                    <option value="{{ $state->name }}" {{ $user->state == $state->name ? 'selected' : '' }}>
+                                        {{ $state->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>                                                                      
 
                         <div class="form-group">
                             <label for="email">Email</label>
                             <input type="email" class="form-control" id="email" name="email" value="{{ $user->email }}" required>
                         </div>
+
+                        <pre id="debug-output"></pre>
+
+
+<script>
+    document.querySelector('form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Stop actual submission for debugging
+        let formData = new FormData(this);
+        let debugOutput = '';
+
+        formData.forEach((value, key) => {
+            debugOutput += key + ': ' + value + '\n';
+        });
+
+        document.getElementById('debug-output').innerText = debugOutput;
+        console.log(debugOutput);
+    });
+</script>
+
 
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                     </form>

@@ -22,6 +22,56 @@ echo "Clearing caches and optimizing application..."
 try_command php artisan optimize:clear
 try_command php artisan optimize
 
+# Delete the logs and folder if they exist, or create them if they don't
+LOG_CYLINDER_CREATION="storage/logs/cylinder_creation.log"
+LOG_WAREHOUSE_CREATION="storage/logs/warehouse_creation.log"
+LOG_WAREHOUSE_UPDATE="storage/logs/warehouse_update.log"
+QR_CODES_FOLDER="storage/app/private/public/qrcodes"
+
+# Delete logs if they exist
+if [ -f "$LOG_CYLINDER_CREATION" ]; then
+    try_command rm "$LOG_CYLINDER_CREATION"
+    echo "Deleted $LOG_CYLINDER_CREATION."
+else
+    echo "$LOG_CYLINDER_CREATION does not exist."
+fi
+
+if [ -f "$LOG_WAREHOUSE_CREATION" ]; then
+    try_command rm "$LOG_WAREHOUSE_CREATION"
+    echo "Deleted $LOG_WAREHOUSE_CREATION."
+else
+    echo "$LOG_WAREHOUSE_CREATION does not exist."
+fi
+
+if [ -f "$LOG_WAREHOUSE_UPDATE" ]; then
+    try_command rm "$LOG_WAREHOUSE_UPDATE"
+    echo "Deleted $LOG_WAREHOUSE_UPDATE."
+else
+    echo "$LOG_WAREHOUSE_UPDATE does not exist."
+fi
+
+# Create fresh log files if they don't exist
+try_command touch "$LOG_CYLINDER_CREATION"
+echo "Created $LOG_CYLINDER_CREATION."
+
+try_command touch "$LOG_WAREHOUSE_CREATION"
+echo "Created $LOG_WAREHOUSE_CREATION."
+
+try_command touch "$LOG_WAREHOUSE_UPDATE"
+echo "Created $LOG_WAREHOUSE_UPDATE."
+
+# Delete QR codes folder if it exists
+if [ -d "$QR_CODES_FOLDER" ]; then
+    try_command rm -rf "$QR_CODES_FOLDER"
+    echo "Deleted $QR_CODES_FOLDER."
+else
+    echo "$QR_CODES_FOLDER does not exist."
+fi
+
+# Recreate QR codes folder
+try_command mkdir -p "$QR_CODES_FOLDER"
+echo "Created $QR_CODES_FOLDER."
+
 # Delete the SQLite database file with a pause if busy
 SQLITE_FILE="database/database.sqlite"
 MAX_ATTEMPTS=5

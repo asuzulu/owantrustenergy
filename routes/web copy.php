@@ -12,8 +12,7 @@ use App\Http\Controllers\{
     CustomerController,
     EmployeeController,
     LocationController,
-    WarehouseController,
-    StatisticsController
+    WarehouseController
 };
 
 // Home page
@@ -76,12 +75,12 @@ Route::view('/management-portal', 'management-portal')->name('management.portal'
 // Profile route
 Route::get('/dashboard/home', [UserController::class, 'showDashboard'])->name('dashboard.home')->middleware('auth');
 
-// Profile image and Edit
+// Profile image
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile/{id}', [UserController::class, 'profile'])->name('profile.view');
-    Route::post('/users/{id}/update-profile-image', [UserController::class, 'updateProfileImage'])->name('users.update-profile-image');
+    Route::post('/profile/update-image', [UserController::class, 'updateProfileImage'])->name('profile.updateImage');
     Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
-    Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
+    Route::post('/users/{id}/update', [UserController::class, 'update'])->name('users.update');
 });
 
 // Cylinder management routes
@@ -144,33 +143,24 @@ Route::resource('cylinders', CylinderController::class)->parameters([
     'cylinder' => 'id',
 ])->except(['show']);
 
-// Warehouse Management route
-Route::resource('warehouses', WarehouseController::class)->except(['show']);  // Keep the resource route definition here
-Route::get('/warehouses/{id}', [WarehouseController::class, 'show'])->name('warehouses.show');  // Keep this route as it's for viewing specific warehouse details
-
-// Route for Managers to delete Warehouse
 Route::middleware(['auth'])->group(function () {
-    Route::resource('warehouses', WarehouseController::class);
+    Route::get('/cylinders/{id}', [CylinderController::class, 'show'])->name('cylinders.show');
 });
 
-// Add new cylinder location dropdown
+//Add New Cylinder form Warehouse location field population logic
+Route::middleware(['auth'])->group(function () {
+    Route::get('/cylinders/create', [CylinderController::class, 'create'])->name('cylinders.create');
+    Route::post('/cylinders', [CylinderController::class, 'store'])->name('cylinders.store');
+});
+
+//Warehouse Management route
+Route::resource('warehouses', WarehouseController::class);
+Route::get('/warehouses/{id}', [WarehouseController::class, 'show'])->name('warehouses.show');
+// Define the route for updating warehouse details
+Route::put('/warehouses/{id}', [WarehouseController::class, 'update'])->name('warehouses.update');
+
+//Add new cylinder location dropdown
 Route::get('/locations/warehouses', [LocationController::class, 'getWarehouses'])->name('locations.getWarehouseLocations');
 Route::get('/locations/getWarehouses', [LocationController::class, 'getWarehouses'])->name('locations.getWarehouses');
 
-// Show Cylinders Details
 Route::get('cylinders/{cylinder}', [CylinderController::class, 'show'])->name('cylinders.show');
-
-// Route for managers to delete Cylinder
-Route::middleware(['auth'])->group(function () {
-    Route::resource('warehouses', WarehouseController::class);
-    Route::resource('cylinders', CylinderController::class);
-});
-
-// Statistics Page
-Route::get('/management/statistics', [StatisticsController::class, 'index'])->name('management.statistics');
-
-// Employee Statistics Page
-Route::get('/employee/statistics', [StatisticsController::class, 'index'])
-    ->name('employee.statistics')
-    ->middleware(['auth']);
-

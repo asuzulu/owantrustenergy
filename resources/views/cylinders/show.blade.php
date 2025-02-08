@@ -59,8 +59,43 @@
                 <div class="tm-table-actions-col-left">
                     <a href="{{ Auth::user()->position === 'Manager' ? route('management.cylinders') : route('employee.cylinders') }}" class="btn btn-secondary">Back to List</a>
                 </div>
+                @if(Auth::user()->position === 'Manager')
+                <div class="tm-table-actions-col-right">
+                    <!-- Delete Button to Trigger Modal -->
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteCylinderModal">
+                        Delete Cylinder
+                    </button>
+                </div>
+                @endif
             </div>
         </div>
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+@if(Auth::user()->position === 'Manager')
+<div class="modal fade" id="deleteCylinderModal" tabindex="-1" role="dialog" aria-labelledby="deleteCylinderModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteCylinderModalLabel">Confirm Cylinder Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this cylinder? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form action="{{ route('cylinders.destroy', $cylinder->id) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection
