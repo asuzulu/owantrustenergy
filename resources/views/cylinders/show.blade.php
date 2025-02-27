@@ -37,10 +37,12 @@
                                 <td><strong>Weight</strong></td>
                                 <td>
                                     @if($cylinder->size == 'Small')
-                                        5 kg
+                                        3 kg
                                     @elseif($cylinder->size == 'Medium')
-                                        12 kg
+                                        5 kg
                                     @elseif($cylinder->size == 'Large')
+                                        12 kg
+                                    @elseif($cylinder->size == 'Extra Large')
                                         25 kg
                                     @else
                                         N/A
