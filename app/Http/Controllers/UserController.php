@@ -7,24 +7,21 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Cylinder;
-use Illuminate\Support\Facades\Log;
 use App\Models\Warehouse;
 
 class UserController extends Controller
 {
-    // Show the registration form
     public function showRegisterForm()
     {
-        $states = State::all(); // Fetch all states from the database
-        return view('register', compact('states')); // Pass states to the view
+        $states = State::all();
+        return view('register', compact('states'));
     }
 
-    // Handle user registration
     public function store(Request $request)
     {
-        // Validate user input
         $validatedData = $request->validate([
             'firstName' => 'required|string|max:255',
             'lastName' => 'required|string|max:255',
@@ -39,13 +36,12 @@ class UserController extends Controller
             'dob' => 'required|date|before:today',
             'password' => 'required|string|min:8|confirmed',
             'position' => 'nullable|string|max:255',
+            'photo_id' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Default position is 'Customer' if not provided
         $position = $validatedData['position'] ?? 'customer';
 
         try {
-            // Create the new user in the database
             $user = User::create([
                 'first_name' => $validatedData['firstName'],
                 'last_name' => $validatedData['lastName'],
@@ -62,140 +58,137 @@ class UserController extends Controller
                 'position' => $position,
             ]);
 
-            Log::info('New user registered: ' . $user->email); // Log user registration
+            // Handle NIN image upload
+            $filename = null; // Ensure $filename is always initialized
+            if ($request->hasFile('photo_id')) {
+                $filename = $user->id . '_' . time() . '.' . $request->file('photo_id')->getClientOriginalExtension();
+                $request->file('photo_id')->storeAs('nin-images', $filename, 'public');
+                $user->update(['photo_id' => $filename]);
+            }
 
-            // Automatically log in the user after registration
-            Auth::login($user);
-
-            // Redirect the user to their respective dashboard
-            return $this->redirectUserByPosition($user);
+            return response()->json([
+                'success' => true,
+                'photo_id' => $filename,
+                'preview_url' => $filename ? asset('storage/nin-images/' . $filename) : null,
+            ]);
         } catch (\Exception $e) {
-            Log::error('User registration failed: ' . $e->getMessage()); // Log error
-            return back()->withErrors('Registration failed. Please try again.');
+            return back()->with('error', 'Registration failed, please try again later.');
         }
     }
 
-    // Redirect the user based on their position
+    public function uploadNin(Request $request, $id)
+    {
+        $request->validate([
+            'nin_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $user = User::findOrFail($id);
+        $imageName = $user->id . '.jpg';
+
+        $path = $request->file('nin_image')->storeAs('nin-images', $imageName);
+
+        $user->photo_id = $imageName;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'photo_id' => $imageName,
+            'preview_url' => asset('storage/nin-images/' . $imageName),
+        ]);
+    }
+
     private function redirectUserByPosition($user)
     {
-        if ($user->position === 'customer') {
-            return redirect()->route('dashboard.customer');
-        } elseif ($user->position === 'employee') {
-            return redirect()->route('dashboard.employee');
-        } elseif ($user->position === 'Manager') {
-            return redirect()->route('dashboard.management');
-        }
-        return redirect()->route('dashboard.home'); // Default fallback
+        return match ($user->position) {
+            'Customer' => redirect()->route('dashboard.profile'),
+            'Employee' => redirect()->route('dashboard.employee'),
+            'Manager' => redirect()->route('dashboard.management'),
+            'Agent' => redirect()->route('dashboard.agent'),
+            'Driver' => redirect()->route('dashboard.driver'),
+            default => redirect('/'),
+        };
     }
 
-    // Show dashboard with cylinders
     public function showDashboard()
     {
-        Log::debug('Entering showDashboard method');  // Log entry into method
-
-        // Check if the user is authenticated
-        if (Auth::check()) {
-            Log::debug('User is authenticated');
-        } else {
-            Log::debug('User is not authenticated');
-        }
-
-        // Get the logged-in user's ID
         $userId = Auth::id();
-        Log::debug('Logged-in User ID: ' . $userId);  // Log user ID
-
-        // Fetch cylinders assigned to the logged-in user
         $cylinders = Cylinder::where('user_id', $userId)->get();
-        Log::debug('Fetched Cylinders: ', $cylinders->toArray());  // Log fetched cylinders
-
-        // Count the number of cylinders assigned to the user
         $totalCylinders = $cylinders->count();
-        Log::debug('Total Cylinders Count: ' . $totalCylinders);  // Log total cylinders count
 
-        // Pass the total cylinders to the view
-        return view('dashboard.home', compact('cylinders', 'totalCylinders'));
+        return view('dashboard.profile', compact('cylinders', 'totalCylinders'));
     }
 
-    // Update the profile image
     public function updateProfileImage(Request $request, $id)
     {
         $request->validate([
-            'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'cropped_image' => 'required', // Ensure the cropped image is provided
         ]);
 
         $user = User::findOrFail($id);
 
-        // Delete old image if it exists
+        // Delete the old image if it exists
         if ($user->profile_image) {
             Storage::disk('public')->delete('profile-images/' . $user->profile_image);
         }
 
-        // Create new filename format: firstName_lastName_YYYYMMDD.extension
-        $filename = $user->first_name . '_' . $user->last_name . '_' . now()->format('Ymd') . '.' . $request->file('profile_image')->getClientOriginalExtension();
+        // Generate new filename using existing naming logic
+        $filename = $user->first_name . '_' . $user->last_name . '_' . now()->format('Ymd') . '.jpg';
 
-        // Store image
-        $imagePath = $request->file('profile_image')->storeAs('profile-images', $filename, 'public');
+        // Decode the base64 cropped image
+        $imageData = $request->input('cropped_image');
+        $image = Image::make($imageData)->encode('jpg', 90); // Convert to JPEG with 90% quality
 
-        // Update user record
-        $user->update([
-            'profile_image' => $filename,
-        ]);
+        // Save the image in the public storage
+        Storage::disk('public')->put('profile-images/' . $filename, $image);
+
+        // Update the user profile with the new image filename
+        $user->update(['profile_image' => $filename]);
 
         return redirect()->route('profile.view', $user->id)->with('success', 'Profile image updated successfully.');
     }
 
-    // Show the profile for a specific user
     public function profile($id)
     {
         $user = User::findOrFail($id);
-
-        // Fetch cylinders linked to the user
         $cylinders = Cylinder::where('user_id', $id)->get();
-
-        // Calculate the user's age
         $user->age = \Carbon\Carbon::parse($user->dob)->age;
-
-        // Fetch warehouse cylinders for managers and employees
         $warehouseCylinders = collect();
 
         if (in_array(Auth::user()->position, ['Manager', 'Employee'])) {
-            // Fetch cylinders where the location matches warehouse names or are unassigned
             $warehouseCylinders = Cylinder::whereIn('location', Warehouse::pluck('name')->toArray())
-                ->orWhereNull('user_id') // Include unassigned cylinders
+                ->orWhereNull('user_id')
                 ->select(['id', 'size'])
                 ->get();
         }
 
-        // Fetch other users if the logged-in user is a manager
-        $users = null;
-        if (Auth::user()->position === 'Manager') {
-            $users = User::all();
-        }
+        $users = Auth::user()->position === 'Manager' ? User::all() : null;
 
         return view('users.profile', compact('user', 'users', 'cylinders', 'warehouseCylinders'));
     }
 
-    // Show the edit form for a user
     public function edit($id)
     {
         $user = User::findOrFail($id);
-        $states = State::all(); // Fetch all states from the database
+        $states = State::all();
         return view('users.edit', compact('user', 'states'));
     }
 
-    // Update the user's profile
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
+        $updateData = array_filter([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'phone_number' => $request->phone_number,
+            'street' => $request->street,
+            'city' => $request->city,
+            'state' => $request->state ? State::where('id', $request->state)->value('name') : null,
+        ], fn($value) => !is_null($value) && $value !== '');
 
-        $updated = $user->update([
-            'first_name'    => $request->first_name,
-            'last_name'     => $request->last_name,
-            'email'         => $request->email,
-            'phone_number'  => $request->phone_number,
-            'city'          => $request->city,
-            'state' => State::where('id', $request->state)->value('name'), // Get the state name
-        ]);
+        if (!empty($updateData)) {
+            $user->update($updateData);
+        }
 
         return redirect()->route('users.profile', $id)->with('success', 'User details updated successfully.');
     }

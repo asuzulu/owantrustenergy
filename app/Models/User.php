@@ -25,6 +25,7 @@ class User extends Authenticatable
         'password',
         'profile_image',
         'dob',
+        'position',
     ];
 
     protected $casts = [
@@ -45,6 +46,11 @@ class User extends Authenticatable
     public function isAgent()
     {
         return $this->position === 'Agent';
+    }
+
+    public function isDriver()
+    {
+        return $this->position === 'Driver';
     }
 
     public function roles()

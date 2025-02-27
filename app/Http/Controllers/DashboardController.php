@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cylinder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -22,7 +23,7 @@ class DashboardController extends Controller
         $cylinders = Cylinder::where('user_id', $user->id)->get();
         $totalCylinders = $cylinders->count();
 
-        return view('dashboard.home', compact('cylinders', 'totalCylinders'));
+        return view('dashboard.profile', compact('cylinders', 'totalCylinders'));
     }
 
     public function managementHome()
@@ -32,5 +33,18 @@ class DashboardController extends Controller
 
         // Pass cylinders to the view
         return view('management.home', compact('cylinders'));
+    }
+
+    public function customerDashboard()
+    {
+        $user = Auth::user();
+        if (!$user) {
+            abort(403, 'Unauthorized'); // Prevents errors if the user is not logged in
+        }
+
+        // Count cylinders assigned to the current user
+        $totalCylinders = DB::table('cylinders')->where('user_id', $user->id)->count();
+
+        return view('dashboard.profile', compact('totalCylinders', 'user'));
     }
 }

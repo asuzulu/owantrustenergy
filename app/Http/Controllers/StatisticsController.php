@@ -4,49 +4,108 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Statistics;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Models\Cylinder;
+use App\Models\User;
+use App\Models\Warehouse;
 
 class StatisticsController extends Controller
 {
     public function index()
     {
-        $statistics = new Statistics();
+        // 1. Cylinders assigned to users
+        $cylinders_assigned = Cylinder::whereIn('location', function ($query) {
+            $query->selectRaw("TRIM(first_name || ' ' || last_name) as full_name")->from('users');
+        })->count();
 
-        $data = [
-            'cylinders_assigned' => $statistics->getCylindersAssigned(),
-            'cylinders_assigned_chart' => $statistics->getCylindersAssignedChart(),
-            'cylinders_in_warehouses' => $statistics->getCylindersInWarehouses(),
-            'total_cylinders' => $statistics->getTotalCylinders(),
-            'total_customers' => $statistics->getTotalCustomers(),
-            'customers_last_month' => $statistics->getCustomersLastMonth(),
-            'customers_last_week' => $statistics->getCustomersLastWeek(),
-            'customers_last_year' => $statistics->getCustomersLastYear(),
-            'total_employees' => $statistics->getTotalEmployees(),
-            'customer_registration_chart' => $statistics->getCustomerRegistrationChart(),
-            'total_warehouses' => $statistics->getTotalWarehouses(),
-        ];
+        // 2. Cylinders in warehouses
+        $cylinders_in_warehouses = Cylinder::whereIn('location', Warehouse::pluck('name'))->count();
 
-        return view('management.statistics', $data);
-        
-        // Fetch the cylinders assigned per month (Last 12 Months)
-        $cylindersAssignedChart = DB::table('cylinders')
-            ->whereNotNull('user_id')
-            ->where('updated_at', '>=', now()->subMonths(12))
-            ->selectRaw("strftime('%Y-%m', updated_at) as month, COUNT(*) as count")
+        // 3. Total cylinders
+        $total_cylinders = Cylinder::count();
+
+        // 4. Total customers
+        $total_customers = User::where('position', 'Customer')->count();
+
+        // 5. Customers registered in the last year
+        $customers_last_year = User::where('position', 'Customer')
+            ->where('created_at', '>=', now()->subYear())
+            ->count();
+
+        // 6. Customers registered in the last 30 days
+        $customers_last_month = User::where('position', 'Customer')
+            ->whereDate('created_at', '>=', now()->subDays(30)->toDateString())
+            ->count();
+
+        // 7. Customers registered in the last 7 days
+        $customers_last_week = User::where('position', 'Customer')
+            ->whereDate('created_at', '>=', now()->subDays(7)->toDateString())
+            ->count();
+
+        // 8. Total customers since the beginning
+        $customers_since_beginning = User::where('position', 'Customer')->count();
+
+        // 9. Total employees
+        $total_employees = User::where('position', 'Employee')->count();
+
+        // 10. Total warehouses
+        $total_warehouses = Warehouse::count();
+
+        // 11. Cylinders assigned per month (last 12 months)
+        $cylindersAssignedChart = Cylinder::selectRaw("strftime('%Y-%m', created_at) as month, COUNT(*) as count")
+            ->whereNotNull('location')
             ->groupBy('month')
             ->orderBy('month')
             ->get();
 
-        // Fetch the customer registrations per month (Last 12 Months)
-        $customerRegistrationsChart = DB::table('users')
-            ->where('position', 'customer')
-            ->where('created_at', '>=', now()->subMonths(12))
-            ->selectRaw("strftime('%Y-%m', created_at) as month, COUNT(*) as count")
+        // 12. Customers registered per month (last 12 months)
+        $customerRegistrationsChart = User::selectRaw("strftime('%Y-%m', created_at) as month, COUNT(*) as count")
+            ->where('position', 'Customer')
             ->groupBy('month')
             ->orderBy('month')
             ->get();
 
-        return view('management.statistics', compact('cylindersAssignedChart', 'customerRegistrationsChart'));
+        return view('management.statistics', compact(
+            'cylinders_assigned',
+            'cylinders_in_warehouses',
+            'total_cylinders',
+            'total_customers',
+            'customers_last_month',
+            'customers_last_week',
+            'customers_last_year', // <-- This is now correctly defined
+            'total_employees',
+            'total_warehouses',
+            'cylindersAssignedChart',
+            'customerRegistrationsChart'
+        ));
+    }
+
+    public function getStatisticsData()
+    {
+        try {
+            // Fetch graph data dynamically via AJAX
+            $cylindersAssignedChart = DB::table('cylinders')
+                ->whereNotNull('user_id')
+                ->where('updated_at', '>=', now()->subMonths(12))
+                ->selectRaw("strftime('%Y-%m', updated_at) as month, COUNT(*) as count")
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get();
+
+            $customerRegistrationsChart = DB::table('users')
+                ->where('position', 'Customer')
+                ->where('created_at', '>=', now()->subMonths(12))
+                ->selectRaw("strftime('%Y-%m', created_at) as month, COUNT(*) as count")
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get();
+
+            return response()->json([
+                'cylindersAssignedChart' => $cylindersAssignedChart,
+                'customerRegistrationsChart' => $customerRegistrationsChart
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

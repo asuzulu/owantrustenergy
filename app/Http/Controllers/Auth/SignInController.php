@@ -8,52 +8,49 @@ use Illuminate\Support\Facades\Auth;
 
 class SignInController extends Controller
 {
-    public function showSignInForm($portal)
+    public function showSignInForm()
     {
-        $validPortals = ['customer', 'employee', 'management'];
-        if (!in_array($portal, $validPortals)) {
-            abort(404);
-        }
-
-        return view("$portal-portal");
+        return view('sign-in');
     }
 
     public function store(Request $request)
     {
         $credentials = $request->only('email', 'password');
-        $portal = $request->input('portal');
 
-        if (!in_array($portal, ['customer', 'employee', 'management'])) {
-            return redirect()->back()->withErrors(['Invalid portal specified.']);
-        }
-
+        // Check if the user is attempting to log in
         if (Auth::attempt($credentials, $request->has('remember'))) {
             $user = Auth::user();
 
-            // Map user position to portal role
-            $roleMap = [
-                'customer' => 'Customer',
-                'employee' => 'Employee',
-                'management' => 'Manager',
-            ];
-
-            if ($user->position !== $roleMap[$portal]) {
-                Auth::logout();
-                return redirect()->back()->withErrors(['You do not have access to this portal.']);
+            // If user is newly registered, redirect to the customer profile
+            if ($user->wasRecentlyCreated) {
+                return redirect()->route('dashboard.profile');
             }
 
-            // Redirect to the correct dashboard route based on portal
-            switch ($portal) {
-                case 'customer':
-                    return redirect()->route('dashboard.home');
-                case 'employee':
-                    return redirect()->route('employee.home'); // Ensure this route exists
-                case 'management':
-                    return redirect()->route('management.home');
-            }
+            // Redirect based on the user's position
+            return $this->redirectUserByPosition($user);
         }
 
         return redirect()->back()->withErrors(['Invalid credentials.']);
+    }
+
+    // Redirect the user based on their position
+    private function redirectUserByPosition($user)
+    {
+        switch (strtolower($user->position)) {
+            case 'customer':
+                return redirect()->route('dashboard.profile');
+            case 'employee':
+                return redirect()->route('dashboard.employee');
+            case 'manager':
+                return redirect()->route('dashboard.management');
+            case 'agent':
+                return redirect()->route('dashboard.agent');
+            case 'driver':
+                return redirect()->route('drivers.cylinders');
+            default:
+                Auth::logout();
+                return redirect('/sign-in')->route('signin.form')->withErrors(['Invalid role.']);
+        }
     }
 
     public function customLogout(Request $request)

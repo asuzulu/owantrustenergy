@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\RedirectIfNotAuthenticated;
 use App\Http\Controllers\{
     UserController,
     DashboardController,
@@ -13,52 +14,29 @@ use App\Http\Controllers\{
     EmployeeController,
     LocationController,
     WarehouseController,
-    StatisticsController
+    StatisticsController,
+    AgentController,
+    DriversController,
+    SearchAutoCompleteController,
+    DeliveryController,
+    PickupController
 };
 
-// Home page
-Route::get('/', function () {
-    return view('home');
-})->name('home');
+// Public pages
+Route::get('/', fn() => view('home'))->name('home');
+Route::get('/about', fn() => view('about'))->name('about');
+Route::get('/products', fn() => view('products'))->name('products');
+Route::get('/contact', fn() => view('contact'))->name('contact');
 
-// About page
-Route::get('/about', function () {
-    return view('about');
-})->name('about');
-
-// Products page
-Route::get('/products', function () {
-    return view('products');
-})->name('products');
-
-// Contact page
-Route::get('/contact', function () {
-    return view('contact');
-})->name('contact');
-
-// Register page and routes
+// Authentication routes
 Route::get('/register', [UserController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [UserController::class, 'store'])->name('register.store');
-
-// Sign In page for each portal
-Route::get('/signin/{portal}', [SignInController::class, 'showSignInForm'])->name('signin.form');
-
-// Handle sign-in submission
+Route::get('/sign-in', [SignInController::class, 'showSignInForm'])->name('signin.form');
 Route::post('/signin', [SignInController::class, 'store'])->name('signin.store');
-
-// AuthController routes to handle login for customer, employee, and manager
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'authenticate'])->name('login.store');
-
-// Logout route
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-// Dashboard routes
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard/home', [DashboardController::class, 'customerHome'])->name('dashboard.home');
-    Route::get('/employee/home', [EmployeeController::class, 'dashboard'])->name('employee.home');
-    Route::get('/management/home', [DashboardController::class, 'managementHome'])->name('management.home');
-});
+Route::post('/logout', [SignInController::class, 'customLogout'])->name('logout');
+Route::get('/login', [SignInController::class, 'showSignInForm'])->name('login');
+Route::post('/login', [SignInController::class, 'store'])->name('login.store');
 
 // Password reset routes
 Route::get('password/reset', [PasswordController::class, 'showLinkRequestForm'])->name('password.request');
@@ -66,111 +44,102 @@ Route::post('password/email', [PasswordController::class, 'sendResetLinkEmail'])
 Route::get('password/reset/{token}', [PasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/reset', [PasswordController::class, 'reset'])->name('password.update');
 
-// Custom Logout route
-Route::post('/logout', [SignInController::class, 'customLogout'])->name('logout');
+// Dashboard routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard/profile', [DashboardController::class, 'customerDashboard'])->name('dashboard.profile');
+    Route::get('/employee/home', [EmployeeController::class, 'dashboard'])->name('employee.home');
+    Route::get('/management/home', [DashboardController::class, 'managementHome'])->name('management.home');
+});
 
-// Employee and Management portal static pages
-Route::view('/employee-portal', 'employee-portal')->name('employee.portal');
-Route::view('/management-portal', 'management-portal')->name('management.portal');
-
-// Profile route
-Route::get('/dashboard/home', [UserController::class, 'showDashboard'])->name('dashboard.home')->middleware('auth');
-
-// Profile image and Edit
+// Profile routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile/{id}', [UserController::class, 'profile'])->name('profile.view');
     Route::post('/users/{id}/update-profile-image', [UserController::class, 'updateProfileImage'])->name('users.update-profile-image');
     Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
+    Route::get('/users/{id}', [UserController::class, 'profile'])->name('users.profile');
 });
 
 // Cylinder management routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/management/cylinders', [ManagementController::class, 'cylindersPage'])->name('management.cylinders');
-    Route::delete('cylinders/destroy/{id}', [CylinderController::class, 'destroyCustom'])->name('cylinders.destroy.custom');  // updated route name
+    Route::delete('cylinders/destroy/{id}', [CylinderController::class, 'destroyCustom'])->name('cylinders.destroy.custom');
     Route::get('/cylinders/create', [CylinderController::class, 'create'])->name('cylinders.create');
     Route::get('/cylinders', [CylinderController::class, 'index'])->name('cylinders.index');
+    Route::post('/management/assign-cylinder/{user}', [CylinderController::class, 'assignCylinder'])->name('management.assign-cylinder');
 });
 
-// Route for Customer Cylinder List
-Route::get('/dashboard/cylinder/{userId?}', [CylinderController::class, 'index'])->name('dashboard.cylinder');
-
-// Management Dashboard
-Route::get('/management-dashboard', [ManagementController::class, 'index'])->name('dashboard.management');
-
-// Statistics Page Route
-Route::get('/management/statistics', [ManagementController::class, 'statistics'])->name('management.statistics');
-
-// Management Cylinder Page Route
-Route::get('management/cylinder', [ManagementController::class, 'cylinder'])->name('management.cylindersPage');
-
-// Route to assign cylinder
-Route::post('/management/assign-cylinder/{user}', [CylinderController::class, 'assignCylinder'])->name('management.assign-cylinder');
-
-// Route for managing customers
-Route::get('/management/accounts', [ManagementController::class, 'accounts'])->name('management.accounts');
-
-// Route for managing employees
-Route::get('/management/employees', [ManagementController::class, 'employees'])->name('management.employees');
-
-// Route for managing agents
-Route::get('/management/agents', [ManagementController::class, 'agents'])->name('management.agents');
-
-// Route for viewing the user profile
-Route::get('/users/{id}', [UserController::class, 'profile'])->name('users.profile');
-
-// Route for Customer's view of Cylinder List
-Route::middleware(['auth', 'role:Customer'])->group(function () {
-    Route::get('/customer/cylinders', [CustomerController::class, 'showCylinders'])->name('customer.cylinder');
+// Cylinder detail routes
+Route::prefix('cylinders')->name('cylinders.')->group(function () {
+    Route::get('/', [CylinderController::class, 'index'])->name('index');
+    Route::get('detail/{id}', [CylinderController::class, 'show'])->name('show.detail');
+    Route::delete('destroy/{id}', [CylinderController::class, 'destroyCustom'])->name('destroy.custom');
 });
+Route::resource('cylinders', CylinderController::class)->parameters(['cylinder' => 'id']);
+
+// Customer-specific routes
+Route::get('/dashboard/cylinders', [CustomerController::class, 'showCylinders'])->name('dashboard.cylinder');
 
 // Employee-specific routes
 Route::middleware(['auth'])->group(function () {
+    Route::get('/employee/dashboard', [ManagementController::class, 'index'])->name('dashboard.employee');
     Route::get('/employee/accounts', [EmployeeController::class, 'accounts'])->name('employee.accounts');
     Route::get('/employee/agents', [EmployeeController::class, 'agents'])->name('employee.agents');
     Route::get('/employee/statistics', [EmployeeController::class, 'statistics'])->name('employee.statistics');
     Route::get('/employee/cylinders', [EmployeeController::class, 'cylindersPage'])->name('employee.cylinders');
 });
 
-// Routes for the cylinder detail page
-Route::prefix('cylinders')->name('cylinders.')->group(function () {
-    Route::get('/', [CylinderController::class, 'index'])->name('index');
-    Route::get('detail/{id}', [CylinderController::class, 'show'])->name('show.detail');  // Renamed route to avoid conflict
-    Route::delete('destroy/{id}', [CylinderController::class, 'destroyCustom'])->name('destroy.custom');  // updated route name
-});
+// Agent-specific routes
+Route::get('/agent/dashboard', [AgentController::class, 'dashboard'])->name('dashboard.agent');
+Route::get('/agent/cylinders', [AgentController::class, 'cylindersPage'])->name('agent.cylinders');
+Route::get('/agent/accounts', [AgentController::class, 'accounts'])->name('agent.accounts');
 
-// Remove the previous conflicting route for `cylinders.show`
-Route::resource('cylinders', CylinderController::class)->parameters([
-    'cylinder' => 'id',
-])->except(['show']);
+//Driver-specific routes
+Route::get('/drivers/cylinders', [DriversController::class, 'dashboard'])->name('drivers.cylinders');
+Route::get('/drivers/{id}/profile', [DriversController::class, 'driverProfile'])->name('drivers.profile');
+// Driver cylinders show page route
+Route::get('cylinders/{id}', [CylinderController::class, 'show'])->name('show.cylinders');
 
-// Warehouse Management route
-Route::resource('warehouses', WarehouseController::class)->except(['show']);  // Keep the resource route definition here
-Route::get('/warehouses/{id}', [WarehouseController::class, 'show'])->name('warehouses.show');  // Keep this route as it's for viewing specific warehouse details
+// Management routes
+Route::get('/management/dashboard', [ManagementController::class, 'index'])->name('dashboard.management');
+Route::get('/management/statistics', [StatisticsController::class, 'index'])->name('management.statistics');
+Route::get('/management/accounts', [ManagementController::class, 'accounts'])->name('management.accounts');
+Route::get('/management/employees', [ManagementController::class, 'employees'])->name('management.employees');
+Route::get('/management/agents', [ManagementController::class, 'agents'])->name('management.agents');
+Route::get('management/drivers', [ManagementController::class, 'drivers'])->name('management.drivers');
+Route::get('/drivers/{id}/profile', [DriversController::class, 'driverProfile'])->name('drivers.profile');
 
-// Route for Managers to delete Warehouse
-Route::middleware(['auth'])->group(function () {
-    Route::resource('warehouses', WarehouseController::class);
-});
+// Warehouse management routes
+Route::resource('warehouses', WarehouseController::class)->except(['show']);
+Route::get('/warehouses/{id}', [WarehouseController::class, 'show'])->name('warehouses.show');
 
-// Add new cylinder location dropdown
+// Location routes
 Route::get('/locations/warehouses', [LocationController::class, 'getWarehouses'])->name('locations.getWarehouseLocations');
 Route::get('/locations/getWarehouses', [LocationController::class, 'getWarehouses'])->name('locations.getWarehouses');
 
-// Show Cylinders Details
-Route::get('cylinders/{cylinder}', [CylinderController::class, 'show'])->name('cylinders.show');
-
-// Route for managers to delete Cylinder
-Route::middleware(['auth'])->group(function () {
-    Route::resource('warehouses', WarehouseController::class);
-    Route::resource('cylinders', CylinderController::class);
-});
-
-// Statistics Page
-Route::get('/management/statistics', [StatisticsController::class, 'index'])->name('management.statistics');
-
-// Employee Statistics Page
+// Employee statistics page
 Route::get('/employee/statistics', [StatisticsController::class, 'index'])
     ->name('employee.statistics')
     ->middleware(['auth']);
 
+// Redirect unauthenticated users to
+Route::middleware([RedirectIfNotAuthenticated::class])->group(function () {
+    Route::get('/cylinders/{cylinder}', [CylinderController::class, 'show'])->name('cylinders.show');
+});
+
+// Statistics charts data
+Route::get('/statistics/data', [StatisticsController::class, 'getStatisticsData']);
+
+// Assign Cylinder Search Bar
+Route::post('/assign-cylinder', [CylinderController::class, 'assign'])->name('cylinders.assign');
+Route::get('/search/customers', [SearchAutoCompleteController::class, 'searchCustomers'])->name('search.customers');
+Route::get('/search/drivers', [SearchAutoCompleteController::class, 'searchDrivers'])->name('search.drivers');
+
+// Cylinder delivery route
+Route::post('/deliveries', [DeliveryController::class, 'store'])->name('deliveries.store');
+
+// Cylinder Pickup route
+Route::post('/pickups/store', [PickupController::class, 'store'])->name('pickups.store');
+
+// Route for uploading NIN image
+Route::post('/users/{id}/upload-nin', [UserController::class, 'uploadNin'])->name('upload.nin');

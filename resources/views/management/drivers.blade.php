@@ -1,8 +1,4 @@
-@extends(Auth::user()->position === 'Manager' 
-    ? 'layouts.management-dashboard' 
-    : (Auth::user()->position === 'Employee' 
-        ? 'layouts.employee-dashboard' 
-        : 'layouts.agent-dashboard'))
+@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : 'layouts.drivers-dashboard')
 
 @section('content')
     <div class="container">
@@ -11,7 +7,7 @@
                 <div class="bg-white tm-block">
                     <div class="row">
                         <div class="col-12">
-                            <h2 class="tm-block-title d-inline-block">Customer Accounts</h2>
+                            <h2 class="tm-block-title d-inline-block">Driver Accounts</h2>
                         </div>
                     </div>
                     <table class="table table-striped">
@@ -27,19 +23,21 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($users as $user)
-                                <tr onclick="window.location.href='{{ route('users.profile', $user->id) }}'" style="cursor: pointer;">
+                            @forelse ($drivers as $user)
+                                <tr onclick="window.location.href='{{ route('drivers.profile', $user->id) }}'"
+                                    style="cursor: pointer;">
                                     <td>{{ $user->first_name }} {{ $user->last_name }}</td>
                                     <td>{{ $user->phone_number }}</td>
                                     <td>{{ $user->email }}</td>
                                     <td>{{ $user->position }}</td>
                                     <td>{{ $user->city }}</td>
                                     <td>{{ $user->state }}</td>
-                                    <td>{{ $user->dob ? \Carbon\Carbon::parse($user->dob)->age : 'N/A' }}</td> <!-- Display Age -->
+                                    <td>{{ $user->dob ? \Carbon\Carbon::parse($user->dob)->age : 'N/A' }}</td>
+                                    <!-- Display Age -->
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">No users found.</td>
+                                    <td colspan="7" class="text-center">No drivers found.</td>
                                 </tr>
                             @endforelse
                         </tbody>

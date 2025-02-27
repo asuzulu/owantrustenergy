@@ -20,10 +20,11 @@ class CreateUsersTable extends Migration
             $table->string('bvn')->unique();
             $table->string('nin')->unique();
             $table->string('email')->unique();
-            $table->date('dob'); // Added dob
+            $table->date('dob');
+            $table->string('photo_id')->nullable();
             $table->string('password');
             $table->string('profile_image')->nullable();
-            $table->string('position')->nullable()->default('Customer');  // or set nullable()
+            $table->string('position')->nullable()->default('Customer');
             $table->timestamps();
         });
     }

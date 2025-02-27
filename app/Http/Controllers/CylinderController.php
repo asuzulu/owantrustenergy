@@ -48,7 +48,9 @@ class CylinderController extends Controller
     public function show($id)
     {
         $cylinder = Cylinder::findOrFail($id);
-        return view('cylinders.show', compact('cylinder'));
+        $warehouses = DB::table('warehouses')->get(); // Fetch all warehouses
+
+        return view('cylinders.show', compact('cylinder', 'warehouses'));
     }
 
     public function store(Request $request)
@@ -65,7 +67,7 @@ class CylinderController extends Controller
         // Ensure the directory exists
         Storage::makeDirectory('public/qrcodes');
 
-        // Generate QR Code using SVG format
+        // Generate QR Code with URL to the cylinder details page
         $qrCode = QrCode::format('svg')
             ->size(300)
             ->generate(route('cylinders.show', $cylinderId));
@@ -104,45 +106,44 @@ class CylinderController extends Controller
         }
     }
 
-    // Assign a cylinder to a user
-    public function assignCylinder(Request $request, $userId)
+    // Assign a cylinder to a user from User page
+    public function assignCylinder(Request $request)
     {
-        Log::debug('Assign Cylinder Method Triggered');
-
-        try {
-            $user = User::findOrFail($userId);
-        } catch (\Exception $e) {
-            abort(404, 'User not found.');
-        }
-
-        if (!in_array(Auth::user()->position, ['Manager', 'Employee'])) {
-            return redirect()->back()->with('error', 'You do not have permission to assign cylinders.');
-        }
-
-        $validated = $request->validate([
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
             'cylinder_id' => 'required|exists:cylinders,id',
         ]);
 
-        $cylinder = Cylinder::findOrFail($validated['cylinder_id']);
+        $user = User::findOrFail($request->user_id);
+        $cylinder = Cylinder::findOrFail($request->cylinder_id);
 
         if ($user->position !== 'Customer') {
-            return redirect()->back()->with('error', 'Only customers can be assigned cylinders.');
+            return response()->json(['error' => 'Only customers can be assigned cylinders.'], 403);
         }
 
         $cylinder->user_id = $user->id;
         $cylinder->location = $user->first_name . ' ' . $user->last_name;
+        $cylinder->save();
 
-        DB::beginTransaction();
-        try {
-            $cylinder->save();
-            DB::commit();
-            return redirect()->route('users.profile', ['id' => $user->id])->with('success', 'Cylinder assigned successfully.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Failed to assign cylinder.');
-        }
+        return response()->json(['success' => 'Cylinder assigned successfully.']);
     }
 
+    public function assign(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'cylinder_id' => 'required|exists:cylinders,id',
+        ]);
+
+        $cylinder = Cylinder::findOrFail($request->cylinder_id);
+        $user = User::findOrFail($request->user_id);
+
+        $cylinder->user_id = $user->id;
+        $cylinder->location = $user->first_name . ' ' . $user->last_name;
+        $cylinder->save();
+
+        return response()->json(['success' => true, 'message' => 'Cylinder assigned successfully']);
+    }
     private function generateUniqueCylinderId()
     {
         do {
@@ -152,12 +153,11 @@ class CylinderController extends Controller
         return $id;
     }
 
-    //Manager can delete cylinder
     public function destroy($id)
     {
         $cylinder = Cylinder::findOrFail($id);
 
-        if (auth()->user()->position !== 'Manager') {
+        if (Auth::user()->position !== 'Manager') {
             return redirect()->route('cylinders.index')->with('error', 'Unauthorized action.');
         }
 

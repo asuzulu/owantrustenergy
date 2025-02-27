@@ -23,11 +23,14 @@
             <li class="nav-item {{ request()->routeIs('management.agents') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('management.agents') }}">Agents</a>
             </li>
-            <li class="nav-item {{ request()->routeIs('management.statistics') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('management.statistics') }}">Statistics</a>
+            <li class="nav-item {{ request()->routeIs('management.drivers') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('management.drivers') }}">Drivers</a>
             </li>
             <li class="nav-item {{ request()->routeIs('warehouses.index') ? 'active' : '' }}">
                 <a href="{{ route('warehouses.index') }}" class="nav-link">Warehouses</a>
+            </li>
+            <li class="nav-item {{ request()->routeIs('management.statistics') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('management.statistics') }}">Statistics</a>
             </li>
             <li class="nav-item dropdown {{ request()->is('settings*') ? 'active' : '' }}">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"

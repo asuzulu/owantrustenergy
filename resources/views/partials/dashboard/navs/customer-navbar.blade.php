@@ -9,15 +9,26 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mx-auto">
-            <li class="nav-item"><a class="nav-link active" href="{{ route('dashboard.home') }}">Profile</a></li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('dashboard.cylinder', ['userId' => Auth::id()]) }}">Cylinders</a>
+                <a class="nav-link {{ request()->routeIs('dashboard.profile') ? 'active' : '' }}"
+                   href="{{ route('dashboard.profile') }}">
+                   <i class="fas fa-user-circle mr-2"></i>Profile
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('dashboard.cylinder') ? 'active' : '' }}"
+                   href="{{ route('dashboard.cylinder', ['userId' => Auth::id()]) }}">
+                    Cylinders
+                </a>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" data-toggle="dropdown">Settings</a>
+                <a class="nav-link dropdown-toggle {{ request()->is('settings/*') ? 'active' : '' }}"
+                   href="#" id="navbarDropdown" data-toggle="dropdown">
+                    Settings
+                </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="#">Profile</a>
-                    <a class="dropdown-item" href="#">Billing</a>
+                    <a class="dropdown-item {{ request()->is('settings/profile') ? 'active' : '' }}" href="#">Profile</a>
+                    <a class="dropdown-item {{ request()->is('settings/billing') ? 'active' : '' }}" href="#">Billing</a>
                 </div>
             </li>
         </ul>

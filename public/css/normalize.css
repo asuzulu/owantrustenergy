@@ -266,7 +266,8 @@ button,
 html [type="button"], /* 1 */
 [type="reset"],
 [type="submit"] {
-  -webkit-appearance: button; /* 2 */
+    appearance: button;
+    -webkit-appearance: button;
 }
 
 /**
@@ -351,10 +352,11 @@ textarea {
  * 2. Correct the outline style in Safari.
  */
 
-[type="search"] {
-  -webkit-appearance: textfield; /* 1 */
-  outline-offset: -2px; /* 2 */
-}
+ [type="search"] {
+    appearance: textfield; /* Standard property */
+    -webkit-appearance: textfield; /* 1 */
+    outline-offset: -2px; /* 2 */
+  }
 
 /**
  * Remove the inner padding and cancel buttons in Chrome and Safari on macOS.

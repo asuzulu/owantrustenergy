@@ -33,10 +33,12 @@
                                     <td class="text-center">{{ $cylinder->size }}</td>
                                     <td class="text-center">
                                         @if ($cylinder->size == 'Small')
-                                            5kg
+                                            3kg
                                         @elseif ($cylinder->size == 'Medium')
-                                            12kg
+                                            5kg
                                         @elseif ($cylinder->size == 'Large')
+                                            12kg
+                                        @elseif ($cylinder->size == 'XL')
                                             25kg
                                         @else
                                             N/A

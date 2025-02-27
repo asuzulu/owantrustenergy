@@ -184,5 +184,14 @@
     </div>
 </div>
 <!-- client section end -->
-
+<style>
+    /* This style override will ensure the navbar touches the very top of the viewport on this page */
+    .navbar {
+        position: fixed !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin-top: 0 !important;
+        z-index: 1000; /* Ensure the navbar stays above other elements */
+    }
+</style>
 @endsection

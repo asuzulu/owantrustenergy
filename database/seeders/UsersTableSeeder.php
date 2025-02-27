@@ -299,6 +299,45 @@ class UsersTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+
+            [
+                'first_name' => 'Adekunle',
+                'last_name' => 'Adebayo',
+                'phone_number' => '08123456789',
+                'gender' => 'male',
+                'street' => '12 Adebayo Street',
+                'city' => 'Lagos',
+                'state' => 'Lagos',
+                'bvn' => '67890123450',
+                'nin' => '22334455660',
+                'email' => 'adekunleadebayo@gmail.com',
+                'dob' => '1989-07-21',
+                'password' => bcrypt('password'),
+                'profile_image' => null,
+                'position' => 'Driver',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'first_name' => 'Ijeoma',
+                'last_name' => 'Okafor',
+                'phone_number' => '08098765432',
+                'gender' => 'female',
+                'street' => '34 Independence Avenue',
+                'city' => 'Enugu',
+                'state' => 'Enugu',
+                'bvn' => '78901234561',
+                'nin' => '33445566771',
+                'email' => 'ijeomaokafor@gmail.com',
+                'dob' => '1993-05-15',
+                'password' => bcrypt('password'),
+                'profile_image' => null,
+                'position' => 'Driver',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+
+
         ]);
     }
 }

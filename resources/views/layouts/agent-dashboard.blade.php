@@ -7,7 +7,7 @@
     <div id="home" class="">
         <div class="container">
             {{-- Navbar --}}
-            @include('partials.dashboard.navs.employee-navbar')
+            @include('partials.dashboard.navs.agent-navbar')
 
             {{-- Page Content --}}
             <div class="row tm-content-row tm-mt-big">

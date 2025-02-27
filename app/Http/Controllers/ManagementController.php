@@ -4,12 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Cylinder;
-use Spatie\Permission\Models\Role;
-use App\Models\Warehouse;
 use Illuminate\Http\Request;
+use App\Models\Delivery;
+use Illuminate\Support\Facades\Auth;
 
 class ManagementController extends Controller
 {
+    public function index()
+    {
+        $cylinders = Cylinder::orderBy('id')->paginate(10);
+        return view('management.home', compact('cylinders'));
+    }
+
     public function accounts()
     {
         // Fetch all users with the role 'customer'
@@ -57,6 +63,26 @@ class ManagementController extends Controller
 
     public function statistics()
     {
-        return view('management.statistics');
+        // Fetch assigned cylinders per month
+        $cylindersAssignedChart = Cylinder::selectRaw("strftime('%Y-%m', created_at) as month, COUNT(*) as count")
+            ->whereNotNull('user_id') // Only assigned cylinders
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        // Fetch new customer registrations per month
+        $customerRegistrationsChart = User::selectRaw("strftime('%Y-%m', created_at) as month, COUNT(*) as count")
+            ->where('position', 'Customer')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        return view('management.statistics', compact('cylindersAssignedChart', 'customerRegistrationsChart'));
+    }
+    public function drivers()
+    {
+        // Fetch all users with the role 'Driver'
+        $drivers = User::where('position', 'Driver')->get();
+        return view('management.drivers', compact('drivers'));
     }
 }

@@ -2,83 +2,93 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class Statistics extends Model
 {
-    public function getCylindersAssigned()
-    {
-        return DB::table('cylinders')->whereNotNull('user_id')->count() ?: 'N/A';
-    }
-
-    public function getCylindersAssignedChart()
+    public static function getCylindersAssignedCount()
     {
         return DB::table('cylinders')
-            ->select(DB::raw("strftime('%Y-%m', updated_at) as month, COUNT(*) as count"))
+            ->join('users', DB::raw("cylinders.location"), "=", DB::raw("users.first_name || ' ' || users.last_name"))
+            ->count();
+    }
+
+    public static function getCylindersInWarehouses()
+    {
+        return DB::table('cylinders')
+            ->join('warehouses', 'cylinders.location', '=', 'warehouses.name')
+            ->count();
+    }
+
+    public static function getTotalCylinders()
+    {
+        return DB::table('cylinders')->count();
+    }
+
+    public static function getTotalCustomers()
+    {
+        return DB::table('users')->where('position', 'customer')->count();
+    }
+
+    public static function getNewCustomersLastMonth()
+    {
+        return DB::table('users')
+        ->where('position', 'Customer')
+        ->where('created_at', '>=', now()->subMonth())
+            ->count();
+    }
+
+    public static function getNewCustomersLastWeek()
+    {
+        return DB::table('users')
+        ->where('position', 'Customer')
+        ->where('created_at', '>=', now()->subWeek())
+            ->count();
+    }
+
+    public static function getNewCustomersLastYear()
+    {
+        return DB::table('users')
+        ->where('position', 'Customer')
+        ->where('created_at', '>=', now()->subYear())
+            ->count();
+    }
+
+    public static function getTotalCustomersAllTime()
+    {
+        return DB::table('users')->where('position', 'customer')->count();
+    }
+
+    public static function getTotalWarehouses()
+    {
+        return DB::table('warehouses')->count();
+    }
+
+    public static function getTotalEmployees()
+    {
+        return DB::table('users')->where('position', 'Employee')->count();
+    }
+
+    public static function getCylindersAssignedChart()
+    {
+        return DB::table('cylinders')
             ->whereNotNull('user_id')
-            ->where('assigned_at', '>=', Carbon::now()->subMonths(12))
+            ->where('updated_at', '>=', now()->subMonths(12))
+            ->selectRaw("strftime('%Y-%m', updated_at) as month, COUNT(*) as count")
             ->groupBy('month')
+            ->orderBy('month')
             ->get();
     }
 
-    public function getCylindersInWarehouses()
-    {
-        return DB::table('cylinders')->whereNotNull('warehouse_id')->count() ?: 'N/A';
-    }
-
-    public function getTotalCylinders()
-    {
-        return DB::table('cylinders')->count() ?: 'N/A';
-    }
-
-    public function getTotalCustomers()
-    {
-        return DB::table('users')->where('position', 'Customer')->count() ?: 'N/A';
-    }
-
-    public function getCustomersLastMonth()
+    public static function getCustomerRegistrationsChart()
     {
         return DB::table('users')
-            ->where('position', 'Customer')
-            ->where('created_at', '>=', Carbon::now()->subMonth())
-            ->count() ?: 'N/A';
-    }
-
-    public function getCustomersLastWeek()
-    {
-        return DB::table('users')
-            ->where('position', 'Customer')
-            ->where('created_at', '>=', Carbon::now()->subWeek())
-            ->count() ?: 'N/A';
-    }
-
-    public function getCustomersLastYear()
-    {
-        return DB::table('users')
-            ->where('position', 'Customer')
-            ->where('created_at', '>=', Carbon::now()->subYear())
-            ->count() ?: 'N/A';
-    }
-
-    public function getTotalEmployees()
-    {
-        return DB::table('users')->where('position', 'Employee')->count() ?: 'N/A';
-    }
-
-    public function getCustomerRegistrationChart()
-    {
-        return DB::table('users')
-            ->select(DB::raw("strftime('%Y-%m', created_at) as month, COUNT(*) as count"))
-            ->where('position', 'Customer')
-            ->where('created_at', '>=', Carbon::now()->subMonths(12))
+        ->where('position', 'Customer')
+        ->where('created_at', '>=', now()->subMonths(12))
+            ->selectRaw("strftime('%Y-%m', created_at) as month, COUNT(*) as count")
             ->groupBy('month')
+            ->orderBy('month')
             ->get();
-    }
-
-    public function getTotalWarehouses()
-    {
-        return DB::table('warehouses')->count() ?: 'N/A';
     }
 }

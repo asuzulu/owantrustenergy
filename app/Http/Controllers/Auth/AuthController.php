@@ -44,13 +44,16 @@ class AuthController extends Controller
     // Determine the correct dashboard based on user position
     private function redirectUserByPosition($user)
     {
-        if ($user->position === 'customer') {
-            return redirect()->route('dashboard.customer');
-        } elseif ($user->position === 'employee') {
+        if ($user->position === 'Customer') {
+            return redirect()->route('dashboard.profile');
+        } elseif ($user->position === 'Employee') {
             return redirect()->route('dashboard.employee');
         } elseif ($user->position === 'Manager') {
             return redirect()->route('dashboard.management');
+        } elseif ($user->position === 'Agent') {
+            return redirect()->route('dashboard.agent');
+        } elseif ($user->position === 'Driver') {
+            return redirect()->route('dashboard.driver');
         }
-        return redirect()->route('dashboard.home'); // Default fallback
     }
 }

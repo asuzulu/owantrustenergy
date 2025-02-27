@@ -1,107 +1,102 @@
 @extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : 'layouts.employee-dashboard')
 
 @section('content')
-<div class="container-fluid">
-    <!-- Statistics Boxes -->
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="bg-white tm-block text-center p-4">
-                <h2 class="tm-block-title">Cylinders Assigned</h2>
-                <p class="tm-value display-4">{{ $cylinders_assigned }}</p>
-            </div>
+    <div class="container-fluid">
+        <div class="row g-4">
+            @php
+                $stats = [
+                    ['id' => 'cylinders-assigned', 'title' => 'Cylinders Assigned', 'value' => $cylinders_assigned],
+                    ['id' => 'cylinders-warehouses', 'title' => 'Cylinders in Warehouses', 'value' => $cylinders_in_warehouses],
+                    ['id' => 'total-cylinders', 'title' => 'Total Cylinders', 'value' => $total_cylinders],
+                    ['id' => 'new-customers-week', 'title' => 'New Customers Last Week', 'value' => $customers_last_week],
+                    ['id' => 'new-customers-month', 'title' => 'New Customers Last Month', 'value' => $customers_last_month],
+                    ['id' => 'new-customers-year', 'title' => 'New Customers Last Year', 'value' => $customers_last_year],
+                    ['id' => 'total-customers', 'title' => 'Total Customers', 'value' => $total_customers],
+                    ['id' => 'total-employees', 'title' => 'Total Employees', 'value' => $total_employees],
+                    ['id' => 'total-warehouses', 'title' => 'Total Warehouses', 'value' => $total_warehouses]
+                ];
+            @endphp
+
+            @foreach ($stats as $stat)
+                <div class="col-lg-4 col-md-6">
+                    <div class="bg-white tm-block text-center p-4 d-flex flex-column justify-content-between shadow-sm rounded">
+                        <h4 class="tm-block-title">{{ $stat['title'] }}</h4>
+                        <p id="{{ $stat['id'] }}" class="tm-value display-5 text-primary fw-bold">{{ $stat['value'] }}</p>
+                    </div>
+                </div>
+            @endforeach
         </div>
-        <div class="col-md-4 mb-4">
-            <div class="bg-white tm-block text-center p-4">
-                <h2 class="tm-block-title">Cylinders in Warehouses</h2>
-                <p class="tm-value display-4">{{ $cylinders_in_warehouses }}</p>
+
+        <div class="row mt-4">
+            <div class="col-lg-6">
+                <div class="bg-white tm-block p-4 shadow-sm rounded">
+                    <h4 class="tm-block-title">Cylinders Assigned Over Time</h4>
+                    <canvas id="cylinders-chart" class="chart-canvas"></canvas>
+                </div>
             </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="bg-white tm-block text-center p-4">
-                <h2 class="tm-block-title">Total Cylinders</h2>
-                <p class="tm-value display-4">{{ $total_cylinders }}</p>
+            <div class="col-lg-6">
+                <div class="bg-white tm-block p-4 shadow-sm rounded">
+                    <h4 class="tm-block-title">Customer Registrations Over Time</h4>
+                    <canvas id="customers-chart" class="chart-canvas"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="bg-white tm-block text-center p-4">
-                <h2 class="tm-block-title">Total Customers</h2>
-                <p class="tm-value display-4">{{ $total_customers }}</p>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="bg-white tm-block text-center p-4">
-                <h2 class="tm-block-title">New Customers Last Month</h2>
-                <p class="tm-value display-4">{{ $customers_last_month }}</p>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="bg-white tm-block text-center p-4">
-                <h2 class="tm-block-title">New Customers Last Week</h2>
-                <p class="tm-value display-4">{{ $customers_last_week }}</p>
-            </div>
-        </div>
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function drawLineChart(chartId, data, labels, label) {
+            var ctx = document.getElementById(chartId).getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        borderColor: 'blue',
+                        backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
 
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="bg-white tm-block text-center p-4">
-                <h2 class="tm-block-title">New Customers Last Year</h2>
-                <p class="tm-value display-4">{{ $customers_last_year }}</p>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="bg-white tm-block text-center p-4">
-                <h2 class="tm-block-title">Total Employees</h2>
-                <p class="tm-value display-4">{{ $total_employees }}</p>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="bg-white tm-block text-center p-4">
-                <h2 class="tm-block-title">Total Warehouses</h2>
-                <p class="tm-value display-4">{{ $total_warehouses }}</p>
-            </div>
-        </div>
-    </div>
+        document.addEventListener('DOMContentLoaded', function () {
+            let cylinderData = {!! json_encode($cylindersAssignedChart) !!};
+            let customerData = {!! json_encode($customerRegistrationsChart) !!};
 
-    <!-- Charts -->
-    <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="bg-white tm-block p-4">
-                <h2 class="tm-block-title">Cylinders Assigned Over Time</h2>
-                <canvas id="cylinderChart" class="chart-canvas"></canvas>
-            </div>
-        </div>
-        <div class="col-md-6 mb-4">
-            <div class="bg-white tm-block p-4">
-                <h2 class="tm-block-title">Customer Registrations Over Time</h2>
-                <canvas id="customerChart" class="chart-canvas"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
+            let cylinderLabels = cylinderData.map(item => item.month || "Unknown");
+            let cylinderCounts = cylinderData.map(item => item.count || 0);
 
-<!-- Chart Data -->
-<script>
-    let cylinderData = {!! json_encode($cylinders_assigned_chart) !!};
-    let customerData = {!! json_encode($customer_registration_chart) !!};
-</script>
+            let customerLabels = customerData.map(item => item.month || "Unknown");
+            let customerCounts = customerData.map(item => item.count || 0);
 
-<!-- Chart Styling -->
-<style>
-    .tm-block {
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-    .tm-value {
-        font-weight: bold;
-        color: #333;
-    }
-    .chart-canvas {
-        width: 100%;
-        height: 350px;
-    }
-</style>
+            drawLineChart("cylinders-chart", cylinderCounts, cylinderLabels);
+            drawBarChart("customers-chart", customerCounts, customerLabels);
+        });
+    </script>
+
+    <style>
+        .tm-block {
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+        .tm-value {
+            font-weight: bold;
+            color: #333;
+            font-size: 30px;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            max-height: 350px;
+        }
+    </style>
 @endsection
