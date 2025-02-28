@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     @include('partials.dashboard.head')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body id="reportsPage">
     <div id="home" class="">

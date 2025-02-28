@@ -25,8 +25,8 @@
                             Age: {{ $user->dob ? \Carbon\Carbon::parse($user->dob)->age : 'N/A' }}
                             <br>
                             @if (!$user->photo_id || !Storage::disk('public')->exists('nin-images/' . $user->photo_id))
-                            <button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal"
-                            data-bs-target="#uploadNinModal">Upload NIN</button>
+                                <button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal"
+                                    data-bs-target="#uploadNinModal">Upload NIN</button>
                             @endif
                         </div>
                     </div>
@@ -62,7 +62,6 @@
                         @if ($user->photo_id && Storage::disk('public')->exists('nin-images/' . $user->photo_id))
                             <img id="ninImagePreview" class="img-fluid rounded mb-3"
                                 src="{{ asset('storage/nin-images/' . $user->photo_id) }}" alt="NIN Image">
-                                <img id="ninImagePreview" class="img-fluid rounded mb-3" src="{{ asset('storage/nin-images/' . $user->photo_id) }}" alt="NIN Image">
                             <br>
                             <button id="updateNinBtn" class="btn btn-success mt-3" data-bs-toggle="modal"
                                 data-bs-target="#updateNinModal">Change Image</button>
@@ -102,15 +101,14 @@
             </div>
         </div>
     </div>
-
 @endsection
 
 @section('scripts')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             // Handle file name display for both upload and update inputs
-            $("#nin_image, #update_nin_image").on("change", function () {
+            $("#nin_image, #update_nin_image").on("change", function() {
                 let fileName = $(this).val().split("\\").pop();
                 $(this).next("p").text(fileName);
             });
@@ -126,10 +124,11 @@
                     data: formData,
                     processData: false,
                     contentType: false,
-                    success: function (response) {
+                    success: function(response) {
                         console.log("Upload success:", response);
                         if (response.success) {
-                            $("#ninImagePreview").attr("src", response.preview_url + "?t=" + new Date().getTime());
+                            $("#ninImagePreview").attr("src", response.preview_url + "?t=" + new Date()
+                                .getTime());
                             $("#updateNinBtn").show();
 
                             if (update) {
@@ -139,20 +138,20 @@
                             }
                         }
                     },
-                    error: function (xhr) {
+                    error: function(xhr) {
                         console.error("Upload failed:", xhr.responseText);
                         alert("Upload failed. Please try again.");
                     }
                 });
             }
             // Handle NIN image upload
-            $("#ninUploadForm").on("submit", function (e) {
+            $("#ninUploadForm").on("submit", function(e) {
                 e.preventDefault();
                 handleNinUpload(this);
             });
 
             // Handle NIN image update
-            $("#updateNinForm").on("submit", function (e) {
+            $("#updateNinForm").on("submit", function(e) {
                 e.preventDefault();
                 handleNinUpload(this, true);
             });
@@ -160,4 +159,4 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous">
-@endsection
+    @endsection

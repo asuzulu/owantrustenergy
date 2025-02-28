@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Cylinder;
+use App\Models\State;
 use Illuminate\Http\Request;
-use App\Models\Delivery;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ManagementController extends Controller
 {
@@ -32,9 +33,15 @@ class ManagementController extends Controller
 
     public function agents()
     {
-        // Fetch all users with the role 'Agent'
-        $agents = User::where('position', 'Agent')->get();
-        return view('management.agents', compact('agents'));
+        try {
+            $agents = User::where('position', 'Agent')->paginate(10);
+            $states = State::all();  // Retrieve all states
+        } catch (\Exception $e) {
+            Log::error('Error retrieving agents: ' . $e->getMessage());
+            abort(500, 'Error retrieving agents.');
+        }
+
+        return view('management.agents', compact('agents', 'states'));
     }
 
     public function cylindersPage()
@@ -81,8 +88,17 @@ class ManagementController extends Controller
     }
     public function drivers()
     {
-        // Fetch all users with the role 'Driver'
-        $drivers = User::where('position', 'Driver')->get();
-        return view('management.drivers', compact('drivers'));
+        if (Auth::user()->position === 'Customer') {
+            abort(403, 'Unauthorized action.');
+        }
+        try {
+            // Use paginate(10) so that $drivers is a paginator, not a collection
+            $drivers = User::where('position', 'Driver')->paginate(10);
+            $states = State::all();
+        } catch (\Exception $e) {
+            Log::debug('Error retrieving Drivers: ', ['error' => $e->getMessage()]);
+            abort(500, 'Failed to retrieve drivers.');
+        }
+        return view('management.drivers', compact('drivers', 'states'));
     }
 }

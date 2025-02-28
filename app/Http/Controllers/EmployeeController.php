@@ -4,60 +4,100 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
-use App\Models\Cylinder;
+use App\Models\State;
 
 class EmployeeController extends Controller
 {
-    public function dashboard()
+    public function index()
     {
-        $cylinders = Cylinder::paginate(10); // Paginate cylinders, 10 per page
-        return view('management.home', compact('cylinders'));
-    }
-    public function accounts()
-    {
-        // Fetch all users with the role 'customer'
-        $users = User::where('position', 'Customer')->get();  // Ensure 'Customer' is case-sensitive match for the role column
-
-        return view('management.accounts', compact('users'));
-    }
-
-    public function agents()
-    {
-        // Fetch all users with the role 'Agent'
-        $agents = User::where('position', 'Agent')->get();
-
-        return view('management.agents', compact('agents'));
+        if (Auth::user()->position === 'Customer') {
+            abort(403, 'Unauthorized action.');
+        }
+        try {
+            $employees = User::where('position', 'Employee')->paginate(10);
+            $states = State::all();
+        } catch (\Exception $e) {
+            Log::debug('Error retrieving Employees: ', ['error' => $e->getMessage()]);
+            abort(500, 'Failed to retrieve employees.');
+        }
+        // Updated view path to match resources/views/management/employees.blade.php
+        return view('management.employees', compact('employees', 'states'));
     }
 
-    public function cylindersPage()
+    public function show($id)
     {
-        // Fetch paginated cylinders from the database (10 per page)
-        $cylinders = Cylinder::paginate(10);
-
-        // Pass the paginated cylinders to the view
-        return view('management.home', compact('cylinders'));
+        $user = User::findOrFail($id);
+        // If you don't have any actual data for warehouse cylinders, pass an empty collection
+        $warehouseCylinders = collect();
+        return view('users.profile', compact('user', 'warehouseCylinders'));
     }
 
-    public function assignCylinder(Request $request, User $user)
+
+    public function store(Request $request)
     {
-        $request->validate([
-            'cylinder_id' => 'required|exists:cylinders,id',
+        $validatedData = $request->validate([
+            'firstName'         => 'required|string|max:255',
+            'lastName'          => 'required|string|max:255',
+            'phoneNumber'       => 'required|string|max:15',
+            'gender'            => 'required|string',
+            'street'            => 'required|string|max:255',
+            'city'              => 'required|string|max:255',
+            'state'             => 'required|exists:states,id',
+            'bvn'               => 'required|digits:11',
+            'nin'               => 'required|digits:11',
+            'email'             => 'required|email|unique:users,email',
+            'dob'               => 'required|date|before:today',
+            'password'          => 'required|string|min:8|confirmed',
+            'position'    => 'required|string|in:Employee',
         ]);
 
-        $user->assignedCylinder()->associate(Cylinder::find($request->cylinder_id));
-        $user->save();
+        try {
+            // Retrieve the state name from the states table using the provided state ID
+            $stateName = State::where('id', $validatedData['state'])->value('name');
 
-        // Assign the 'Employee' role to the user if not already assigned
-        if (!$user->hasRole('Employee')) {
-            $user->assignRole('Employee'); // Correct method for assigning roles
+            $employee = User::create([
+                'first_name'   => $validatedData['firstName'],
+                'last_name'    => $validatedData['lastName'],
+                'phone_number' => $validatedData['phoneNumber'],
+                'gender'       => $validatedData['gender'],
+                'street'       => $validatedData['street'],
+                'city'         => $validatedData['city'],
+                'state'        => $stateName,
+                'bvn'          => $validatedData['bvn'],
+                'nin'          => $validatedData['nin'],
+                'email'        => $validatedData['email'],
+                'dob'          => $validatedData['dob'],
+                'password'     => Hash::make($validatedData['password']),
+                'position'     => $validatedData['position'],
+            ]);
+
+            return redirect()->route('employees.index')->with('success', 'Employee added successfully.');
+        } catch (\Exception $e) {
+            Log::debug('Error adding Employee: ', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Failed to add employee.');
         }
-
-        return redirect()->route('users.profile', $user->id)->with('success', 'Cylinder assigned and role updated successfully!');
     }
 
-    public function statistics()
+    public function destroy($id)
     {
-        return view('management.statistics');
+        $employee = User::findOrFail($id);
+
+        if (Auth::user()->position !== 'Manager') {
+            return redirect()->route('employees.index')->with('error', 'Unauthorized action.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $employee->delete();
+            DB::commit();
+            return redirect()->route('employees.index')->with('success', 'Employee deleted successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to delete employee.');
+        }
     }
 }

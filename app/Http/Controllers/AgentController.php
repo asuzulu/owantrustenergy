@@ -4,52 +4,96 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
-use App\Models\Cylinder;
+use App\Models\State;
 
 class AgentController extends Controller
 {
-    public function dashboard()
+    public function index()
     {
-        $cylinders = Cylinder::paginate(10); // Paginate cylinders, 10 per page
-        return view('management.home', compact('cylinders'));
-    }
-    public function accounts()
-    {
-        // Fetch all users with the role 'customer'
-        $users = User::where('position', 'Customer')->get();  // Ensure 'Customer' is case-sensitive match for the role column
-
-        return view('management.accounts', compact('users'));
-    }
-
-    public function cylindersPage()
-    {
-        // Fetch paginated cylinders from the database (10 per page)
-        $cylinders = Cylinder::paginate(10);
-
-        // Pass the paginated cylinders to the view
-        return view('management.home', compact('cylinders'));
+        if (Auth::user()->position === 'Customer') {
+            abort(403, 'Unauthorized action.');
+        }
+        try {
+            $agents = User::where('position', 'Agent')->paginate(10);
+            $states = State::all();
+        } catch (\Exception $e) {
+            Log::debug('Error retrieving Agents: ', ['error' => $e->getMessage()]);
+            abort(500, 'Failed to retrieve agents.');
+        }
+        return view('management.agents', compact('agents', 'states'));
     }
 
-    public function assignCylinder(Request $request, User $user)
+    public function show($id)
     {
-        $request->validate([
-            'cylinder_id' => 'required|exists:cylinders,id',
+        $user = User::findOrFail($id);
+        $warehouseCylinders = collect();
+        return view('users.profile', compact('user', 'warehouseCylinders'));
+    }
+
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'firstName'         => 'required|string|max:255',
+            'lastName'          => 'required|string|max:255',
+            'phoneNumber'       => 'required|string|max:15',
+            'gender'            => 'required|string',
+            'street'            => 'required|string|max:255',
+            'city'              => 'required|string|max:255',
+            'state'             => 'required|exists:states,id',
+            'bvn'               => 'required|digits:11',
+            'nin'               => 'required|digits:11',
+            'email'             => 'required|email|unique:users,email',
+            'dob'               => 'required|date|before:today',
+            'password'          => 'required|string|min:8|confirmed',
+            'position'          => 'required|string|in:Agent',
         ]);
 
-        $user->assignedCylinder()->associate(Cylinder::find($request->cylinder_id));
-        $user->save();
+        try {
+            $stateName = State::where('id', $validatedData['state'])->value('name');
 
-        // Assign the 'Employee' role to the user if not already assigned
-        if (!$user->hasRole('Employee')) {
-            $user->assignRole('Employee'); // Correct method for assigning roles
+            $agent = User::create([
+                'first_name'   => $validatedData['firstName'],
+                'last_name'    => $validatedData['lastName'],
+                'phone_number' => $validatedData['phoneNumber'],
+                'gender'       => $validatedData['gender'],
+                'street'       => $validatedData['street'],
+                'city'         => $validatedData['city'],
+                'state'        => $stateName,
+                'bvn'          => $validatedData['bvn'],
+                'nin'          => $validatedData['nin'],
+                'email'        => $validatedData['email'],
+                'dob'          => $validatedData['dob'],
+                'password'     => Hash::make($validatedData['password']),
+                'position'     => $validatedData['position'],
+            ]);
+
+            return redirect()->route('agents.index')->with('success', 'Agent added successfully.');
+        } catch (\Exception $e) {
+            Log::debug('Error adding Agent: ', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Failed to add agent.');
         }
-
-        return redirect()->route('users.profile', $user->id)->with('success', 'Cylinder assigned and role updated successfully!');
     }
 
-    public function statistics()
+    public function destroy($id)
     {
-        return view('management.statistics');
+        $agent = User::findOrFail($id);
+
+        if (Auth::user()->position !== 'Manager') {
+            return redirect()->route('agents.index')->with('error', 'Unauthorized action.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $agent->delete();
+            DB::commit();
+            return redirect()->route('agents.index')->with('success', 'Agent deleted successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to delete agent.');
+        }
     }
 }

@@ -1,45 +1,184 @@
-@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : 'layouts.employee-dashboard')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@if (Auth::user()->position === 'Customer')
+    <script>
+        window.location.href = "{{ route('dashboard') }}"; // Redirect to a safe page
+    </script>
+    @php exit; @endphp
+@endif
+
+@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.default-dashboard')))
 
 @section('content')
-    <div class="container">
-        <div class="row tm-content-row tm-mt-big justify-content-center">
-            <div class="col-12 col-lg-10"> <!-- Increased column width -->
-                <div class="bg-white tm-block">
-                    <div class="row">
-                        <div class="col-12">
-                            <h2 class="tm-block-title d-inline-block">Agent Accounts</h2>
-                        </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <div class="container" style="margin-top: -6rem;">
+        <div class="row tm-content-row tm-mt-big">
+            <div class="bg-white tm-block h-100">
+                <div class="row">
+                    <div class="col-md-8 col-sm-12">
+                        <h2 class="tm-block-title d-inline-block">Agents</h2>
                     </div>
-                    <table class="table table-striped">
+                    @if (Auth::user()->position !== 'Agent')
+                        <div class="col-md-4 col-sm-12 text-right">
+                            <button class="btn btn-small btn-primary" data-toggle="modal" data-target="#addAgentModal">Add New Agent</button>
+                        </div>
+                    @endif
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped tm-table-striped-even mt-3">
                         <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Phone Number</th>
-                                <th>Email</th>
-                                <th>Position</th>
-                                <th>City</th>
-                                <th>State</th>
-                                <th>Age</th> <!-- Age Column -->
+                            <tr class="tm-bg-gray">
+                                <th scope="col">Name</th>
+                                <th scope="col">Phone Number</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Position</th>
+                                <th scope="col">City</th>
+                                <th scope="col">State</th>
+                                <th scope="col">Age</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($agents as $user)
-                                <tr onclick="window.location.href='{{ route('users.profile', $user->id) }}'" style="cursor: pointer;">
-                                    <td>{{ $user->first_name }} {{ $user->last_name }}</td>
-                                    <td>{{ $user->phone_number }}</td>
-                                    <td>{{ $user->email }}</td>
-                                    <td>{{ $user->position }}</td>
-                                    <td>{{ $user->city }}</td>
-                                    <td>{{ $user->state }}</td>
-                                    <td>{{ $user->dob ? \Carbon\Carbon::parse($user->dob)->age : 'N/A' }}</td> <!-- Display Age -->
+                            @foreach ($agents as $agent)
+                                <tr onclick="window.location='{{ route('agents.show', $agent->id) }}'" style="cursor: pointer;">
+                                    <td>{{ $agent->first_name }} {{ $agent->last_name }}</td>
+                                    <td>{{ $agent->phone_number }}</td>
+                                    <td>{{ $agent->email }}</td>
+                                    <td>{{ $agent->position }}</td>
+                                    <td>{{ $agent->city }}</td>
+                                    <td>{{ $agent->state }}</td>
+                                    <td>{{ $agent->dob ? \Carbon\Carbon::parse($agent->dob)->age : 'N/A' }}</td>
                                 </tr>
-                            @empty
+                            @endforeach
+                            @if($agents->isEmpty())
                                 <tr>
                                     <td colspan="7" class="text-center">No agents found.</td>
                                 </tr>
-                            @endforelse
+                            @endif
                         </tbody>
                     </table>
+                </div>
+            </div>
+            {{-- Pagination Links --}}
+            @if ($agents->hasPages())
+                <div style="text-align: center; margin-top: 20px;">
+                    {{ $agents->links('pagination::bootstrap-4') }}
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- Add Agent Modal -->
+    <div class="modal fade" id="addAgentModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Agent</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="agentForm" action="{{ route('agents.store') }}" method="POST">
+                        @csrf
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="firstName">First Name</label>
+                                <input type="text" class="form-control" id="firstName" name="firstName" required placeholder="Enter First Name" value="{{ old('firstName') }}" />
+                                @error('firstName')<div class="text-danger">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="lastName">Last Name</label>
+                                <input type="text" class="form-control" id="lastName" name="lastName" required placeholder="Enter Last Name" value="{{ old('lastName') }}" />
+                                @error('lastName')<div class="text-danger">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="phoneNumber">Phone Number</label>
+                                <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" required placeholder="Enter Phone Number" value="{{ old('phoneNumber') }}" />
+                                @error('phoneNumber')<div class="text-danger">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required placeholder="Enter Email Address" value="{{ old('email') }}" />
+                                @error('email')<div class="text-danger">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="dob">Date of Birth</label>
+                                <input type="date" class="form-control" id="dob" name="dob" required value="{{ old('dob') }}" />
+                                @error('dob')<div class="text-danger">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="gender">Gender</label>
+                                <div class="form-check form-check-inline" style="margin-top: 2rem;">
+                                    <input class="form-check-input" type="radio" name="gender" id="male" value="male" required {{ old('gender') == 'male' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="male">Male</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="gender" id="female" value="female" required {{ old('gender') == 'female' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="female">Female</label>
+                                </div>
+                                @error('gender')<div class="text-danger">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="street">Street Address</label>
+                            <input type="text" class="form-control" id="street" name="street" required placeholder="Enter Street Address" value="{{ old('street') }}" />
+                            @error('street')<div class="text-danger">{{ $message }}</div>@enderror
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="city">City</label>
+                                <input type="text" class="form-control" id="city" name="city" required placeholder="Enter City" value="{{ old('city') }}" />
+                                @error('city')<div class="text-danger">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="state">State</label>
+                                <select class="form-control" id="state" name="state" required>
+                                    <option value="" disabled selected>Select State</option>
+                                    @foreach($states as $state)
+                                        <option value="{{ $state->id }}" {{ old('state') == $state->id ? 'selected' : '' }}>{{ $state->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('state')<div class="text-danger">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="bvn">BVN (Bank Verification Number)</label>
+                                <input type="text" class="form-control" id="bvn" name="bvn" required placeholder="Enter 11-digit BVN" pattern="\d{11}" title="Please enter exactly 11 digits" maxlength="11" value="{{ old('bvn') }}" />
+                                @error('bvn')<div class="text-danger">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="nin">NIN (National Identification Number)</label>
+                                <input type="text" class="form-control" id="nin" name="nin" required placeholder="Enter 11-digit NIN" pattern="\d{11}" title="Please enter exactly 11 digits" maxlength="11" value="{{ old('nin') }}" />
+                                @error('nin')<div class="text-danger">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="password">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" required placeholder="At least 8 characters" />
+                                @error('password')<div class="text-danger">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="password_confirmation">Confirm Password</label>
+                                <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required placeholder="Confirm Password" />
+                                @error('password_confirmation')<div class="text-danger">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="position" value="Agent" />
+
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-primary">Add Agent</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -48,4 +187,23 @@
 
 @section('scripts')
     @include('partials.dashboard.scripts')
+    <script>
+        $(document).ready(function(){
+            $("#agentForm").submit(function(event) {
+                event.preventDefault();
+                $.ajax({
+                    url: "{{ route('agents.store') }}",
+                    type: "POST",
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        alert("Agent added successfully!");
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert("Error adding agent.");
+                    }
+                });
+            });
+        });
+    </script>
 @endsection

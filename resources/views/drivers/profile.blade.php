@@ -1,32 +1,52 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@if (Auth::user()->position === 'Customer')
+    <script>
+        window.location.href = "{{ route('dashboard') }}"; // Redirect to a safe page
+    </script>
+    @php exit;
+@endif
+
 @extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : 'layouts.drivers-dashboard')
 
 @section('content')
     <div class="container">
         <div class="row tm-content-row tm-mt-big">
             <div class="tm-col tm-col-big">
-                <div class="bg-white tm-block">
-                    <div class="row">
-                        <div class="col-24">
-                            <h2 class="tm-block-title">Driver Account Details</h2>
-                            <!-- Display user's details -->
-                            Name: {{ $user->first_name }} {{ $user->last_name }}
-                            <br>
-                            Email: {{ $user->email }}
-                            <br>
-                            Gender: {{ $user->gender }}
-                            <br>
-                            Phone: {{ $user->phone_number }}
-                            <br>
-                            Street: {{ $user->street }}
-                            <br>
-                            City: {{ $user->city }}
-                            <br>
-                            State: {{ $user->state }}
+                @if (isset($user))
+                    <div class="bg-white tm-block">
+                        <div class="row">
+                            <div class="col-24">
+                                <h2 class="tm-block-title">Driver Account Details</h2>
+                                <!-- Display user's details -->
+                                Name: {{ $user->first_name }} {{ $user->last_name }}
+                                <br>
+                                Email: {{ $user->email }}
+                                <br>
+                                Gender: {{ $user->gender }}
+                                <br>
+                                Phone: {{ $user->phone_number }}
+                                <br>
+                                Street: {{ $user->street }}
+                                <br>
+                                City: {{ $user->city }}
+                                <br>
+                                State: {{ $user->state }}
+                                <br>
+                                Age: {{ $user->dob ? \Carbon\Carbon::parse($user->dob)->age : 'N/A' }}<br>
+                                <button type="button" class="btn btn-primary mt-3" data-toggle="modal"
+                                    data-target="#editDriverModal">Edit
+                                    Profile</button>
+                                @if (Auth::user()->position === 'Manager' || !$user->photo_id)
+                                    <button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal"
+                                        data-bs-target="#uploadNinModal">Upload NIN</button>
+                                @endif
+                            </div>
                         </div>
                     </div>
-                </div>
+                @else
+                    <p>No driver selected.</p>
+                @endif
             </div>
-
             <div class="tm-col tm-col-small">
                 <div class="bg-white tm-block">
                     @include('partials.dashboard.profile-image.display')
@@ -34,11 +54,11 @@
             </div>
         </div>
 
-        <!-- Display the cylinders assigned to the driver or the logged-in user -->
+        <!-- Display the cylinders assigned to the driver -->
         <div class="row tm-content-row tm-mt-big">
             <div class="bg-white tm-block">
                 <h3 class="tm-block-title" style="text-align: center">Cylinders Assigned</h3>
-                @if($deliveries->isNotEmpty())
+                @if ($deliveries->isNotEmpty())
                     <table class="table table-hover">
                         <thead>
                             <tr>
@@ -49,12 +69,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($deliveries as $delivery)
-                                <tr onclick="window.location='{{ route('cylinders.show', ['cylinder' => $delivery->cylinder]) }}';" style="cursor: pointer;">
+                            @foreach ($deliveries as $delivery)
+                                <tr onclick="window.location='{{ route('cylinders.show', ['cylinder' => $delivery->cylinder]) }}';"
+                                    style="cursor: pointer;">
                                     <td>{{ str_pad($delivery->cylinder, 9, '0', STR_PAD_LEFT) }}</td>
                                     <td>{{ $delivery->size }}</td>
                                     <td>{{ $delivery->customer }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($delivery->delivery_date)->format('d-m-Y') ?? 'N/A' }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($delivery->delivery_date)->format('d-m-Y') ?? 'N/A' }}
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -63,9 +85,266 @@
                 @else
                     <p>No cylinders assigned to this driver.</p>
                 @endif
-                    <p style="text-align: center">You have been assigned a total of <strong>{{ $totalCylinders }}</strong> cylinder(s).</p>
+                <p style="text-align: center">You have been assigned a total of <strong>{{ $totalCylinders }}</strong>
+                    cylinder(s).</p>
+            </div>
+        </div>
+
+        <!-- Edit Driver Modal -->
+        <div class="modal fade" id="editDriverModal" tabindex="-1" role="dialog" aria-labelledby="editDriverModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Driver Profile</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editDriverForm" action="{{ route('drivers.update', $user->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <div class="form-group">
+                                <label for="editFirstName">First Name</label>
+                                <input type="text" class="form-control" id="editFirstName" name="firstName"
+                                    value="{{ $user->first_name }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editLastName">Last Name</label>
+                                <input type="text" class="form-control" id="editLastName" name="lastName"
+                                    value="{{ $user->last_name }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editPhoneNumber">Phone Number</label>
+                                <input type="tel" class="form-control" id="editPhoneNumber" name="phoneNumber"
+                                    value="{{ $user->phone_number }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Gender</label><br>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="gender" id="editMale"
+                                        value="male" {{ $user->gender == 'male' ? 'checked' : '' }} required>
+                                    <label class="form-check-label" for="editMale">Male</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="gender" id="editFemale"
+                                        value="female" {{ $user->gender == 'female' ? 'checked' : '' }} required>
+                                    <label class="form-check-label" for="editFemale">Female</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="editStreet">Street Address</label>
+                                <input type="text" class="form-control" id="editStreet" name="street"
+                                    value="{{ $user->street }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editCity">City</label>
+                                <input type="text" class="form-control" id="editCity" name="city"
+                                    value="{{ $user->city }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editState">State</label>
+                                <select class="form-control" id="editState" name="state" required>
+                                    <option value="" disabled>Select State</option>
+                                    @foreach ($states as $state)
+                                        <option value="{{ $state->id }}"
+                                            {{ $user->state == $state->name ? 'selected' : '' }}>{{ $state->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editEmail">Email</label>
+                                <input type="email" class="form-control" id="editEmail" name="email"
+                                    value="{{ $user->email }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editDob">Date of Birth</label>
+                                <input type="date" class="form-control" id="editDob" name="dob"
+                                    value="{{ \Carbon\Carbon::parse($user->dob)->format('Y-m-d') }}" required>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-@endsection
+
+        <!-- Upload NIN Modal -->
+        <div class="modal fade" id="uploadNinModal" tabindex="-1" role="dialog" aria-labelledby="uploadNinModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="uploadNinModalLabel">Upload NIN</h5>
+                    </div>
+                    <div class="modal-body text-center">
+                        <!-- NIN Preview -->
+                        <div id="ninPreviewContainer">
+                            @if ($user->photo_id && Storage::disk('public')->exists('nin-images/' . $user->photo_id))
+                                <img id="ninImagePreview" class="img-fluid rounded mb-3"
+                                    src="{{ asset('storage/nin-images/' . $user->photo_id) }}" alt="NIN Image">
+                                <br>
+                                <button id="updateNinBtn" class="btn btn-success mt-3" data-bs-toggle="modal"
+                                    data-bs-target="#updateNinModal">Change Image</button>
+                            @else
+                                <p class="text-danger">No NIN image available.</p>
+                                <form id="ninUploadForm" action="{{ route('upload.nin', ['id' => $user->id]) }}"
+                                    method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    <input type="file" name="nin_image" id="nin_image" accept="image/*"
+                                        class="form-control">
+                                    <button type="submit" class="btn btn-primary mt-3">Upload</button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Update NIN Modal -->
+        <div class="modal fade" id="updateNinModal" tabindex="-1" role="dialog" aria-labelledby="updateNinModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="updateNinModalLabel">Update NIN Image</h5>
+                    </div>
+                    <div class="modal-body text-center">
+                        <form id="updateNinForm" action="{{ route('upload.nin', ['id' => $user->id]) }}" method="POST"
+                            enctype="multipart/form-data">
+                            @csrf
+                            <input type="file" name="nin_image" id="update_nin_image" accept="image/*"
+                                class="form-control">
+                            <p id="update-file-chosen">No file selected</p>
+                            <button type="submit" class="btn btn-success mt-3">Upload</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endsection
+
+    @section('scripts')
+        <script>
+            $(document).ready(function() {
+                $("#editDriverForm").on("submit", function(e) {
+                    e.preventDefault(); // Prevent normal form submission
+
+                    let formData = $(this).serialize(); // Serialize form data
+                    let actionUrl = $(this).attr("action");
+
+                    $.ajax({
+                        url: actionUrl,
+                        type: "POST",
+                        data: formData,
+                        success: function(response) {
+                            if (response.success) {
+                                // Close the modal
+                                $("#editDriverModal").modal("hide");
+
+                                // Update user details on the page dynamically
+                                $("#editFirstName").val(response.user.first_name);
+                                $("#editLastName").val(response.user.last_name);
+                                $("#editPhoneNumber").val(response.user.phone_number);
+                                $("#editStreet").val(response.user.street);
+                                $("#editCity").val(response.user.city);
+                                $("#editState").val(response.user.state);
+                                $("#editEmail").val(response.user.email);
+                                $("#editDob").val(response.user.dob);
+
+                                // Update displayed profile details
+                                $(".tm-block").html(`
+                                Name: ${response.user.first_name} ${response.user.last_name}<br>
+                                Email: ${response.user.email}<br>
+                                Gender: ${response.user.gender}<br>
+                                Phone: ${response.user.phone_number}<br>
+                                Street: ${response.user.street}<br>
+                                City: ${response.user.city}<br>
+                                State: ${response.user.state}<br>
+                                Age: ${response.user.age}<br>
+                    `);
+
+                                alert("Profile updated successfully!");
+                            } else {
+                                alert("Something went wrong. Please try again.");
+                            }
+                        },
+                        error: function(xhr) {
+                            alert("Error updating profile: " + xhr.responseJSON.message);
+                        }
+                    });
+                });
+
+                // Handle file name display for both upload and update inputs
+                $("#nin_image, #update_nin_image").on("change", function() {
+                    let fileName = $(this).val().split("\\").pop();
+                    $(this).next("p").text(fileName);
+                });
+
+                // Upload NIN
+                $("#ninUploadForm").on("submit", function(e) {
+                    e.preventDefault(); // Prevent default form submission
+                    let formData = new FormData(this);
+                    let actionUrl = $(this).attr("action");
+
+                    $.ajax({
+                        url: actionUrl,
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            if (response.success) {
+                                // Close the modal
+                                $("#uploadNinModal").modal("hide");
+
+                                // Update NIN preview
+                                $("#ninPreviewContainer").html(`
+                        <img id="ninImagePreview" class="img-fluid rounded mb-3"
+                            src="${response.nin_url}" alt="NIN Image">
+                        <br>
+                        <button id="updateNinBtn" class="btn btn-success mt-3" data-bs-toggle="modal"
+                            data-bs-target="#updateNinModal">Change Image</button>
+                    `);
+                            }
+                        },
+                        error: function(xhr) {
+                            alert("Error uploading NIN. Please try again.");
+                        }
+                    });
+                });
+
+                // Update NIN
+                $("#updateNinForm").on("submit", function(e) {
+                    e.preventDefault();
+                    let formData = new FormData(this);
+                    let actionUrl = $(this).attr("action");
+
+                    $.ajax({
+                        url: actionUrl,
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            if (response.success) {
+                                // Close the modal
+                                $("#updateNinModal").modal("hide");
+
+                                // Update NIN preview
+                                $("#ninImagePreview").attr("src", response.nin_url);
+                            }
+                        },
+                        error: function(xhr) {
+                            alert("Error updating NIN. Please try again.");
+                        }
+                    });
+                });
+            });
+        </script>
+    @endsection

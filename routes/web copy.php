@@ -183,7 +183,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/management/drivers', [DriversController::class, 'index'])->name('drivers.index');
     Route::post('/management/drivers', [DriversController::class, 'store'])->name('drivers.store');
     Route::get('/management/drivers/profile/{id}', [DriversController::class, 'driverProfile'])->name('drivers.profile');
-    Route::put('/management/drivers/profile/{id}', [DriversController::class, 'update'])->name('drivers.update');
+    Route::put('/management/drivers/{id}', [DriversController::class, 'update'])->name('drivers.update');
     Route::delete('/management/drivers/{id}', [DriversController::class, 'destroy'])->name('drivers.destroy');
     Route::get('/drivers/cylinders', [DriversController::class, 'dashboard'])->name('drivers.dashboard');
 });

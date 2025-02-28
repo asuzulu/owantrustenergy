@@ -84,7 +84,7 @@ class WarehouseController extends Controller
     {
         $warehouse = Warehouse::findOrFail($id);
 
-        if (auth()->user()->position !== 'Manager') {
+        if (Auth::user()->position !== 'Manager') {
             return redirect()->route('warehouses.index')->with('error', 'Unauthorized action.');
         }
 
