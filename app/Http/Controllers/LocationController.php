@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
+
+
 
 class LocationController extends Controller
 {
@@ -13,3 +17,4 @@ class LocationController extends Controller
         return response()->json($warehouses);
     }
 }
+

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -35,10 +36,26 @@ class AuthController extends Controller
     }
 
     // Handle user logout
-    public function logout()
+    public function logout(Request $request)
     {
-        Auth::logout(); // Log out the user
-        return redirect()->route('login'); // Redirect to the login page
+        $user = Auth::user();
+        Auth::logout();
+
+        if ($user) {
+            if ($user->position === 'Customer') {
+                return redirect()->route('dashboard.profile');
+            } elseif ($user->position === 'Employee') {
+                return redirect()->route('dashboard.employee');
+            } elseif ($user->position === 'Manager') {
+                return redirect()->route('dashboard.management');
+            } elseif ($user->position === 'Agent') {
+                return redirect()->route('dashboard.agent');
+            } elseif ($user->position === 'Driver') {
+                return redirect()->route('dashboard.driver');
+            }
+        }
+
+        return redirect()->route('home');
     }
 
     // Determine the correct dashboard based on user position
@@ -57,3 +74,4 @@ class AuthController extends Controller
         }
     }
 }
+

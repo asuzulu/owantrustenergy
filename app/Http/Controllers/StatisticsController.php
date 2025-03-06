@@ -52,15 +52,15 @@ class StatisticsController extends Controller
         $total_warehouses = Warehouse::count();
 
         // 11. Cylinders assigned per month (last 12 months)
-        $cylindersAssignedChart = Cylinder::selectRaw("strftime('%Y-%m', created_at) as month, COUNT(*) as count")
-            ->whereNotNull('location')
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
+	$cylindersAssignedChart = Cylinder::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count")
+    	    ->whereNotNull('location')
+    	    ->groupBy('month')
+    	    ->orderBy('month')
+    	     ->get();
 
         // 12. Customers registered per month (last 12 months)
-        $customerRegistrationsChart = User::selectRaw("strftime('%Y-%m', created_at) as month, COUNT(*) as count")
-            ->where('position', 'Customer')
+        $customerRegistrationsChart = User::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count")	    
+	    ->where('position', 'Customer')
             ->groupBy('month')
             ->orderBy('month')
             ->get();
@@ -87,7 +87,7 @@ class StatisticsController extends Controller
             $cylindersAssignedChart = DB::table('cylinders')
                 ->whereNotNull('user_id')
                 ->where('updated_at', '>=', now()->subMonths(12))
-                ->selectRaw("strftime('%Y-%m', updated_at) as month, COUNT(*) as count")
+                ->selectRaw("DATE_FORMAT(updated_at, '%Y-%m') as month, COUNT(*) as count")
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get();
@@ -95,8 +95,8 @@ class StatisticsController extends Controller
             $customerRegistrationsChart = DB::table('users')
                 ->where('position', 'Customer')
                 ->where('created_at', '>=', now()->subMonths(12))
-                ->selectRaw("strftime('%Y-%m', created_at) as month, COUNT(*) as count")
-                ->groupBy('month')
+                ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count")    
+		->groupBy('month')
                 ->orderBy('month')
                 ->get();
 

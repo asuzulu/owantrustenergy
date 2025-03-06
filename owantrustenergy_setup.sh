@@ -1,152 +1,99 @@
 #!/bin/bash
 
-# Function to attempt command
-try_command() {
-    # Try running the command
-    "$@"
-    RESULT=$?
+echo "Loading Laravel environment variables..."
+# (Assumes .env is already loaded by Laravel; no extra steps required)
 
-    # If the command fails and is not the `rm` command, inform the user
-    if [ $RESULT -ne 0 ]; then
-        if [[ "$1" != "rm" ]]; then
-            echo "Command failed: $@"
-        fi
-    fi
-}
-
-# Stop the PHP service if running (Optional based on your setup)
-# Uncomment the next line if you need to stop the PHP service before running the script
-# try_command net stop php
-
-echo "Clearing caches and optimizing application..."
-try_command php artisan optimize:clear
-try_command php artisan optimize
-
-# Delete the logs and folder if they exist, or create them if they don't
-LOG_CYLINDER_CREATION="storage/logs/cylinder_creation.log"
-LOG_WAREHOUSE_CREATION="storage/logs/warehouse_creation.log"
-LOG_WAREHOUSE_UPDATE="storage/logs/warehouse_update.log"
-QR_CODES_FOLDER="storage/app/private/public/qrcodes"
-
-# Delete logs if they exist
-if [ -f "$LOG_CYLINDER_CREATION" ]; then
-    try_command rm "$LOG_CYLINDER_CREATION"
-    echo "Deleted $LOG_CYLINDER_CREATION."
-else
-    echo "$LOG_CYLINDER_CREATION does not exist."
-fi
-
-if [ -f "$LOG_WAREHOUSE_CREATION" ]; then
-    try_command rm "$LOG_WAREHOUSE_CREATION"
-    echo "Deleted $LOG_WAREHOUSE_CREATION."
-else
-    echo "$LOG_WAREHOUSE_CREATION does not exist."
-fi
-
-if [ -f "$LOG_WAREHOUSE_UPDATE" ]; then
-    try_command rm "$LOG_WAREHOUSE_UPDATE"
-    echo "Deleted $LOG_WAREHOUSE_UPDATE."
-else
-    echo "$LOG_WAREHOUSE_UPDATE does not exist."
-fi
-
-# Create fresh log files if they don't exist
-try_command touch "$LOG_CYLINDER_CREATION"
-echo "Created $LOG_CYLINDER_CREATION."
-
-try_command touch "$LOG_WAREHOUSE_CREATION"
-echo "Created $LOG_WAREHOUSE_CREATION."
-
-try_command touch "$LOG_WAREHOUSE_UPDATE"
-echo "Created $LOG_WAREHOUSE_UPDATE."
-
-# Delete QR codes folder if it exists
-if [ -d "$QR_CODES_FOLDER" ]; then
-    try_command rm -rf "$QR_CODES_FOLDER"
-    echo "Deleted $QR_CODES_FOLDER."
-else
-    echo "$QR_CODES_FOLDER does not exist."
-fi
-
-# Recreate QR codes folder
-try_command mkdir -p "$QR_CODES_FOLDER"
-echo "Created $QR_CODES_FOLDER."
-
-# Delete the SQLite database file with a pause if busy
-SQLITE_FILE="database/database.sqlite"
-MAX_ATTEMPTS=5
-ATTEMPT=0
-
-while [ -f "$SQLITE_FILE" ]; do
-    try_command rm "$SQLITE_FILE" 2>/dev/null  # Suppress output and error
-
-    if [ $? -eq 0 ]; then
-        echo "Successfully deleted SQLite database: $SQLITE_FILE"
-        break
-    else
-        echo "Failed to delete SQLite database. It might be in use. Waiting for 2 seconds before retrying..."
-        sleep 2
-        ATTEMPT=$((ATTEMPT + 1))
-        if [ $ATTEMPT -ge $MAX_ATTEMPTS ]; then
-            echo "Exceeded maximum attempts to delete SQLite database. Exiting."
-            exit 1
-        fi
-    fi
+echo "Checking MySQL service..."
+echo "Waiting for MySQL to be available..."
+RETRIES=10
+while ! sudo mysqladmin ping -h127.0.0.1 --silent; do
+  sleep 3
+  RETRIES=$((RETRIES - 1))
+  if [ $RETRIES -le 0 ]; then
+      echo "MySQL not available after multiple attempts."
+      exit 1
+  fi
 done
 
-# Create a fresh SQLite database file
-echo "Creating fresh SQLite database..."
-try_command touch "$SQLITE_FILE"
-if [ -f "$SQLITE_FILE" ]; then
-    echo "Successfully created new SQLite database: $SQLITE_FILE"
+echo "Dropping and recreating MySQL database..."
+# Using inline credentials (user 'ote' with password 'HappyDay@1')
+mysql -uote -p'HappyDay@1' -e "DROP DATABASE IF EXISTS owantrustenergy;"
+mysql -uote -p'HappyDay@1' -e "CREATE DATABASE owantrustenergy;"
+
+if [ $? -eq 0 ]; then
+    echo "Database reset successful."
 else
-    echo "Failed to create new SQLite database: $SQLITE_FILE"
+    echo "Failed to reset database."
 fi
 
-echo "Dropping all tables and running migrations with seeders..."
-try_command php artisan migrate:fresh --seed
-
+echo "Running migrations with seeders..."
+php artisan migrate:fresh --seed
 if [ $? -eq 0 ]; then
     echo "Database migration and seeding completed successfully."
 else
     echo "Database migration and seeding failed."
 fi
 
-echo "Caching routes..."
-try_command php artisan route:cache
+echo "Clearing caches and optimizing application..."
+# Now that migrations have run and the cache table exists, these commands should succeed.
+php artisan optimize:clear || echo "Warning: optimize:clear encountered errors, continuing..."
+php artisan optimize || echo "Warning: optimize encountered errors, continuing..."
 
+echo "Ensuring logs directory exists..."
+LOG_FILES=(
+    "storage/logs/cylinder_creation.log"
+    "storage/logs/warehouse_creation.log"
+    "storage/logs/warehouse_update.log"
+)
+for LOG_FILE in "${LOG_FILES[@]}"; do
+    if [ -f "$LOG_FILE" ]; then
+        sudo rm "$LOG_FILE"
+        echo "Deleted $LOG_FILE."
+    else
+        echo "$LOG_FILE does not exist."
+    fi
+    sudo touch "$LOG_FILE"
+    echo "Created $LOG_FILE."
+done
+
+echo "Recreating QR codes folder..."
+QR_CODES_FOLDER="storage/app/private/public/qrcodes"
+if [ -d "$QR_CODES_FOLDER" ]; then
+    sudo rm -rf "$QR_CODES_FOLDER"
+    echo "Deleted $QR_CODES_FOLDER."
+else
+    echo "$QR_CODES_FOLDER does not exist."
+fi
+sudo mkdir -p "$QR_CODES_FOLDER"
+echo "Created $QR_CODES_FOLDER."
+
+echo "Caching routes..."
+php artisan route:cache
 if [ $? -eq 0 ]; then
     echo "Routes cached successfully."
 else
-    echo "Failed to cache routes."
+    echo "Failed to cache routes. Clearing route cache and skipping route caching..."
+    php artisan route:clear
 fi
 
-# Attempt to set permissions for laravel.log
-LOG_FILE="storage/logs/laravel.log"
 echo "Setting permissions for laravel.log..."
-try_command chmod 777 "$LOG_FILE"
+LOG_FILE="storage/logs/laravel.log"
+sudo chmod 777 "$LOG_FILE"
 if [ -f "$LOG_FILE" ]; then
     echo "Successfully set permissions for laravel.log."
 else
     echo "Failed to set permissions for laravel.log."
 fi
 
-echo "===== Operation Results ====="
-echo "Config cache cleared successfully."
-echo "Route cache cleared successfully."
-echo "View cache cleared successfully."
-echo "Application cache cleared successfully."
-echo "Compiled files cleared successfully."
-echo "Optimization cache cleared successfully."
-if [ -f "$SQLITE_FILE" ]; then
-    echo "SQLite database reset operation succeeded."
-else
-    echo "SQLite database reset operation failed."
-fi
-if [ -f "$LOG_FILE" ]; then
-    echo "Log file permissions set successfully."
-else
-    echo "Failed to set log file permissions."
-fi
+echo "Setting ownership and permissions for storage and bootstrap/cache..."
+sudo chown -R nginx:nginx /var/www/html/owantrustenergy/storage
+sudo chown -R nginx:nginx /var/www/html/owantrustenergy/bootstrap/cache
+sudo find /var/www/html/owantrustenergy/storage -type d -exec chmod 775 {} \;
+sudo find /var/www/html/owantrustenergy/storage -type f -exec chmod 664 {} \;
+sudo find /var/www/html/owantrustenergy/bootstrap/cache -type d -exec chmod 775 {} \;
+sudo find /var/www/html/owantrustenergy/bootstrap/cache -type f -exec chmod 664 {} \;
+
+echo "Ownership and permissions set. Application should now run without permission errors."
 
 echo "APPLICATION RESET COMPLETE."
+

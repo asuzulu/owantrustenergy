@@ -1,0 +1,15 @@
+nohup: ignoring input
+
+> dev
+> vite
+
+
+  VITE v5.4.14  ready in 454 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+
+  LARAVEL v11.44.0  plugin v1.2.0
+
+  ➜  APP_URL: https://ec2-44-212-42-151.compute-1.amazonaws.com/
+10:59:27 PM [vite] full reload routes/web.php

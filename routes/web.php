@@ -23,12 +23,13 @@ use App\Http\Controllers\{
 };
 
 // Public pages
-Route::get('/', fn() => view('home'))->name('home');
-Route::get('/about', fn() => view('about'))->name('about');
-Route::get('/products', fn() => view('products'))->name('products');
-Route::get('/contact', fn() => view('contact'))->name('contact');
+Route::view('/', 'home')->name('home');
+Route::view('/about', 'about')->name('about');
+Route::view('/products', 'products')->name('products');
+Route::view('/contact', 'contact')->name('contact');
 
 // Authentication routes
+Auth::routes(['register' => false]);
 Route::get('/register', [UserController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [UserController::class, 'store'])->name('register.store');
 Route::get('/sign-in', [SignInController::class, 'showSignInForm'])->name('signin.form');
@@ -107,7 +108,6 @@ Route::get('/management/accounts', [ManagementController::class, 'accounts'])->n
 Route::get('/management/employees', [ManagementController::class, 'employees'])->name('management.employees');
 Route::get('/management/agents', [ManagementController::class, 'agents'])->name('management.agents');
 Route::get('management/drivers', [ManagementController::class, 'drivers'])->name('management.drivers');
-Route::get('/drivers/{id}/profile', [DriversController::class, 'driverProfile'])->name('drivers.profile');
 
 // Warehouse management routes
 Route::resource('warehouses', WarehouseController::class)->except(['show']);
@@ -144,8 +144,6 @@ Route::post('/pickups/store', [PickupController::class, 'store'])->name('pickups
 // Route for uploading NIN image
 Route::post('/users/{id}/upload-nin', [UserController::class, 'uploadNin'])->name('upload.nin');
 
-Auth::routes();
-
 Route::middleware(['auth'])->group(function () {
     // Employee Management Routes under the 'management' prefix
     Route::prefix('management')->group(function () {
@@ -160,10 +158,7 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home.dashboard');
 
 Route::middleware(['auth'])->group(function () {
     // List all agents (paginated)
@@ -182,7 +177,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/management/drivers', [DriversController::class, 'index'])->name('drivers.index');
     Route::post('/management/drivers', [DriversController::class, 'store'])->name('drivers.store');
-    Route::get('/management/drivers/profile/{id}', [DriversController::class, 'driverProfile'])->name('drivers.profile');
+    Route::get('/management/drivers/profile/{id}', [DriversController::class, 'driverProfile'])->name('management.drivers.profile');
     Route::put('/management/drivers/profile/{id}', [DriversController::class, 'update'])->name('drivers.update');
     Route::delete('/management/drivers/{id}', [DriversController::class, 'destroy'])->name('drivers.destroy');
     Route::get('/drivers/cylinders', [DriversController::class, 'dashboard'])->name('drivers.dashboard');

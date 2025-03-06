@@ -59,3 +59,4 @@ class SignInController extends Controller
         return redirect()->route('home');
     }
 }
+

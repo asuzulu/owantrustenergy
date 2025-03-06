@@ -81,7 +81,7 @@ class DriversController extends Controller
             return redirect()->back()->with('error', 'Failed to add driver.');
         }
     }
-    
+
     public function update(Request $request, $id)
     {
         // Validate request
@@ -187,3 +187,4 @@ class DriversController extends Controller
         return view('drivers.profile', compact('user', 'deliveries', 'cylinders', 'totalCylinders', 'warehouseCylinders', 'states'));
     }
 }
+
