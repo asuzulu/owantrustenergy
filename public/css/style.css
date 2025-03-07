@@ -366,6 +366,7 @@ button {
     background-color: green;
     text-align: center;
     padding: 10px 0px;
+    border-radius: 10px;
 }
 
 .contact_bt a:hover {
@@ -921,8 +922,8 @@ textarea#comment::placeholder {
     opacity: 0.6;
     height: auto;
     width: 58%;
-    padding: 30px 60px;
-    border-radius: 100px;
+    padding: 10px 10px;
+    border-radius: 10px;
     margin: auto;
 }
 

@@ -385,35 +385,35 @@ button {
     align-items: center;
 }
 
+.trainer_section .image_1,
+.trainer_section .meditation_text {
+    margin-left: 0 !important;
+}
+
 .image_1 {
     width: 100%;
+    float: left;
     text-align: center;
-    margin: 0 auto;
+    margin-left: 145px;
 }
 
 .meditation_text {
     width: 100%;
+    float: left;
     font-size: 25px;
     color: green;
     text-align: center;
     padding-top: 30px;
-    margin: 0 auto;
-}
-
-.font_style2 {
-    color: rgb(0, 0, 0);
-    width: 100%;
-    text-align: center;
-    margin: 0 auto;
-    font-size: large;
+    margin-left: 145px;
 }
 
 .lorem_tetx {
     width: 100%;
+    float: left;
     font-size: 16px;
     color: #353336;
     text-align: center;
-    margin: 0 auto;
+    margin-left: 150px;
 }
 
 #myCarousel .carousel-inner,
@@ -903,8 +903,9 @@ textarea#comment::placeholder {
 .font_style2 {
     color: rgb(0, 0, 0);
     width: 100%;
+    float: left;
     text-align: center;
-    margin: 0 auto;
+    margin-left: 150px;
     font-size: large;
 }
 
@@ -1026,6 +1027,34 @@ textarea#comment::placeholder {
     }
 
     .banner_text {
-        bottom: calc(75px - 3rem);
+        transform: translate(-50%, 5rem);
+    }
+}
+
+@media (max-width:430px) {
+    .banner_section {
+        padding-top: calc(10px * (100vw / 430));
+        padding-bottom: calc(215.5px * (100vw / 430));
+        margin-top: calc(85px * (100vw / 430));
+    }
+
+    .yoga_text {
+        font-size: calc(60px * (100vw / 430));
+        text-shadow: calc(2px * (100vw / 430)) calc(2px * (100vw / 430)) 0px #00b400;
+        margin-bottom: calc(10px * (100vw / 430));
+    }
+
+    .banner_text {
+        bottom: calc(75px * (100vw / 430));
+    }
+
+    .font_style4 {
+        padding: calc(30px * (100vw / 430)) calc(60px * (100vw / 430));
+        border-radius: calc(100px * (100vw / 430));
+    }
+
+    .contact_bt a {
+        padding: calc(10px * (100vw / 430)) calc(20px * (100vw / 430));
+        font-size: calc(18px * (100vw / 430));
     }
 }
