@@ -1059,7 +1059,7 @@ textarea#comment::placeholder {
     }
 }
 
-@media only screen and (orientation: landscape) and (max-width: 667px) {
+@media only screen and (orientation: landscape) and (max-width: 1200px) {
     .font_style4 {
         margin-top: 2rem;
     }
