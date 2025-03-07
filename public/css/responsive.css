@@ -1058,3 +1058,9 @@ textarea#comment::placeholder {
         font-size: calc(18px * (100vw / 430));
     }
 }
+
+@media only screen and (orientation: landscape) and (max-width: 667px) {
+    .font_style4 {
+        margin-top: 2rem;
+    }
+}
