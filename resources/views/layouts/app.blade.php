@@ -15,8 +15,8 @@
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
-    <!--link rel="stylesheet" href="{{ asset('css/responsive.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/owl.carousel.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/responsive.css') }}">
+    <!--link rel="stylesheet" href="{{ asset('css/owl.carousel.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/owl.theme.default.min.css') }}">
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css"-->
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">

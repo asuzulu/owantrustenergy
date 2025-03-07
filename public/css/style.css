@@ -1,8 +1,4 @@
 /*--------------------------------------------------------------------- File Name: style.css ---------------------------------------------------------------------*/
-
-
-/*--------------------------------------------------------------------- import Fonts ---------------------------------------------------------------------*/
-
 @import url('https://fonts.googleapis.com/css?family=Rajdhani:300,400,500,600,700');
 @import url('https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i');
 
@@ -12,13 +8,7 @@
     src: url("../fonts/BalooChettan-Regular.ttf");
 }
 
-/*****---------------------------------------- 1) font-family: 'Rajdhani', sans-serif;
- 2) font-family: 'Poppins', sans-serif;
- ----------------------------------------*****/
-
-
-/*--------------------------------------------------------------------- import Files ---------------------------------------------------------------------*/
-
+/*----- 1) font-family: 'Rajdhani', sans-serif; 2) font-family: 'Poppins', sans-serif; -----*/
 @import url(animate.min.css);
 @import url(normalize.css);
 @import url(icomoon.css);
@@ -30,8 +20,6 @@
 @import url(jquery.fancybox.min.css);
 @import url(jquery-ui.css);
 @import url(nice-select.css);
-
-/*--------------------------------------------------------------------- skeleton ---------------------------------------------------------------------*/
 
 * {
     box-sizing: border-box !important;
@@ -123,7 +111,7 @@ h5 a,
 h6 a {
     color: #212121;
     text-decoration: none !important;
-    opacity: 1
+    opacity: 1;
 }
 
 button:focus {
@@ -222,7 +210,6 @@ img {
     border-bottom: 1px solid rgba(4, 245, 4, 0.705);
 }
 
-
 .form-control {
     width: 100%;
     margin-bottom: 10px;
@@ -236,20 +223,15 @@ img {
 
 .btn-primary:hover {
     background-color: #008000;
-    /* Change color on hover */
 }
 
 .radio-inline {
     margin-right: 20px;
-    /* Adjust the margin between radio buttons */
 }
 
 .radio-inline label {
     margin-right: 20px;
-    /* Adjust the margin between radio button and label */
 }
-
-
 
 .badge {
     font-weight: 500;
@@ -294,7 +276,6 @@ button {
     position: fixed;
     width: 100%;
     z-index: 1000;
-    /* High z-index to ensure it stays on top */
 }
 
 .logo {
@@ -316,7 +297,7 @@ button {
 }
 
 .banner_section {
-    position: relative; /* Establishes a positioning context */
+    position: relative;
     width: 100vw;
     height: 85vh;
     background-image: url(../images/banner-bg.png);
@@ -325,30 +306,27 @@ button {
     background-position: center top;
     background-color: #fafbfd !important;
     display: flex;
-    justify-content: flex-start; /* Assuming the top-left text remains separate */
+    justify-content: flex-start;
     align-items: flex-start;
-    padding: 20px; /* Adjust as needed */
+    padding: 20px;
     margin-top: 85px;
     padding-bottom: 215.5px;
     padding-top: 10px;
 }
 
-/* Position the banner text at the bottom center */
 .banner_text {
     position: absolute;
-    bottom: 75px; /* Adjust this value for vertical spacing from the bottom */
+    bottom: 75px;
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
     width: 100%;
 }
 
-/* Ensures the text is always below the navbar */
 .text_style {
     text-align: left;
 }
 
-/* Adjust text size and spacing */
 .yoga_text {
     font-size: 60px;
     color: white;
@@ -412,12 +390,21 @@ button {
 
 .meditation_text {
     width: 100%;
-    float: left;
+    float: none;
     font-size: 25px;
     color: green;
     text-align: center;
     padding-top: 30px;
-    margin-left: 145px;
+    margin: 0 auto;
+}
+
+.font_style2 {
+    color: rgb(0, 0, 0);
+    width: 100%;
+    float: none;
+    text-align: center;
+    margin: 0 auto;
+    font-size: large;
 }
 
 .lorem_tetx {
@@ -444,10 +431,6 @@ button {
     padding: 0;
 }
 
-
-
-/*------------------------------ vertical bootstrap slider----------------------------*/
-
 .banner_section .carousel-inner>.carousel-item.carousel-item-next,
 .banner_section .carousel-inner>.carousel-item.active.carousel-item-right {
     transform: translate3d(0, 100%, 0);
@@ -456,7 +439,6 @@ button {
     -moz-transform: translate3d(0, 100%, 0);
     -o-transform: translate3d(0, 100%, 0);
     top: 0;
-
 }
 
 .banner_section .carousel-inner>.carousel-item.carousel-item-prev,
@@ -467,7 +449,6 @@ button {
     -ms-transform: translate3d(0, -100%, 0);
     -o-transform: translate3d(0, -100%, 0);
     top: 0;
-
 }
 
 .banner_section .carousel-inner>.carousel-item.next.carousel-item-left,
@@ -476,14 +457,11 @@ button {
     transform: translate3d(0, 0, 0);
     -webkit-transform: translate3d(0, 0, 0);
     -ms-transform: translate3d(0, 0, 0);
-    ;
     -moz-transform: translate3d(0, 0, 0);
     -o-transform: translate3d(0, 0, 0);
     top: 0;
-
 }
 
-/*------------------------------- vertical carousel indicators ------------------------------*/
 .banner_section.carousel-indicators {
     position: absolute;
     top: 0;
@@ -504,7 +482,6 @@ button {
     display: block;
     margin-bottom: 5px;
     border: 1px solid #00a199;
-
 }
 
 .banner_section.carousel-indicators li.active {
@@ -533,7 +510,6 @@ button {
 #myCarousel .carousel-indicators .active {
     background-color: #00b400;
 }
-
 
 .about_section {
     width: 100%;
@@ -833,7 +809,6 @@ textarea#comment::placeholder {
     float: left;
     font-size: 50px;
     color: #ffffff;
-
 }
 
 .map {
@@ -863,16 +838,12 @@ textarea#comment::placeholder {
     font-size: 18px;
     color: #ffffff;
     padding-top: 30px;
-
 }
 
 .padding_left_0 {
     padding-left: 20px;
 }
 
-
-
-/*------------------------Assign cylinder customer search pop up----------------------*/
 #profilePopup {
     position: absolute;
     background: white;
@@ -893,21 +864,16 @@ textarea#comment::placeholder {
     z-index: 1000;
 }
 
-/*---------------------------------------- footer-------------------------------------*/
-
 .copyright_section {
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
     background-color: #f8f9fa;
-    /* Adjust color as needed */
     padding: 10px 0;
     text-align: center;
     z-index: 1000;
-    /* Ensures it stays above other content */
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-    /* Optional shadow effect */
     float: left;
     height: auto;
 }
@@ -937,16 +903,15 @@ textarea#comment::placeholder {
 .font_style2 {
     color: rgb(0, 0, 0);
     width: 100%;
-    float: left;
+    float: none;
     text-align: center;
-    margin-left: 150px;
+    margin: 0 auto;
     font-size: large;
 }
 
 .font_style3 {
     color: rgb(255, 255, 255);
     text-shadow: 2px 2px 0px #545454;
-    /* FF3.5+, Opera 9+, Saf1+, Chrome, IE10 */
 }
 
 .font_style4 {
@@ -956,29 +921,23 @@ textarea#comment::placeholder {
     opacity: 0.6;
     height: auto;
     width: 58%;
-    padding: 10px 10px;
-    border-radius: 100px;
     padding: 30px 60px;
+    border-radius: 100px;
     margin: auto;
 }
 
-/* Enlarge the gender radio buttons and text labels */
 .gender-group input[type="radio"] {
     transform: scale(2);
-    /* Scale the radio buttons to 2x their original size */
     margin-right: 10px;
 }
 
 .gender-group label {
     font-size: 1rem;
-    /* Increase label font size */
 }
-
 
 .chart-container {
     width: 100%;
     max-width: 100%;
     height: 400px;
-    /* Adjust as needed */
     position: relative;
 }

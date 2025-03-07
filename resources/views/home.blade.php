@@ -34,7 +34,7 @@
             <strong>Accessories:</strong> Hoses, control valves, grease trays, counter traps, countertops, etc.
         </p>
         <div class="contact_bt">
-            <a href="{{ route('contact') }}">Contact Us</a>
+            <a href="http://127.0.0.1:8000/contact">Contact Us</a>
         </div>
     </div>
 </div>
