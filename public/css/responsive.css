@@ -385,35 +385,35 @@ button {
     align-items: center;
 }
 
-.trainer_section .image_1,
-.trainer_section .meditation_text {
-    margin-left: 0 !important;
-}
-
 .image_1 {
     width: 100%;
-    float: left;
     text-align: center;
-    margin-left: 145px;
+    margin: 0 auto;
 }
 
 .meditation_text {
     width: 100%;
-    float: left;
     font-size: 25px;
     color: green;
     text-align: center;
     padding-top: 30px;
-    margin-left: 145px;
+    margin: 0 auto;
+}
+
+.font_style2 {
+    color: rgb(0, 0, 0);
+    width: 100%;
+    text-align: center;
+    margin: 0 auto;
+    font-size: large;
 }
 
 .lorem_tetx {
     width: 100%;
-    float: left;
     font-size: 16px;
     color: #353336;
     text-align: center;
-    margin-left: 150px;
+    margin: 0 auto;
 }
 
 #myCarousel .carousel-inner,
@@ -903,9 +903,8 @@ textarea#comment::placeholder {
 .font_style2 {
     color: rgb(0, 0, 0);
     width: 100%;
-    float: left;
     text-align: center;
-    margin-left: 150px;
+    margin: 0 auto;
     font-size: large;
 }
 
@@ -1024,5 +1023,9 @@ textarea#comment::placeholder {
 @media (max-width:1200px) {
     .contact_bt {
         display: none;
+    }
+
+    .banner_text {
+        bottom: calc(75px - 3rem);
     }
 }
