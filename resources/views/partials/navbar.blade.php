@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light" style>
     <div class="logo"><a href="{{ route('home') }}"><img src="{{ asset('images/logo.png') }}"></a></div>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
         aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -11,10 +11,10 @@
             <a class="nav-item nav-link" href="{{ route('products') }}">Products</a>
             <a class="nav-item nav-link" href="{{ route('contact') }}">Contact Us</a>
 
-            @if(Auth::check())
+            @if (Auth::check())
                 <a class="nav-item nav-link" href="{{ route('dashboard.profile') }}">{{ Auth::user()->full_name }}</a>
                 <a class="nav-item nav-link" href="{{ route('logout') }}"
-                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Sign Out</a>
+                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Sign Out</a>
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                     @csrf
                 </form>

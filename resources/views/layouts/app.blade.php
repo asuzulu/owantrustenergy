@@ -25,7 +25,6 @@
     <script src="{{ asset('js/popper.min.js') }}"></script>
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('js/plugin.js') }}"></script>
-    <script src="{{ asset('js/owl.carousel.js') }}"></script>
     <script src="{{ asset('js/custom.js') }}"></script>
     @vite('resources/js/app.js')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
