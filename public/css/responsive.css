@@ -1059,8 +1059,8 @@ textarea#comment::placeholder {
     }
 }
 
-@media only screen and (orientation: landscape) and (max-width: 1200px) {
+@media (orientation: landscape) and (max-width: 1200px) {
     .font_style4 {
-        margin-top: 2rem;
+        transform: translateY(5rem);
     }
 }
