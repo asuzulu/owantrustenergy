@@ -10,20 +10,23 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mx-auto">
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('dashboard.profile') ? 'active' : '' }}"
-                   href="{{ route('dashboard.profile') }}">
-                   <i class="fas fa-user-circle mr-2"></i>Profile
+                <a class="nav-link {{ request()->routeIs('dashboard.profile') ? 'active' : '' }}" href="{{ route('dashboard.profile') }}">
+                    <i class="fas fa-user-circle mr-2"></i>Profile
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('dashboard.cylinder') ? 'active' : '' }}"
-                   href="{{ route('dashboard.cylinder', ['userId' => Auth::id()]) }}">
+                <a class="nav-link {{ request()->routeIs('dashboard.cylinder') ? 'active' : '' }}" href="{{ route('dashboard.cylinder', ['userId' => Auth::id()]) }}">
                     Cylinders
                 </a>
             </li>
+            <!-- New Order Cylinder Nav Link -->
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('dashboard.ordercylinder') ? 'active' : '' }}" href="{{ route('dashboard.ordercylinder') }}">
+                    <i class="fas fa-shopping-cart mr-2"></i>Order Cylinder
+                </a>
+            </li>
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle {{ request()->is('settings/*') ? 'active' : '' }}"
-                   href="#" id="navbarDropdown" data-toggle="dropdown">
+                <a class="nav-link dropdown-toggle {{ request()->is('settings/*') ? 'active' : '' }}" href="#" id="navbarDropdown" data-toggle="dropdown">
                     Settings
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">

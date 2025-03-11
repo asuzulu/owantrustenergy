@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cylinder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Order;
 
 class DashboardController extends Controller
 {
@@ -39,12 +40,17 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         if (!$user) {
-            abort(403, 'Unauthorized'); // Prevents errors if the user is not logged in
+            abort(403, 'Unauthorized');
         }
 
         // Count cylinders assigned to the current user
         $totalCylinders = DB::table('cylinders')->where('user_id', $user->id)->count();
 
-        return view('dashboard.profile', compact('totalCylinders', 'user'));
+        // Fetch orders for the logged-in user
+        $orders = Order::where('first_name', $user->first_name)
+                   ->where('last_name', $user->last_name)
+                   ->get();
+
+        return view('dashboard.profile', compact('totalCylinders', 'user', 'orders'));
     }
 }

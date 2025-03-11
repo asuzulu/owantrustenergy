@@ -19,7 +19,8 @@ use App\Http\Controllers\{
     DriversController,
     SearchAutoCompleteController,
     DeliveryController,
-    PickupController
+    PickupController,
+    OrdersController
 };
 
 // Public pages
@@ -38,6 +39,9 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::post('/logout', [SignInController::class, 'customLogout'])->name('logout');
 Route::get('/login', [SignInController::class, 'showSignInForm'])->name('login');
 Route::post('/login', [SignInController::class, 'store'])->name('login.store');
+Route::get('/logout', function () {
+    return redirect('/');
+});
 
 // Password reset routes
 Route::get('password/reset', [PasswordController::class, 'showLinkRequestForm'])->name('password.request');
@@ -79,7 +83,20 @@ Route::prefix('cylinders')->name('cylinders.')->group(function () {
 Route::resource('cylinders', CylinderController::class)->parameters(['cylinder' => 'id']);
 
 // Customer-specific routes
-Route::get('/dashboard/cylinders', [CustomerController::class, 'showCylinders'])->name('dashboard.cylinder');
+Route::middleware(['auth'])->group(function () {
+    // Display Customer Cylinder page
+    Route::get('/dashboard/cylinders', [CustomerController::class, 'showCylinders'])->name('dashboard.cylinder');
+
+    // Display Order Cylinder page
+    Route::get('/dashboard/ordercylinder', function () {
+        return view('dashboard.ordercylinder');
+    })->name('dashboard.ordercylinder');
+
+    // Handle Order Placement
+    Route::post('/order/place', function () {
+        return redirect()->route('dashboard.ordercylinder')->with('success', 'Your order has been placed successfully.');
+    })->name('order.place');
+});
 
 // Employee-specific routes
 Route::middleware(['auth'])->group(function () {
@@ -183,3 +200,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/drivers/cylinders', [DriversController::class, 'dashboard'])->name('drivers.dashboard');
 });
 
+// Customer Orders Routes
+Route::post('/order/place', [OrdersController::class, 'placeOrder'])->name('order.place');
+Route::delete('/orders/delete', [OrdersController::class, 'destroy'])->name('orders.delete');

@@ -36,7 +36,7 @@
                             <tr>
                                 <td><strong>Weight</strong></td>
                                 <td>
-                                    @if($cylinder->size == 'Small')
+                                    @if ($cylinder->size == 'Small')
                                         3 kg
                                     @elseif($cylinder->size == 'Medium')
                                         5 kg
@@ -56,7 +56,8 @@
                                         @if (in_array($cylinder->user->position, ['Manager', 'Employee', 'Agent']))
                                             {{ $cylinder->location }}
                                         @else
-                                            {{ $cylinder->user->street }}, {{ $cylinder->user->city }}, {{ $cylinder->user->state }}
+                                            {{ $cylinder->user->street }}, {{ $cylinder->user->city }},
+                                            {{ $cylinder->user->state }}
                                         @endif
                                     @else
                                         {{ $cylinder->location }}
@@ -65,34 +66,28 @@
                             </tr>
                             <tr>
                                 <td><strong>Date Allocated</strong></td>
-                                <td>{{ $cylinder->allocated_date ? $cylinder->allocated_date->format('d-m-Y') : 'N/A' }}</td>
+                                <td>{{ $cylinder->allocated_date ? $cylinder->allocated_date->format('d-m-Y') : 'N/A' }}
+                                </td>
                             </tr>
                             <tr>
                                 <td><strong>Assigned User</strong></td>
-                                <td>{{ $cylinder->user ? $cylinder->user->first_name . ' ' . $cylinder->user->last_name : 'Not Assigned' }}</td>
+                                <td>{{ $cylinder->user ? $cylinder->user->first_name . ' ' . $cylinder->user->last_name : 'Not Assigned' }}
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="tm-table-actions-row">
-                    <div class="tm-table-actions-col-left">
-                        <a href="{{ Auth::user()->position === 'Driver' ? route('drivers.cylinders') : route('management.cylinders') }}"
-                            class="btn btn-secondary">Back to List</a>
-                    </div>
-                    <div class="tm-table-actions-col-right">
-                        @if (in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
-                            <button type="button" class="btn btn-primary" data-toggle="modal"
-                                data-target="#assignCylinderModal">Assign to User</button>
-                        @endif
-                    </div>
-                    <div class="tm-table-actions-col-right">
-                        @if (Auth::user()->position === 'Manager')
-                            <button type="button" class="btn btn-danger" data-toggle="modal"
-                                data-target="#deleteCylinderModal">
-                                Delete Cylinder
-                            </button>
-                        @endif
-                    </div>
+                <div class="d-flex justify-content-start mt-3">
+                    <a href="{{ Auth::user()->position === 'Driver' ? route('drivers.cylinders') : route('management.cylinders') }}"
+                        class="btn btn-secondary mr-2">Back to List</a>
+                    @if (in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
+                        <button type="button" class="btn btn-primary mr-2" data-toggle="modal"
+                            data-target="#assignCylinderModal">Assign to User</button>
+                    @endif
+                    @if (Auth::user()->position === 'Manager')
+                        <button type="button" class="btn btn-danger" data-toggle="modal"
+                            data-target="#deleteCylinderModal">Delete Cylinder</button>
+                    @endif
                 </div>
             </div>
         </div>

@@ -292,7 +292,8 @@ button {
 
 .navbar-light .navbar-nav .nav-link {
     color: green;
-    font-size: 18px;
+    font-size: 16px;
+    font-weight: 1000;
     position: relative;
 }
 

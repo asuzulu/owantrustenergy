@@ -7,7 +7,7 @@
     /* Reduce the font size of the title and nav links */
     .tm-site-title,
     .nav-link {
-        font-size: 0.67em; /* 2/3 of the inherited font-size */
+        font-size: 0.8em; /* 2/3 of the inherited font-size */
     }
   </style>
 

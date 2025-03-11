@@ -3,10 +3,14 @@
 <head>
     @include('partials.dashboard.head')
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Ensure jQuery and Bootstrap are included -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 </head>
 <body id="reportsPage">
-    <div id="home" class="">
-        <div class="container">
+    <div id="home">
+        <div class="container-fluid"> <!-- Changed to container-fluid for better responsiveness -->
             {{-- Navbar --}}
             @include('partials.dashboard.navs.customer-navbar')
 
@@ -20,6 +24,10 @@
         </div>
     </div>
 
+    {{-- Global Scripts --}}
     @include('partials.dashboard.scripts')
+
+    {{-- Page-Specific Scripts --}}
+    @yield('scripts')
 </body>
 </html>
