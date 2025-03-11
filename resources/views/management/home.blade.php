@@ -1,4 +1,6 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 @if (Auth::user()->position === 'Customer')
     <script>
         window.location.href = "{{ route('dashboard') }}"; // Redirect to a safe page
@@ -73,6 +75,12 @@
     <div class="modal fade" id="addCylinderModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
+                <div class="about_bt_main">
+                    <div class="about_bt">
+                        <a href="{{ route('orders.pickup') }}" class="btn btn-primary">Pick Up Orders</a>
+                    </div>
+                </div>
+
                 <div class="modal-header">
                     <h5 class="modal-title">Add New Cylinder</h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>

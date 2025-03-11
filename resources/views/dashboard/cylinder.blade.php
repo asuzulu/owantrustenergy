@@ -17,7 +17,8 @@
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped tm-table-striped-even mt-3 table-fixed" style="table-layout: fixed; width: 100%;">
+                    <table class="table table-hover table-striped tm-table-striped-even mt-3 table-fixed"
+                        style="table-layout: fixed; width: 100%;">
                         <thead>
                             <tr class="tm-bg-gray">
                                 <th scope="col" style="width: 25%;">Cylinder #</th>
@@ -59,7 +60,8 @@
                 <div class="orders-section" style="margin-top: 2rem;">
                     <h2 class="tm-block-title">Ordered Cylinders:</h2>
                     <div class="table-responsive">
-                        <table class="table table-hover table-striped tm-table-striped-even mt-3 table-fixed" style="table-layout: fixed; width: 100%;">
+                        <table class="table table-hover table-striped tm-table-striped-even mt-3 table-fixed"
+                            style="table-layout: fixed; width: 100%;">
                             <thead>
                                 <tr class="tm-bg-gray">
                                     <th scope="col" style="width: 15%;">Select</th>
@@ -73,7 +75,8 @@
                             <tbody>
                                 @forelse ($orders as $order)
                                     <tr>
-                                        <td class="text-center"><input type="checkbox" class="order-checkbox" value="{{ $order->id }}"></td>
+                                        <td class="text-center"><input type="checkbox" class="order-checkbox"
+                                                value="{{ $order->id }}"></td>
                                         <td class="tm-product-name">{{ $order->id }}</td>
                                         <td class="text-center">{{ $order->cylinder_size }}</td>
                                         <td class="text-center">{{ $order->weight }}</td>
@@ -88,7 +91,8 @@
                             </tbody>
                         </table>
                     </div>
-                    <button class="btn btn-danger mt-3" id="delete-order-btn" disabled data-bs-toggle="modal" data-bs-target="#deleteOrderModal">Delete Order</button>
+                    <button class="btn btn-danger mt-3" id="delete-order-btn" disabled data-bs-toggle="modal"
+                        data-bs-target="#deleteOrderModal">Delete Order</button>
                 </div>
                 <!-- End Orders Section -->
             </div>
@@ -128,32 +132,36 @@
 
             confirmDeleteBtn.addEventListener("click", function() {
                 let selectedOrders = Array.from(document.querySelectorAll(".order-checkbox:checked"))
-                                        .map(cb => cb.value);
+                    .map(cb => cb.value);
 
                 if (selectedOrders.length === 0) {
                     alert("Please select at least one order to delete.");
                     return;
                 }
 
-                fetch("{{ route('orders.delete') }}", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ order_ids: selectedOrders })
-                }).then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert("We apologize, but some orders have already been assigned.");
-                        location.reload();
-                    }
-                }).catch(error => {
-                    console.error("Error:", error);
-                    alert("An error occurred while deleting the orders.");
-                });
+                fetch('/orders', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            order_ids: selectedOrders
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert("Some orders may already be assigned and cannot be deleted.");
+                            location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        alert("An error occurred while deleting the orders.");
+                    });
             });
         });
     </script>

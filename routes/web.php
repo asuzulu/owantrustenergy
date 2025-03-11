@@ -202,5 +202,5 @@ Route::middleware(['auth'])->group(function () {
 
 // Customer Orders Routes
 Route::post('/order/place', [OrdersController::class, 'placeOrder'])->name('order.place');
-Route::delete('/orders/delete', [OrdersController::class, 'destroy'])->name('orders.delete');
-Route::post('/orders/delete', [OrdersController::class, 'destroy'])->name('orders.delete');
+Route::delete('/orders/delete', [OrdersController::class, 'destroy'])->name('orders.destroy');
+Route::delete('/orders', [OrdersController::class, 'destroy'])->name('orders.delete');

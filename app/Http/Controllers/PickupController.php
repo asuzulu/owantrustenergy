@@ -10,6 +10,12 @@ use Carbon\Carbon;
 
 class PickupController extends Controller
 {
+    public function index()
+    {
+        $pickups = Pickup::latest()->get();
+        return view('orders.pickup', compact('pickups'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([

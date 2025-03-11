@@ -34,19 +34,30 @@ class OrdersController extends Controller
     }
 
     public function destroy(Request $request)
-    {
-        try {
-            $orderIds = $request->input('order_ids');
+{
+    \Log::info('Destroy method hit', ['order_ids' => $request->input('order_ids')]);
 
-            if (empty($orderIds)) {
-                return response()->json(['success' => false, 'message' => 'No orders selected.'], 400);
-            }
+    try {
+        $orderIds = $request->input('order_ids');
 
-            Order::whereIn('id', $orderIds)->delete();
-
-            return response()->json(['success' => true, 'message' => 'Orders deleted successfully.']);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Error deleting orders.', 'error' => $e->getMessage()], 500);
+        if (empty($orderIds)) {
+            \Log::warning('No orders selected for deletion.');
+            return response()->json(['success' => false, 'message' => 'No orders selected.'], 400);
         }
+
+        $deletedRows = Order::whereIn('id', $orderIds)->delete();
+
+        \Log::info('Orders deleted', ['deleted_rows' => $deletedRows]);
+
+        return response()->json(['success' => true, 'message' => 'Orders deleted successfully.']);
+    } catch (\Exception $e) {
+        \Log::error('Error deleting orders', ['error' => $e->getMessage()]);
+        return response()->json(['success' => false, 'message' => 'Error deleting orders.', 'error' => $e->getMessage()], 500);
+    }
+}
+
+    public function pickup()
+    {
+        return view('orders.pickup');
     }
 }
