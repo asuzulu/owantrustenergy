@@ -22,7 +22,7 @@
             <!-- New Order Cylinder Nav Link -->
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('dashboard.ordercylinder') ? 'active' : '' }}" href="{{ route('dashboard.ordercylinder') }}">
-                    <i class="fas fa-shopping-cart mr-2"></i>Order Cylinder
+                    <i class="fas fa-shopping-cart mr-2"></i>Order Cylinders
                 </a>
             </li>
             <li class="nav-item dropdown">

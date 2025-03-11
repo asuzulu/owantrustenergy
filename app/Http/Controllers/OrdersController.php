@@ -35,9 +35,18 @@ class OrdersController extends Controller
 
     public function destroy(Request $request)
     {
-        $orderIds = $request->input('order_ids');
-        Order::whereIn('id', $orderIds)->delete();
+        try {
+            $orderIds = $request->input('order_ids');
 
-        return redirect()->back()->with('success', 'Orders deleted successfully.');
+            if (empty($orderIds)) {
+                return response()->json(['success' => false, 'message' => 'No orders selected.'], 400);
+            }
+
+            Order::whereIn('id', $orderIds)->delete();
+
+            return response()->json(['success' => true, 'message' => 'Orders deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error deleting orders.', 'error' => $e->getMessage()], 500);
+        }
     }
 }

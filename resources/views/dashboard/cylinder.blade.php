@@ -130,10 +130,15 @@
                 let selectedOrders = Array.from(document.querySelectorAll(".order-checkbox:checked"))
                                         .map(cb => cb.value);
 
+                if (selectedOrders.length === 0) {
+                    alert("Please select at least one order to delete.");
+                    return;
+                }
+
                 fetch("{{ route('orders.delete') }}", {
                     method: "POST",
                     headers: {
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({ order_ids: selectedOrders })
@@ -145,6 +150,9 @@
                         alert("We apologize, but some orders have already been assigned.");
                         location.reload();
                     }
+                }).catch(error => {
+                    console.error("Error:", error);
+                    alert("An error occurred while deleting the orders.");
                 });
             });
         });
