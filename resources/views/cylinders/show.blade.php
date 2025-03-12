@@ -138,7 +138,7 @@
                     </div>
                     <div id="pickupFields" style="display: none;">
                         <div class="form-group">
-                            <label for="pickupLocation">Location:</label>
+                            <label for="pickupLocation">Pick Up Location:</label>
                             <select id="pickupLocation" class="form-control" style="height: 4rem;">
                                 @foreach ($warehouses as $warehouse)
                                     <option value="{{ $warehouse->name }}">{{ $warehouse->name }}</option>

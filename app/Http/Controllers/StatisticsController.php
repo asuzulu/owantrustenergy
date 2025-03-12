@@ -13,6 +13,9 @@ class StatisticsController extends Controller
 {
     public function index()
     {
+        $databaseConnection = DB::getDriverName();
+        $dateFunction = $databaseConnection === 'sqlite' ? "strftime('%Y-%m', created_at)" : "DATE_FORMAT(created_at, '%Y-%m')";
+
         // 1. Cylinders assigned to users
         $cylinders_assigned = Cylinder::whereIn('location', function ($query) {
             $query->selectRaw("TRIM(first_name || ' ' || last_name) as full_name")->from('users');
@@ -52,15 +55,15 @@ class StatisticsController extends Controller
         $total_warehouses = Warehouse::count();
 
         // 11. Cylinders assigned per month (last 12 months)
-	$cylindersAssignedChart = Cylinder::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count")
-    	    ->whereNotNull('location')
-    	    ->groupBy('month')
-    	    ->orderBy('month')
-    	     ->get();
+        $cylindersAssignedChart = Cylinder::selectRaw("$dateFunction as month, COUNT(*) as count")
+            ->whereNotNull('location')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
 
         // 12. Customers registered per month (last 12 months)
-        $customerRegistrationsChart = User::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count")	    
-	    ->where('position', 'Customer')
+        $customerRegistrationsChart = User::selectRaw("$dateFunction as month, COUNT(*) as count")
+            ->where('position', 'Customer')
             ->groupBy('month')
             ->orderBy('month')
             ->get();
@@ -72,7 +75,7 @@ class StatisticsController extends Controller
             'total_customers',
             'customers_last_month',
             'customers_last_week',
-            'customers_last_year', // <-- This is now correctly defined
+            'customers_last_year',
             'total_employees',
             'total_warehouses',
             'cylindersAssignedChart',
@@ -83,11 +86,13 @@ class StatisticsController extends Controller
     public function getStatisticsData()
     {
         try {
-            // Fetch graph data dynamically via AJAX
+            $databaseConnection = DB::getDriverName();
+            $dateFunction = $databaseConnection === 'sqlite' ? "strftime('%Y-%m', updated_at)" : "DATE_FORMAT(updated_at, '%Y-%m')";
+
             $cylindersAssignedChart = DB::table('cylinders')
                 ->whereNotNull('user_id')
                 ->where('updated_at', '>=', now()->subMonths(12))
-                ->selectRaw("DATE_FORMAT(updated_at, '%Y-%m') as month, COUNT(*) as count")
+                ->selectRaw("$dateFunction as month, COUNT(*) as count")
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get();
@@ -95,8 +100,8 @@ class StatisticsController extends Controller
             $customerRegistrationsChart = DB::table('users')
                 ->where('position', 'Customer')
                 ->where('created_at', '>=', now()->subMonths(12))
-                ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count")    
-		->groupBy('month')
+                ->selectRaw("$dateFunction as month, COUNT(*) as count")
+                ->groupBy('month')
                 ->orderBy('month')
                 ->get();
 

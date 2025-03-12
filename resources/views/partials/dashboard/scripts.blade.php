@@ -78,26 +78,6 @@
         }
     </script>
 
-    <!--script>
-        $(document).ready(function () {
-            $(".preview-nin-button").on("click", function (event) {
-                event.preventDefault();
-
-                let ninImageUrl = $(this).data("nin-url");
-
-                let ninImageElement = $("#ninImagePreview");
-                if (ninImageElement.length) {
-                    ninImageElement.attr("src", ninImageUrl);
-                }
-
-                let ninPreviewModal = $("#ninPreviewModal");
-                if (ninPreviewModal.length) {
-                    ninPreviewModal.modal("show");
-                }
-            });
-        });
-    </script-->
-
     <script>
         $(document).ready(function () {
             let croppieInstance;
@@ -129,3 +109,4 @@
     </script>
 
 @endif
+

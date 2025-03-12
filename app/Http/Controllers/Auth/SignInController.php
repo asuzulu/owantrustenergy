@@ -42,7 +42,7 @@ class SignInController extends Controller
             case 'employee':
                 return redirect()->route('dashboard.employee');
             case 'manager':
-                return redirect()->route('dashboard.management');
+                return redirect()->route('management.home');
             case 'agent':
                 return redirect()->route('dashboard.agent');
             case 'driver':

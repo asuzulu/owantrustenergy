@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\RedirectIfNotAuthenticated;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,8 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Register custom middleware aliases
         $middleware->alias([
-            'VerifyCsrfToken' => \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class, // Corrected fully qualified class name
-            'role' => RoleMiddleware::class, // Use the correct middleware here
+            'VerifyCsrfToken' => \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+            'role' => RoleMiddleware::class,
+            'auth.redirect' => RedirectIfNotAuthenticated::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

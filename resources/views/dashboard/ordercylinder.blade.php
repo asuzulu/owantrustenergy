@@ -75,6 +75,14 @@
                                             <input type="radio" name="order_type[{{ $cylinder['size'] }}]" value="refill" data-weight="{{ $cylinder['weight'] }}">
                                             Refill
                                         </div>
+                                        <!-- Retrieval Dropdown for this cylinder -->
+                                        <div class="mt-2">
+                                            <select name="retrieval[{{ $cylinder['size'] }}]" class="retrieval-dropdown form-control" style="display: none; height: 4rem;">
+                                                <option value="">Select Retrieval Option</option>
+                                                <option value="delivery">Delivery</option>
+                                                <option value="pick up">Pick up</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach
@@ -120,10 +128,27 @@
 
 @section('scripts')
     <script>
+        // When a radio button is selected within a cylinder option, show that option's retrieval dropdown.
+        $(document).ready(function() {
+            $('input[name^="order_type"]').on('change', function() {
+                $(this).closest('.cylinder-option').find('.retrieval-dropdown')
+                    .show()
+                    .prop('required', true);
+            });
+        });
+
         function validateAndConfirm() {
-            let orderTypes = document.querySelectorAll('input[name^="order_type"]:checked');
-            if (orderTypes.length === 0) {
-                alert("Please select at least one order type (New or Refill).");
+            // Find the first selected radio button (assuming one order is being placed)
+            let selected = document.querySelector('input[name^="order_type"]:checked');
+            if (!selected) {
+                alert("Please select an order type (New or Refill) for a cylinder.");
+                return;
+            }
+            // Extract the cylinder size from the radio's name attribute.
+            let cylinderSize = selected.name.match(/\[(.*?)\]/)[1];
+            let retrieval = $('select[name="retrieval[' + cylinderSize + ']"]').val();
+            if (!retrieval) {
+                alert("Please select a retrieval option (Delivery or Pick up) for the selected cylinder.");
                 return;
             }
             $('#confirmOrderModal').modal('show');
@@ -136,12 +161,14 @@
             let cylinderSize = selected.name.match(/\[(.*?)\]/)[1];
             let weight = selected.dataset.weight;
             let orderType = selected.value;
+            let retrieval = $('select[name="retrieval[' + cylinderSize + ']"]').val();
             let postData = {
                 first_name: firstName,
                 last_name: lastName,
                 cylinder_size: cylinderSize,
                 weight: weight,
                 order_type: orderType,
+                retrieval: retrieval,
                 _token: $('input[name="_token"]').val()
             };
             console.log(postData);
@@ -154,6 +181,7 @@
                 alert("There was an error placing your order. Please try again.");
             });
         }
+
         $(document).ready(function() {
             $('.close, .btn-secondary').on('click', function() {
                 $('#confirmOrderModal').modal('hide');

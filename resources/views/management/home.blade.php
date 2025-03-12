@@ -15,13 +15,19 @@
         <div class="row tm-content-row tm-mt-big">
             <div class="bg-white tm-block h-100">
                 <div class="row">
-                    <div class="col-md-8 col-sm-12">
+                    <div class="col-md-3 col-sm-12">
                         <h2 class="tm-block-title d-inline-block">Cylinders</h2>
                     </div>
                     @if (Auth::user()->position !== 'Agent')
-                        <div class="col-md-4 col-sm-12 text-right">
-                            <button class="btn btn-small btn-primary" data-toggle="modal" data-target="#addCylinderModal">Add
-                                New Cylinder</button>
+                        <div class="col-md-9 col-sm-12">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex">
+                                    <a href="{{ route('management.orders.requests') }}" class="btn btn-primary">Customers' Requests</a>
+                                    <a href="{{ route('orders.pickup') }}" class="btn btn-primary ms-3">Pick Up Orders</a>
+                                </div>
+                                <button class="btn btn-small btn-primary ms-3" data-toggle="modal"
+                                    data-target="#addCylinderModal">Add Cylinder</button>
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -37,8 +43,9 @@
                             </tr>
                         </thead>
                         <tbody>
+                        <tbody>
                             @foreach ($cylinders as $cylinder)
-                                <tr onclick="window.location='{{ route('cylinders.show', $cylinder->id) }}'">
+                                <tr onclick="window.location='{{ route('management.cylinders.show', $cylinder->id) }}'" style="cursor: pointer;">
                                     <td>{{ str_pad($cylinder->id, 9, '0', STR_PAD_LEFT) }}</td>
                                     <td>{{ $cylinder->size }}</td>
                                     <td>
@@ -75,12 +82,6 @@
     <div class="modal fade" id="addCylinderModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="about_bt_main">
-                    <div class="about_bt">
-                        <a href="{{ route('orders.pickup') }}" class="btn btn-primary">Pick Up Orders</a>
-                    </div>
-                </div>
-
                 <div class="modal-header">
                     <h5 class="modal-title">Add New Cylinder</h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>

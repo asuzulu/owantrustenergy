@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Cylinder;
 use App\Models\State;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +22,11 @@ class ManagementController extends Controller
     {
         // Fetch all users with the role 'customer'
         $users = User::where('position', 'Customer')->get();
-        return view('management.accounts', compact('users'));
+
+        // Fetch states for the Add Customer form
+        $states = State::all();
+
+        return view('management.accounts', compact('users', 'states'));
     }
 
     public function employees()
@@ -100,5 +105,12 @@ class ManagementController extends Controller
             abort(500, 'Failed to retrieve drivers.');
         }
         return view('management.drivers', compact('drivers', 'states'));
+    }
+
+    public function showCylinder($id)
+    {
+        $cylinder = Cylinder::findOrFail($id);
+        $warehouses = DB::table('warehouses')->get(); // if needed
+        return view('cylinders.show', compact('cylinder', 'warehouses'));
     }
 }

@@ -64,12 +64,13 @@
                             style="table-layout: fixed; width: 100%;">
                             <thead>
                                 <tr class="tm-bg-gray">
-                                    <th scope="col" style="width: 15%;">Select</th>
-                                    <th scope="col" style="width: 20%;">Order ID</th>
+                                    <th scope="col" style="width: 10%;">Select</th>
+                                    <th scope="col" style="width: 15%;">Order ID</th>
                                     <th scope="col" class="text-center" style="width: 20%;">Size</th>
                                     <th scope="col" class="text-center" style="width: 20%;">Weight</th>
                                     <th scope="col" class="text-center" style="width: 20%;">Order Type</th>
-                                    <th scope="col" style="width: 25%;">Order Date</th>
+                                    <th scope="col" style="width: 20%;">Order Date</th>
+                                    <th scope="col" style="width: 20%;">Retrieval</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -82,6 +83,7 @@
                                         <td class="text-center">{{ $order->weight }}</td>
                                         <td class="text-center">{{ ucfirst($order->order_type) }}</td>
                                         <td>{{ \Carbon\Carbon::parse($order->created_at)->format('Y-m-d') }}</td>
+                                        <td>{{ $order->retrieval }}</td>
                                     </tr>
                                 @empty
                                     <tr>

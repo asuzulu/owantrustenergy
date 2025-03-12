@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->string('last_name');
             $table->string('cylinder_size');
             $table->string('weight');
+            $table->string('retrieval'); // New field for retrieval option
 
             // Use enum type on databases that support it; use a plain string for SQLite.
             if (DB::getDriverName() === 'sqlite') {
@@ -31,4 +32,3 @@ return new class extends Migration {
         Schema::dropIfExists('orders');
     }
 };
-

@@ -66,13 +66,21 @@ class UserController extends Controller
                 $user->update(['photo_id' => $filename]);
             }
 
-            return response()->json([
-                'success' => true,
-                'photo_id' => $filename,
-                'preview_url' => $filename ? asset('storage/nin-images/' . $filename) : null,
-            ]);
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'photo_id' => $filename,
+                    'preview_url' => $filename ? asset('storage/nin-images/' . $filename) : null,
+                ]);
+            } else {
+                return redirect()->route('dashboard.profile')->with('success', 'Registration successful.');
+            }
         } catch (\Exception $e) {
-            return back()->with('error', 'Registration failed, please try again later.');
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Registration failed, please try again later.'], 500);
+            } else {
+                return back()->with('error', 'Registration failed, please try again later.');
+            }
         }
     }
 
@@ -102,7 +110,7 @@ class UserController extends Controller
         return match ($user->position) {
             'Customer' => redirect()->route('dashboard.profile'),
             'Employee' => redirect()->route('dashboard.employee'),
-            'Manager' => redirect()->route('dashboard.management'),
+            'Manager' => redirect()->route('management.home'),
             'Agent' => redirect()->route('dashboard.agent'),
             'Driver' => redirect()->route('dashboard.driver'),
             default => redirect('/'),

@@ -17,6 +17,7 @@ class OrdersController extends Controller
             'last_name' => 'required|string',
             'cylinder_size' => 'required|string',
             'order_type' => 'required|string|in:new,refill',
+            'retrieval'      => 'required|string|in:delivery,pick up',
         ]);
 
         // Extract numeric value from weight (if needed)
@@ -28,34 +29,45 @@ class OrdersController extends Controller
             'cylinder_size' => $validated['cylinder_size'],
             'weight' => $weight, // Now it contains only numbers
             'order_type' => $validated['order_type'],
+            'retrieval'     => $validated['retrieval'],
         ]);
 
         return response()->json(['message' => 'Order placed successfully!'], 201);
     }
 
     public function destroy(Request $request)
-{
-    \Log::info('Destroy method hit', ['order_ids' => $request->input('order_ids')]);
+    {
+        \Log::info('Destroy method hit', ['order_ids' => $request->input('order_ids')]);
 
-    try {
-        $orderIds = $request->input('order_ids');
+        try {
+            $orderIds = $request->input('order_ids');
 
-        if (empty($orderIds)) {
-            \Log::warning('No orders selected for deletion.');
-            return response()->json(['success' => false, 'message' => 'No orders selected.'], 400);
+            if (empty($orderIds)) {
+                \Log::warning('No orders selected for deletion.');
+                return response()->json(['success' => false, 'message' => 'No orders selected.'], 400);
+            }
+
+            $deletedRows = Order::whereIn('id', $orderIds)->delete();
+
+            \Log::info('Orders deleted', ['deleted_rows' => $deletedRows]);
+
+            return response()->json(['success' => true, 'message' => 'Orders deleted successfully.']);
+        } catch (\Exception $e) {
+            \Log::error('Error deleting orders', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Error deleting orders.', 'error' => $e->getMessage()], 500);
         }
-
-        $deletedRows = Order::whereIn('id', $orderIds)->delete();
-
-        \Log::info('Orders deleted', ['deleted_rows' => $deletedRows]);
-
-        return response()->json(['success' => true, 'message' => 'Orders deleted successfully.']);
-    } catch (\Exception $e) {
-        \Log::error('Error deleting orders', ['error' => $e->getMessage()]);
-        return response()->json(['success' => false, 'message' => 'Error deleting orders.', 'error' => $e->getMessage()], 500);
     }
-}
 
+    //Customer order requests
+    public function requests(Request $request)
+    {
+        $orders = Order::select('id', 'cylinder_size', 'weight', 'order_type', 'retrieval', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('orders.requests', compact('orders'));
+    }
+    
     public function pickup()
     {
         return view('orders.pickup');

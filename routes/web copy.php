@@ -120,7 +120,6 @@ Route::get('/drivers/{id}/profile', [DriversController::class, 'driverProfile'])
 Route::middleware(['auth'])->prefix('drivers/cylinders')->name('drivers.cylinders.')->group(function () {
     Route::get('/', [DriversController::class, 'dashboard'])->name('index');
     Route::get('/{id}', [DriversController::class, 'showCylinder'])->name('show');
-});
 
 // Management routes
 Route::middleware(['auth'])->prefix('management')->name('management.')->group(function () {
@@ -146,10 +145,7 @@ Route::get('/employee/statistics', [StatisticsController::class, 'index'])
     ->name('employee.statistics')
     ->middleware(['auth']);
 
-// Cylinders list page
-Route::get('/management/cylinders', [ManagementController::class, 'cylindersPage'])->name('management.cylinders');
-
-// Cylinders details page
+// Redirect unauthenticated users to
 Route::get('/management/cylinders/{id}', [ManagementController::class, 'showCylinder'])
     ->name('management.cylinders.show')
     ->middleware(['auth']);
@@ -217,3 +213,4 @@ Route::post('/order/place', [OrdersController::class, 'placeOrder'])->name('orde
 Route::delete('/orders/delete', [OrdersController::class, 'destroy'])->name('orders.destroy');
 Route::delete('/orders', [OrdersController::class, 'destroy'])->name('orders.delete');
 Route::get('/orders/requests', [OrdersController::class, 'requests'])->name('orders.requests');
+});

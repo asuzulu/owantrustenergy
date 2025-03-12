@@ -186,5 +186,11 @@ class DriversController extends Controller
         // Return the driver profile view with all variables defined
         return view('drivers.profile', compact('user', 'deliveries', 'cylinders', 'totalCylinders', 'warehouseCylinders', 'states'));
     }
-}
 
+    public function showCylinder($id)
+    {
+        $cylinder = Cylinder::findOrFail($id);
+        $warehouses = DB::table('warehouses')->get();
+        return view('cylinders.show', compact('cylinder', 'warehouses'));
+    }
+}

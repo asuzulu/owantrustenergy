@@ -47,7 +47,7 @@ class AuthController extends Controller
             } elseif ($user->position === 'Employee') {
                 return redirect()->route('dashboard.employee');
             } elseif ($user->position === 'Manager') {
-                return redirect()->route('dashboard.management');
+                return redirect()->route('management.home');
             } elseif ($user->position === 'Agent') {
                 return redirect()->route('dashboard.agent');
             } elseif ($user->position === 'Driver') {
@@ -66,7 +66,7 @@ class AuthController extends Controller
         } elseif ($user->position === 'Employee') {
             return redirect()->route('dashboard.employee');
         } elseif ($user->position === 'Manager') {
-            return redirect()->route('dashboard.management');
+            return redirect()->route('management.home');
         } elseif ($user->position === 'Agent') {
             return redirect()->route('dashboard.agent');
         } elseif ($user->position === 'Driver') {
