@@ -20,6 +20,13 @@ class UserController extends Controller
         return view('register', compact('states'));
     }
 
+    public function registerFromModal(Request $request)
+    {
+        // Force the request to be treated as AJAX so that the store method returns JSON
+        $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+        return $this->store($request);
+    }
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -39,23 +46,24 @@ class UserController extends Controller
             'photo_id' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
+        // Set default position to "Customer" (capital C) if not provided
         $position = $validatedData['position'] ?? 'Customer';
 
         try {
             $user = User::create([
-                'first_name' => $validatedData['firstName'],
-                'last_name' => $validatedData['lastName'],
+                'first_name'   => $validatedData['firstName'],
+                'last_name'    => $validatedData['lastName'],
                 'phone_number' => $validatedData['phoneNumber'],
-                'gender' => $validatedData['gender'],
-                'street' => $validatedData['street'],
-                'city' => $validatedData['city'],
-                'state' => State::where('id', $validatedData['state'])->value('name'),
-                'bvn' => $validatedData['bvn'],
-                'nin' => $validatedData['nin'],
-                'email' => $validatedData['email'],
-                'dob' => $validatedData['dob'],
-                'password' => Hash::make($validatedData['password']),
-                'position' => $position,
+                'gender'       => $validatedData['gender'],
+                'street'       => $validatedData['street'],
+                'city'         => $validatedData['city'],
+                'state'        => State::where('id', $validatedData['state'])->value('name'),
+                'bvn'          => $validatedData['bvn'],
+                'nin'          => $validatedData['nin'],
+                'email'        => $validatedData['email'],
+                'dob'          => $validatedData['dob'],
+                'password'     => Hash::make($validatedData['password']),
+                'position'     => $position,
             ]);
 
             if ($request->hasFile('photo_id')) {
@@ -194,12 +202,5 @@ class UserController extends Controller
         }
 
         return redirect()->route('users.profile', $id)->with('success', 'User details updated successfully.');
-    }
-
-    public function registerFromModal(Request $request)
-    {
-        // Force AJAX header so that the store method returns a JSON response instead of redirecting.
-        $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-        return $this->store($request);
     }
 }
