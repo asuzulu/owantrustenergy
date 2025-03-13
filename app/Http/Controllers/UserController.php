@@ -22,7 +22,7 @@ class UserController extends Controller
 
     public function registerFromModal(Request $request)
     {
-        // Force the request to be treated as AJAX so that the store method returns JSON
+        // Force the request to be treated as AJAX so the store method returns JSON
         $request->headers->set('X-Requested-With', 'XMLHttpRequest');
         return $this->store($request);
     }
@@ -85,6 +85,7 @@ class UserController extends Controller
             }
         }
     }
+
 
     // Handle NIN image upload
     public function uploadNin(Request $request, $id)
