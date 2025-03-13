@@ -39,7 +39,7 @@ class UserController extends Controller
             'photo_id' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $position = $validatedData['position'] ?? 'customer';
+        $position = $validatedData['position'] ?? 'Customer';
 
         try {
             $user = User::create([
@@ -49,7 +49,7 @@ class UserController extends Controller
                 'gender' => $validatedData['gender'],
                 'street' => $validatedData['street'],
                 'city' => $validatedData['city'],
-                'state' => $validatedData['state'],
+                'state' => State::where('id', $validatedData['state'])->value('name'),
                 'bvn' => $validatedData['bvn'],
                 'nin' => $validatedData['nin'],
                 'email' => $validatedData['email'],
@@ -58,8 +58,6 @@ class UserController extends Controller
                 'position' => $position,
             ]);
 
-            // Handle NIN image upload
-            $filename = null; // Ensure $filename is always initialized
             if ($request->hasFile('photo_id')) {
                 $filename = $user->id . '_' . time() . '.' . $request->file('photo_id')->getClientOriginalExtension();
                 $request->file('photo_id')->storeAs('nin-images', $filename, 'public');
@@ -67,23 +65,20 @@ class UserController extends Controller
             }
 
             if ($request->ajax()) {
-                return response()->json([
-                    'success' => true,
-                    'photo_id' => $filename,
-                    'preview_url' => $filename ? asset('storage/nin-images/' . $filename) : null,
-                ]);
+                return response()->json(['success' => true, 'message' => 'User registered successfully!']);
             } else {
                 return redirect()->route('dashboard.profile')->with('success', 'Registration successful.');
             }
         } catch (\Exception $e) {
             if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => 'Registration failed, please try again later.'], 500);
+                return response()->json(['success' => false, 'message' => 'Failed to register user.'], 500);
             } else {
                 return back()->with('error', 'Registration failed, please try again later.');
             }
         }
     }
 
+    // Handle NIN image upload
     public function uploadNin(Request $request, $id)
     {
         $request->validate([
@@ -199,5 +194,12 @@ class UserController extends Controller
         }
 
         return redirect()->route('users.profile', $id)->with('success', 'User details updated successfully.');
+    }
+
+    public function registerFromModal(Request $request)
+    {
+        // Force AJAX header so that the store method returns a JSON response instead of redirecting.
+        $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+        return $this->store($request);
     }
 }

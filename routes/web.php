@@ -35,7 +35,6 @@ Route::get('/register', [UserController::class, 'showRegisterForm'])->name('regi
 Route::post('/register', [UserController::class, 'store'])->name('register.store');
 Route::get('/sign-in', [SignInController::class, 'showSignInForm'])->name('signin.form');
 Route::post('/signin', [SignInController::class, 'store'])->name('signin.store');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::post('/logout', [SignInController::class, 'customLogout'])->name('logout');
 Route::get('/login', [SignInController::class, 'showSignInForm'])->name('login');
 Route::post('/login', [SignInController::class, 'store'])->name('login.store');
@@ -74,6 +73,7 @@ Route::middleware(['auth'])->prefix('management/cylinders')->name('management.cy
     Route::get('/cylinders', [CylinderController::class, 'index'])->name('cylinders.index');
     Route::post('/management/assign-cylinder/{user}', [CylinderController::class, 'assignCylinder'])->name('management.assign-cylinder');
 });
+Route::post('/register-modal', [UserController::class, 'registerFromModal'])->name('register.modal');
 
 // Cylinder detail routes
 Route::prefix('cylinders')->name('cylinders.')->group(function () {

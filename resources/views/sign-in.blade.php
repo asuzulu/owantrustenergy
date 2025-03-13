@@ -42,7 +42,7 @@
                     <p>Don't have an account? <a href="{{ route('register') }}"><span style="color:green;">Sign Up </span></a></p>
                 </div>
             </div>
-        </form>        
+        </form>
     </div>
 </div>
 <!-- Sign In form section end -->

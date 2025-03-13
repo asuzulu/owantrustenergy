@@ -17,20 +17,17 @@ class SignInController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
-        // Check if the user is attempting to log in
         if (Auth::attempt($credentials, $request->has('remember'))) {
             $user = Auth::user();
 
-            // If user is newly registered, redirect to the customer profile
             if ($user->wasRecentlyCreated) {
                 return redirect()->route('dashboard.profile');
             }
 
-            // Redirect based on the user's position
             return $this->redirectUserByPosition($user);
         }
 
-        return redirect()->back()->withErrors(['Invalid credentials.']);
+        return redirect()->back()->with('login_error', 'Invalid email or password.');
     }
 
     // Redirect the user based on their position
@@ -59,4 +56,3 @@ class SignInController extends Controller
         return redirect()->route('home');
     }
 }
-

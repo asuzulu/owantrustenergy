@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Cylinder;
 use App\Models\State;
+use App\Models\Delivery;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -110,7 +111,9 @@ class ManagementController extends Controller
     public function showCylinder($id)
     {
         $cylinder = Cylinder::findOrFail($id);
-        $warehouses = DB::table('warehouses')->get(); // if needed
-        return view('cylinders.show', compact('cylinder', 'warehouses'));
+        $warehouses = DB::table('warehouses')->get();
+        $deliveries = Delivery::where('cylinder', $id)->get();
+
+        return view('cylinders.show', compact('cylinder', 'warehouses', 'deliveries'));
     }
 }

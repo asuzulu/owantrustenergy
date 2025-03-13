@@ -9,11 +9,13 @@
                         <div class="col-12">
                             <div class="d-flex justify-content-between">
                                 <h2 class="tm-block-title">Customer Accounts</h2>
-                                <button class="btn btn-primary" data-toggle="modal" data-target="#addCustomerModal">Add Customer</button>
+                                <button class="btn btn-primary" data-toggle="modal" data-target="#addCustomerModal">Add
+                                    Customer</button>
                             </div>
                         </div>
                     </div>
-                    <table class="table table-striped" style="margin: 0 auto !important; width: 100% !important; font-size: 13px !important;">
+                    <table class="table table-striped"
+                        style="margin: 0 auto !important; width: 100% !important; font-size: 13px !important;">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -27,7 +29,8 @@
                         </thead>
                         <tbody>
                             @forelse ($users as $user)
-                                <tr onclick="window.location.href='{{ route('users.profile', $user->id) }}'" style="cursor: pointer;">
+                                <tr onclick="window.location.href='{{ route('users.profile', $user->id) }}'"
+                                    style="cursor: pointer;">
                                     <td>{{ $user->first_name }} {{ $user->last_name }}</td>
                                     <td>{{ $user->phone_number }}</td>
                                     <td>{{ $user->email }}</td>
@@ -49,7 +52,8 @@
     </div>
 
     <!-- Add Customer Modal -->
-    <div class="modal fade" id="addCustomerModal" tabindex="-1" role="dialog" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addCustomerModal" tabindex="-1" role="dialog" aria-labelledby="addCustomerModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content" style="font-size: 13px !important;">
                 <div class="modal-header">
@@ -60,7 +64,8 @@
                 </div>
                 <div class="modal-body">
                     <!-- Centering the form with mx-auto and defined width -->
-                    <form id="registerForm" class="mx-auto" style="width: 90% !important;">
+                    <form action="{{ route('register.store') }}" method="POST" id="registerForm" class="mx-auto"
+                        style="width: 90% !important;">
                         @csrf
                         <div class="form-group">
                             <label for="firstName">First Name</label>
@@ -84,8 +89,10 @@
                         </div>
                         <div class="form-group">
                             <label>Gender</label><br>
-                            <label class="radio-inline"><input type="radio" name="gender" value="male" required> Male</label>
-                            <label class="radio-inline"><input type="radio" name="gender" value="female" required> Female</label>
+                            <label class="radio-inline"><input type="radio" name="gender" value="male" required>
+                                Male</label>
+                            <label class="radio-inline"><input type="radio" name="gender" value="female" required>
+                                Female</label>
                         </div>
                         <div class="form-group">
                             <label for="street">Street Address</label>
@@ -106,11 +113,13 @@
                         </div>
                         <div class="form-group">
                             <label for="bvn">BVN</label>
-                            <input type="text" class="form-control" id="bvn" name="bvn" required pattern="\d{11}" maxlength="11">
+                            <input type="text" class="form-control" id="bvn" name="bvn" required
+                                pattern="\d{11}" maxlength="11">
                         </div>
                         <div class="form-group">
                             <label for="nin">NIN</label>
-                            <input type="text" class="form-control" id="nin" name="nin" required pattern="\d{11}" maxlength="11">
+                            <input type="text" class="form-control" id="nin" name="nin" required
+                                pattern="\d{11}" maxlength="11">
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>
@@ -118,7 +127,8 @@
                         </div>
                         <div class="form-group">
                             <label for="password_confirmation">Confirm Password</label>
-                            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
+                            <input type="password" class="form-control" id="password_confirmation"
+                                name="password_confirmation" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Register</button>
                     </form>
@@ -131,29 +141,37 @@
 @section('scripts')
     @include('partials.dashboard.scripts')
     <script>
-        $(document).ready(function () {
-            $('#registerForm').on('submit', function (e) {
+        $(document).ready(function() {
+            $('#registerForm').on('submit', function(e) {
                 e.preventDefault(); // Prevent default form submission
 
                 var formData = $(this).serialize(); // Get form data
 
                 $.ajax({
                     type: 'POST',
-                    url: '{{ route("register.store") }}',
+                    url: '{{ route('register.modal') }}',
                     data: formData,
-                    success: function (response) {
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
                         if (response.success) {
-                            $('#addCustomerModal').modal('hide'); // Hide modal temporarily
-                            location.reload(); // Reload the page to update user list
-                            setTimeout(() => {
-                                $('#addCustomerModal').modal('show'); // Show modal again after reload
-                            }, 500);
+                            $('#addCustomerModal').modal('hide'); // Hide modal
+                            location.reload(); // Reload page to reflect changes
                         } else {
-                            alert('Registration failed. Please try again.');
+                            alert(response.message || 'Registration failed. Please try again.');
                         }
                     },
-                    error: function (xhr) {
-                        alert('An error occurred: ' + xhr.responseJSON.message);
+                    error: function(xhr) {
+                        let errors = xhr.responseJSON.errors;
+                        let errorMessage = 'An error occurred.';
+                        if (errors) {
+                            errorMessage = Object.values(errors).map(err => err.join(' ')).join('\n');
+                        } else if (xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        alert(errorMessage);
                     }
                 });
             });

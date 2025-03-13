@@ -69,4 +69,9 @@ class RegisterController extends Controller
             'password' => Hash::make($data['password']),
         ]);
     }
+
+    public function showModal()
+    {
+        return view('auth.register-modal');
+    }
 }
