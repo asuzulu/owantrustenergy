@@ -67,7 +67,7 @@ class OrdersController extends Controller
 
         return view('orders.requests', compact('orders'));
     }
-    
+
     public function pickup()
     {
         return view('orders.pickup');

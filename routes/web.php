@@ -114,8 +114,9 @@ Route::get('/agent/cylinders', [AgentController::class, 'cylindersPage'])->name(
 Route::get('/agent/accounts', [AgentController::class, 'accounts'])->name('agent.accounts');
 
 //Driver-specific routes
-Route::get('/drivers/cylinders', [DriversController::class, 'dashboard'])->name('drivers.cylinders');
 Route::get('/drivers/{id}/profile', [DriversController::class, 'driverProfile'])->name('drivers.profile');
+Route::get('/drivers/cylinders', [DriversController::class, 'dashboard'])->name('drivers.cylinders');
+
 // Driver cylinders show page route
 Route::middleware(['auth'])->prefix('drivers/cylinders')->name('drivers.cylinders.')->group(function () {
     Route::get('/', [DriversController::class, 'dashboard'])->name('index');
@@ -132,6 +133,8 @@ Route::get('/management/accounts', [ManagementController::class, 'accounts'])->n
 Route::get('/management/employees', [ManagementController::class, 'employees'])->name('management.employees');
 Route::get('/management/agents', [ManagementController::class, 'agents'])->name('management.agents');
 Route::get('management/drivers', [ManagementController::class, 'drivers'])->name('management.drivers');
+Route::get('/management/deliveries', [DeliveryController::class, 'index'])->name('management.deliveries');
+Route::delete('/management/deliveries/delete', [DeliveryController::class, 'destroy'])->name('management.deliveries.delete');
 
 // Warehouse management routes
 Route::resource('warehouses', WarehouseController::class)->except(['show']);
@@ -169,6 +172,7 @@ Route::post('/deliveries', [DeliveryController::class, 'store'])->name('deliveri
 Route::post('/pickups/store', [PickupController::class, 'store'])->name('pickups.store');
 Route::get('/orders/pickup', [PickupController::class, 'index'])->name('orders.pickup');
 Route::post('/orders/update-pickup', [OrdersController::class, 'updatePickup'])->name('orders.updatePickup');
+Route::post('/pickups/update', [PickupController::class, 'updatePickup'])->name('pickups.update');
 
 // Route for uploading NIN image
 Route::post('/users/{id}/upload-nin', [UserController::class, 'uploadNin'])->name('upload.nin');
@@ -209,7 +213,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/management/drivers/profile/{id}', [DriversController::class, 'driverProfile'])->name('management.drivers.profile');
     Route::put('/management/drivers/profile/{id}', [DriversController::class, 'update'])->name('drivers.update');
     Route::delete('/management/drivers/{id}', [DriversController::class, 'destroy'])->name('drivers.destroy');
-    Route::get('/drivers/cylinders', [DriversController::class, 'dashboard'])->name('drivers.dashboard');
+    Route::get('/drivers/cylinders', [DriversController::class, 'dashboard'])->name('drivers.cylinders');
 });
 
 // Customer Order Routes

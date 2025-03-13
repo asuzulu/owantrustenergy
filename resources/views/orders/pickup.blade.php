@@ -1,3 +1,9 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap JS (Include Popper.js as well) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 @if (Auth::user()->position === 'Customer')
     <script>
         window.location.href = "{{ route('dashboard') }}"; // Redirect to a safe page
@@ -15,8 +21,15 @@
                     <div class="col">
                         <h2 class="tm-block-title">Pick Up Orders</h2>
                     </div>
-                    <div class="col-auto">
-                        <a href="{{ url('/management/cylinders') }}" class="btn btn-primary">Back to List</a>
+                    <div class="col-md-3 col-sm-12">
+                        <a href="{{ route('management.cylinders') }}" class="btn btn-primary">Back to Cylinders List</a>
+                    </div>
+                    <div class="col-md-6 col-sm-12 text-end">
+                        <div class="d-flex justify-content-end">
+                            <a href="{{ route('management.deliveries') }}" class="btn btn-primary me-3">Deliveries</a>
+                            <a href="{{ route('management.orders.requests') }}" class="btn btn-primary">Customers'
+                                Requests</a>
+                        </div>
                     </div>
                 </div>
                 <div class="table-responsive">
@@ -33,7 +46,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($pickups as $pickup)
+                            @foreach ($pickups as $pickup)
                                 <tr>
                                     <td>{{ $pickup->location }}</td>
                                     <td>{{ $pickup->cylinder }}</td>
@@ -42,9 +55,7 @@
                                     <td>{{ $pickup->date_assigned }}</td>
                                     <td>{{ $pickup->pick_up_date }}</td>
                                     <td>
-                                        <button class="btn btn-success mark-picked-up-btn"
-                                                data-id="{{ $pickup->id }}"
-                                                data-cylinder="{{ $pickup->cylinder }}">
+                                        <button class="btn btn-success mark-picked-up-btn" data-id="{{ $pickup->id }}">
                                             Mark as Picked Up
                                         </button>
                                     </td>
@@ -68,26 +79,23 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="pickupModalLabel">Confirm Pick-Up</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="pickupForm" method="POST" action="{{ route('orders.updatePickup') }}">
+                <form id="pickupForm">
                     @csrf
-                    <input type="hidden" name="order_id" id="pickupOrderId">
-                    <input type="hidden" name="cylinder_id" id="pickupCylinderId">
+                    <input type="hidden" name="pickup_id" id="pickupId">
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label for="pickupDate">Pick-Up Date</label>
+                        <div class="mb-3">
+                            <label for="pickupDate" class="form-label">Pick-Up Date</label>
                             <input type="date" class="form-control" id="pickupDate" name="pickup_date" required>
                         </div>
-                        <div class="form-group">
-                            <label for="pickupTime">Pick-Up Time</label>
+                        <div class="mb-3">
+                            <label for="pickupTime" class="form-label">Pick-Up Time</label>
                             <input type="time" class="form-control" id="pickupTime" name="pickup_time" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </div>
                 </form>
@@ -100,28 +108,26 @@
 <script>
     $(document).ready(function() {
         $('.mark-picked-up-btn').click(function() {
-            let orderId = $(this).data('id');
-            let cylinderId = $(this).data('cylinder');
-
-            $('#pickupOrderId').val(orderId);
-            $('#pickupCylinderId').val(cylinderId);
-
-            $('#pickupModal').modal('show');
+            let pickupId = $(this).data('id');
+            $('#pickupId').val(pickupId);
+            let modal = new bootstrap.Modal(document.getElementById('pickupModal'));
+            modal.show();
         });
 
         $('#pickupForm').submit(function(e) {
             e.preventDefault();
+            let formData = $(this).serialize();
 
             $.ajax({
-                url: "{{ route('orders.updatePickup') }}",
+                url: "{{ route('pickups.update') }}",
                 method: "POST",
-                data: $(this).serialize(),
+                data: formData,
                 success: function(response) {
                     if (response.success) {
                         $('#pickupModal').modal('hide');
                         location.reload();
                     } else {
-                        alert("Error updating the order. Please try again.");
+                        alert("Error updating pickup. Please try again.");
                     }
                 },
                 error: function() {

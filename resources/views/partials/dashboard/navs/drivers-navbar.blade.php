@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-xl navbar-light bg-light">
-    <a class="navbar-brand" href="{{ route('drivers.cylinders') }}">
+    <a class="navbar-brand" href="/">
         <img src="{{ asset('images/fav-icon.png') }}" alt="Dashboard Icon" class="tm-site-icon"
             style="width: 48px; height: 48px;">
         <h1 class="tm-site-title mb-0">{{ config('app.name') }}</h1>

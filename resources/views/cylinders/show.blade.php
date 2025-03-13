@@ -74,6 +74,17 @@
                                 <td>{{ $cylinder->user ? $cylinder->user->first_name . ' ' . $cylinder->user->last_name : 'Not Assigned' }}
                                 </td>
                             </tr>
+                            <tr>
+                                @php
+                                $delivery = $deliveries->firstWhere('cylinder', $cylinder->id);
+                            @endphp
+
+                            @if ($delivery)
+                                <tr>
+                                    <td><strong>Driver</strong></td>
+                                    <td>{{ $delivery->driver }}</td>
+                                </tr>
+                            @endif
                         </tbody>
                     </table>
                 </div>

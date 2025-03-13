@@ -13,7 +13,11 @@ class PickupController extends Controller
 {
     public function index()
     {
-        $pickups = Pickup::orderBy('date_assigned', 'desc')->paginate(10);
+        $pickups = Pickup::whereNull('date_picked_up')
+            ->whereNull('time_picked_up')
+            ->orderBy('date_assigned', 'desc')
+            ->paginate(10);
+
         return view('orders.pickup', compact('pickups'));
     }
 
@@ -51,15 +55,15 @@ class PickupController extends Controller
     public function updatePickup(Request $request)
     {
         $request->validate([
-            'order_id' => 'required|exists:orders,id',
+            'pickup_id' => 'required|exists:pickups,id',
             'pickup_date' => 'required|date',
             'pickup_time' => 'required'
         ]);
 
-        $order = Order::findOrFail($request->order_id);
+        $pickup = Pickup::findOrFail($request->pickup_id);
 
-        // Update the orders table with pickup details
-        $order->update([
+        // Update the pickup details
+        $pickup->update([
             'date_picked_up' => $request->pickup_date,
             'time_picked_up' => $request->pickup_time
         ]);

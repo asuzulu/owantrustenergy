@@ -1,9 +1,9 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-@if (Auth::user()->position === 'Customer')
+@if (!Auth::check() || Auth::user()->position === 'Customer')
     <script>
-        window.location.href = "{{ route('dashboard') }}"; // Redirect to a safe page
+        window.location.href = "{{ route('home') }}";
     </script>
     @php exit; @endphp
 @endif
@@ -22,8 +22,11 @@
                         <div class="col-md-9 col-sm-12">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex">
-                                    <a href="{{ route('management.orders.requests') }}" class="btn btn-primary">Customers' Requests</a>
+                                    <a href="{{ route('management.orders.requests') }}" class="btn btn-primary">Customers'
+                                        Requests</a>
                                     <a href="{{ route('orders.pickup') }}" class="btn btn-primary ms-3">Pick Up Orders</a>
+                                    <a href="{{ route('management.deliveries') }}"
+                                        class="btn btn-primary ms-3">Deliveries</a>
                                 </div>
                                 <button class="btn btn-small btn-primary ms-3" data-toggle="modal"
                                     data-target="#addCylinderModal">Add Cylinder</button>
@@ -45,7 +48,8 @@
                         <tbody>
                         <tbody>
                             @foreach ($cylinders as $cylinder)
-                                <tr onclick="window.location='{{ route('management.cylinders.show', $cylinder->id) }}'" style="cursor: pointer;">
+                                <tr onclick="window.location='{{ route('management.cylinders.show', $cylinder->id) }}'"
+                                    style="cursor: pointer;">
                                     <td>{{ str_pad($cylinder->id, 9, '0', STR_PAD_LEFT) }}</td>
                                     <td>{{ $cylinder->size }}</td>
                                     <td>

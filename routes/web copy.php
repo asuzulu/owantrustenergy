@@ -205,7 +205,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/management/drivers/profile/{id}', [DriversController::class, 'driverProfile'])->name('management.drivers.profile');
     Route::put('/management/drivers/profile/{id}', [DriversController::class, 'update'])->name('drivers.update');
     Route::delete('/management/drivers/{id}', [DriversController::class, 'destroy'])->name('drivers.destroy');
-    Route::get('/drivers/cylinders', [DriversController::class, 'dashboard'])->name('drivers.dashboard');
+    Route::get('/drivers/cylinders', [DriversController::class, 'dashboard'])->name('drivers.cylinders');
 });
 
 // Customer Order Routes

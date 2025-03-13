@@ -39,7 +39,7 @@
                         </thead>
                         <tbody>
                             @foreach ($drivers as $driver)
-                                <tr onclick="window.location='{{ route('drivers.cylinders.show', $cylinder->id) }}'"
+                                <tr onclick="window.location='{{ route('drivers.profile', $driver->id) }}'"
                                     style="cursor: pointer;">
                                     <td>{{ $driver->first_name }} {{ $driver->last_name }}</td>
                                     <td>{{ $driver->phone_number }}</td>

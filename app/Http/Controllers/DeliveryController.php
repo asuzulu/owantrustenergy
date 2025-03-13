@@ -47,4 +47,20 @@ class DeliveryController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Cylinder assigned successfully']);
     }
+
+    public function index()
+    {
+        $deliveries = Delivery::orderBy('date_assigned', 'desc')->paginate(15);
+        return view('management.deliveries', compact('deliveries'));
+    }
+
+    public function destroy(Request $request)
+    {
+        $delivery = Delivery::find($request->id);
+        if ($delivery) {
+            $delivery->delete();
+            return response()->json(['success' => true]);
+        }
+        return response()->json(['success' => false]);
+    }
 }

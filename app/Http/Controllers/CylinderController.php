@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Cylinder;
 use App\Models\User;
+use App\Models\Delivery;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -48,9 +49,10 @@ class CylinderController extends Controller
     public function show($id)
     {
         $cylinder = Cylinder::findOrFail($id);
-        $warehouses = DB::table('warehouses')->get(); // Fetch all warehouses
+        $deliveries = Delivery::where('cylinder', $cylinder->id)->get();
+        $warehouses = DB::table('warehouses')->get();
 
-        return view('cylinders.show', compact('cylinder', 'warehouses'));
+        return view('cylinders.show', compact('cylinder', 'warehouses', 'deliveries' ));
     }
 
     public function store(Request $request)
