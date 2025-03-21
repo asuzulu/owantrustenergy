@@ -1,16 +1,3 @@
-<style>
-    /* Scale the image down to 2/3 of its current size */
-    .tm-site-icon {
-        width: 32px;  /* 48px * 2/3 ≈ 32px */
-        height: 32px;
-    }
-    /* Reduce the font size of the title and nav links */
-    .tm-site-title,
-    .nav-link {
-        font-size: 0.8em; /* 2/3 of the inherited font-size */
-    }
-  </style>
-
   <nav class="navbar navbar-expand-xl navbar-light bg-light">
       <a class="navbar-brand" href="/">
           <img src="{{ asset('images/fav-icon.png') }}" alt="Dashboard Icon" class="tm-site-icon">
@@ -67,3 +54,16 @@
           </ul>
       </div>
   </nav>
+
+  <style>
+    /* Scale the image down to 2/3 of its current size */
+    .tm-site-icon {
+        width: 32px;  /* 48px * 2/3 ≈ 32px */
+        height: 32px;
+    }
+    /* Reduce the font size of the title and nav links */
+    .tm-site-title,
+    .nav-link {
+        font-size: 0.5em; /* 2/3 of the inherited font-size */
+    }
+  </style>
