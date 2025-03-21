@@ -20,7 +20,7 @@ use App\Http\Controllers\{
     SearchAutoCompleteController,
     DeliveryController,
     PickupController,
-    OrdersController
+    OrdersController,
 };
 
 // Public pages
@@ -73,7 +73,7 @@ Route::middleware(['auth'])->prefix('management/cylinders')->name('management.cy
     Route::get('/cylinders', [CylinderController::class, 'index'])->name('cylinders.index');
     Route::post('/management/assign-cylinder/{user}', [CylinderController::class, 'assignCylinder'])->name('management.assign-cylinder');
 });
-Route::post('/register-modal', [UserController::class, 'registerFromModal'])->name('register.modal');
+Route::post('/register-modal', [UserController::class, 'registerModal'])->name('register.modal');
 
 // Cylinder detail routes
 Route::prefix('cylinders')->name('cylinders.')->group(function () {

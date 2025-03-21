@@ -20,12 +20,55 @@ class UserController extends Controller
         return view('register', compact('states'));
     }
 
-    public function registerFromModal(Request $request)
+    public function registerModal(Request $request)
     {
-        // Force the request to be treated as AJAX so the store method returns JSON
-        $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-        return $this->store($request);
+        $validatedData = $request->validate([
+            'firstName' => 'required|string|max:255',
+            'lastName' => 'required|string|max:255',
+            'phoneNumber' => 'required|string|max:15',
+            'email' => 'required|email|unique:users,email',
+            'dob' => 'required|date',
+            'gender' => 'required|in:male,female',
+            'street' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'state' => 'required|exists:states,id',
+            'bvn' => 'required|digits:11',
+            'nin' => 'required|digits:11',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        // Create the user
+        try {
+            $user = User::create([
+                'first_name' => $validatedData['firstName'],
+                'last_name' => $validatedData['lastName'],
+                'phone_number' => $validatedData['phoneNumber'],
+                'email' => $validatedData['email'],
+                'dob' => $validatedData['dob'],
+                'gender' => $validatedData['gender'],
+                'street' => $validatedData['street'],
+                'city' => $validatedData['city'],
+                'state' => State::find($validatedData['state'])->name,
+                'bvn' => $validatedData['bvn'],
+                'nin' => $validatedData['nin'],
+                'password' => Hash::make($validatedData['password']),
+                'position' => 'Customer',
+            ]);
+
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'User registered successfully!']);
+            } else {
+                return redirect()->route('managemnt.accounts')->with('success', 'Registration successful.');
+            }
+        } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Failed to register user.'], 500);
+            } else {
+                return back()->with('error', 'Registration failed, please try again later.');
+            }
+        }
     }
+
 
     public function store(Request $request)
     {
@@ -46,7 +89,7 @@ class UserController extends Controller
             'photo_id' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Set default position to "Customer" (capital C) if not provided
+        // Set default position to "Customer" (capital C)
         $position = $validatedData['position'] ?? 'Customer';
 
         try {
@@ -65,12 +108,6 @@ class UserController extends Controller
                 'password'     => Hash::make($validatedData['password']),
                 'position'     => $position,
             ]);
-
-            if ($request->hasFile('photo_id')) {
-                $filename = $user->id . '_' . time() . '.' . $request->file('photo_id')->getClientOriginalExtension();
-                $request->file('photo_id')->storeAs('nin-images', $filename, 'public');
-                $user->update(['photo_id' => $filename]);
-            }
 
             if ($request->ajax()) {
                 return response()->json(['success' => true, 'message' => 'User registered successfully!']);

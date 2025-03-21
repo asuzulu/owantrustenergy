@@ -22,7 +22,7 @@ class ManagementController extends Controller
     public function accounts()
     {
         // Fetch all users with the role 'customer'
-        $users = User::where('position', 'Customer')->get();
+        $users = User::where('position', 'Customer')->paginate(10);
 
         // Fetch states for the Add Customer form
         $states = State::all();

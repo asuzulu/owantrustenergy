@@ -1,6 +1,3 @@
-```blade
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 @if (!Auth::check() || Auth::user()->position === 'Customer')
     <script>
         window.location.href = "{{ route('home') }}";
@@ -94,6 +91,10 @@
             @endif
         </div>
     </div>
+    @endsection
+    
+    @section('scripts')
+    @include('partials.dashboard.scripts')
     @if (Auth::user()->position === 'Manager' || Auth::user()->position === 'Employee')
         <script>
             $(document).ready(function() {

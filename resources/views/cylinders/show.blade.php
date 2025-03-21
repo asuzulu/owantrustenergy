@@ -90,7 +90,7 @@
                 </div>
                 <div class="d-flex justify-content-start mt-3">
                     <a href="{{ Auth::user()->position === 'Driver' ? route('drivers.cylinders') : route('management.cylinders') }}"
-                        class="btn btn-secondary mr-2">Back to List</a>
+                        class="btn btn-secondary mr-2">Back to Cylinders List</a>
                     @if (in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
                         <button type="button" class="btn btn-primary mr-2" data-toggle="modal"
                             data-target="#assignCylinderModal">Assign to User</button>

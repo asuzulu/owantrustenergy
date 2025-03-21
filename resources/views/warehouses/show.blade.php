@@ -10,7 +10,7 @@
                     <h2 class="tm-block-title d-inline-block">Warehouse Details</h2>
                 </div>
                 <div class="col-md-4 col-sm-12 text-right">
-                    <a href="{{ route('warehouses.index') }}" class="btn btn-small btn-secondary">Back to List</a>
+                    <a href="{{ route('warehouses.index') }}" class="btn btn-small btn-secondary">Back to WarehouseList</a>
                     @if(Auth::check() && Auth::user()->position === 'Manager')
                     <button class="btn btn-small btn-primary" data-toggle="modal" data-target="#editModal">Edit</button>
                     <button class="btn btn-small btn-danger" data-toggle="modal" data-target="#deleteModal">Delete</button>

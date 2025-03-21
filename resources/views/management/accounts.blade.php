@@ -1,4 +1,11 @@
-@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : 'layouts.agent-dashboard'))
+@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.default-dashboard')))
+
+@if (Auth::user()->position === 'Customer')
+    <script>
+        window.location.href = "{{ route('dashboard') }}"; // Redirect to a safe page
+    </script>
+    @php exit; @endphp
+@endif
 
 @section('content')
     <div class="container">
@@ -14,8 +21,7 @@
                             </div>
                         </div>
                     </div>
-                    <table class="table table-striped"
-                        style="margin: 0 auto !important; width: 100% !important; font-size: 13px !important;">
+                    <table class="table table-striped" style="margin: 0 auto !important; width: 100% !important; font-size: 13px !important;">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -29,8 +35,7 @@
                         </thead>
                         <tbody>
                             @forelse ($users as $user)
-                                <tr onclick="window.location.href='{{ route('users.profile', $user->id) }}'"
-                                    style="cursor: pointer;">
+                                <tr onclick="window.location.href='{{ route('users.profile', $user->id) }}'" style="cursor: pointer;">
                                     <td>{{ $user->first_name }} {{ $user->last_name }}</td>
                                     <td>{{ $user->phone_number }}</td>
                                     <td>{{ $user->email }}</td>
@@ -46,14 +51,19 @@
                             @endforelse
                         </tbody>
                     </table>
+                    {{-- Pagination Links --}}
+                    @if ($users->hasPages())
+                        <div class="d-flex justify-content-center mt-3">
+                            {{ $users->links('pagination::bootstrap-4') }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Add Customer Modal -->
-    <div class="modal fade" id="addCustomerModal" tabindex="-1" role="dialog" aria-labelledby="addCustomerModalLabel"
-        aria-hidden="true">
+    <!-- Add Customer Registration Modal -->
+    <div class="modal fade" id="addCustomerModal" tabindex="-1" role="dialog" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content" style="font-size: 13px !important;">
                 <div class="modal-header">
@@ -64,8 +74,7 @@
                 </div>
                 <div class="modal-body">
                     <!-- Centering the form with mx-auto and defined width -->
-                    <form action="{{ route('register.store') }}" method="POST" id="registerForm" class="mx-auto"
-                        style="width: 90% !important;">
+                    <form id="registerForm" action="{{ route('register.modal') }}" method="POST">
                         @csrf
                         <div class="form-group">
                             <label for="firstName">First Name</label>
@@ -89,10 +98,12 @@
                         </div>
                         <div class="form-group">
                             <label>Gender</label><br>
-                            <label class="radio-inline"><input type="radio" name="gender" value="male" required>
-                                Male</label>
-                            <label class="radio-inline"><input type="radio" name="gender" value="female" required>
-                                Female</label>
+                            <label class="radio-inline">
+                                <input type="radio" name="gender" value="male" required> Male
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="gender" value="female" required> Female
+                            </label>
                         </div>
                         <div class="form-group">
                             <label for="street">Street Address</label>
@@ -113,13 +124,11 @@
                         </div>
                         <div class="form-group">
                             <label for="bvn">BVN</label>
-                            <input type="text" class="form-control" id="bvn" name="bvn" required
-                                pattern="\d{11}" maxlength="11">
+                            <input type="text" class="form-control" id="bvn" name="bvn" required pattern="\d{11}" maxlength="11">
                         </div>
                         <div class="form-group">
                             <label for="nin">NIN</label>
-                            <input type="text" class="form-control" id="nin" name="nin" required
-                                pattern="\d{11}" maxlength="11">
+                            <input type="text" class="form-control" id="nin" name="nin" required pattern="\d{11}" maxlength="11">
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>
@@ -127,8 +136,7 @@
                         </div>
                         <div class="form-group">
                             <label for="password_confirmation">Confirm Password</label>
-                            <input type="password" class="form-control" id="password_confirmation"
-                                name="password_confirmation" required>
+                            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Register</button>
                     </form>
@@ -139,41 +147,58 @@
 @endsection
 
 @section('scripts')
-    @include('partials.dashboard.scripts')
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="{{ asset('dashboard/js/moment.min.js') }}"></script>
     <script>
         $(document).ready(function() {
-            $('#registerForm').on('submit', function(e) {
-                e.preventDefault(); // Prevent default form submission
-
-                var formData = $(this).serialize(); // Get form data
-
+            $('#registerForm').submit(function(event) {
+                event.preventDefault();
+                var submitButton = $('#registerForm button[type="submit"]');
+                var formData = new FormData(this);
+                submitButton.prop('disabled', true).text('Registering...');
                 $.ajax({
                     type: 'POST',
                     url: '{{ route('register.modal') }}',
                     data: formData,
+                    processData: false,
+                    contentType: false,
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                        'X-Requested-With': 'XMLHttpRequest'
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
                     },
                     success: function(response) {
                         if (response.success) {
-                            $('#addCustomerModal').modal('hide'); // Hide modal
-                            location.reload(); // Reload page to reflect changes
+                            $('#addCustomerModal').modal('hide');
+                            window.location.reload();
                         } else {
-                            alert(response.message || 'Registration failed. Please try again.');
+                            $('#errorModal').modal('show');
                         }
                     },
                     error: function(xhr) {
-                        let errors = xhr.responseJSON.errors;
-                        let errorMessage = 'An error occurred.';
-                        if (errors) {
-                            errorMessage = Object.values(errors).map(err => err.join(' ')).join('\n');
-                        } else if (xhr.responseJSON.message) {
-                            errorMessage = xhr.responseJSON.message;
-                        }
-                        alert(errorMessage);
+                        let errors = xhr.responseJSON && xhr.responseJSON.errors;
+                        let errorMessage = errors ? Object.values(errors).flat().join('\n') : 'An error occurred.';
+                        $('#errorModal').modal('show');
+                    },
+                    complete: function() {
+                        submitButton.prop('disabled', false).text('Register');
                     }
                 });
+            });
+        });
+
+        $(document).on('click', '.pagination a', function(event) {
+            event.preventDefault();
+            let page = $(this).attr('href').split('page=')[1];
+            $.ajax({
+                url: '/customers?page=' + page,
+                success: function(data) {
+                    $('.table tbody').html($(data).find('tbody').html());
+                    $('.pagination').html($(data).find('.pagination').html());
+                },
+                error: function() {
+                    alert('Could not load new page. Please try again.');
+                }
             });
         });
     </script>

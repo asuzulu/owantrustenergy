@@ -16,7 +16,7 @@
                         <h2 class="tm-block-title">Customer Requests</h2>
                     </div>
                     <div class="col-auto">
-                        <a href="{{ url('/management/cylinders') }}" class="btn btn-primary">Back to List</a>
+                        <a href="{{ url('/management/cylinders') }}" class="btn btn-primary">Back to Cylinders List</a>
                     </div>
                 </div>
                 <div class="table-responsive">
