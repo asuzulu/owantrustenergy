@@ -100,7 +100,7 @@
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label for="phoneNumber">Phone Number</label>
-                                <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" required
+                                <input type="tel" class="form-control" id="phoneNumber" maxlength="10" name="phoneNumber" required
                                     placeholder="Enter Phone Number" value="{{ old('phoneNumber') }}" />
                                 @error('phoneNumber')
                                     <div class="text-danger">{{ $message }}</div>

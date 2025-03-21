@@ -9,7 +9,7 @@
 @extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : 'layouts.drivers-dashboard')
 
 @section('content')
-    <div class="container">
+    <div class="container" style="-5rem;">
         <div class="row tm-content-row tm-mt-big">
             <div class="tm-col tm-col-big">
                 @if (isset($user))
@@ -114,7 +114,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="editPhoneNumber">Phone Number</label>
-                                <input type="tel" class="form-control" id="editPhoneNumber" name="phoneNumber"
+                                <input type="tel" class="form-control" id="editPhoneNumber" name="phoneNumber" maxlength="10"
                                     value="{{ $user->phone_number }}" required>
                             </div>
                             <div class="form-group">

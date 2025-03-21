@@ -26,7 +26,7 @@
             <div class="form-row justify-content-center">
                 <div class="form-group col-md-3">
                     <label for="phoneNumber">Phone Number</label>
-                    <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" required placeholder="Enter Phone Number" value="{{ old('phoneNumber') }}" />
+                    <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="Enter Phone Number" maxlength="10" value="{{ old('phoneNumber') }}" required/>
                     @error('phoneNumber')<div class="text-danger">{{ $message }}</div>@enderror
                 </div>
                 <div class="form-group col-md-3">

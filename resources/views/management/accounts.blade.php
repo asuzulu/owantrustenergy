@@ -86,7 +86,7 @@
                         </div>
                         <div class="form-group">
                             <label for="phoneNumber">Phone Number</label>
-                            <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" required>
+                            <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" maxlength="10" required>
                         </div>
                         <div class="form-group">
                             <label for="email">Email</label>

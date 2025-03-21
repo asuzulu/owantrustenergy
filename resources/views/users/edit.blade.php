@@ -24,7 +24,7 @@
 
                     <div class="form-group">
                         <label for="phone_number">Phone Number</label>
-                        <input type="text" class="form-control" id="phone_number" name="phone_number"
+                        <input type="text" class="form-control" id="phone_number" name="phone_number" maxlength="10"
                             value="{{ $user->phone_number }}" required>
                     </div>
 
