@@ -58,12 +58,12 @@
   <style>
     /* Scale the image down to 2/3 of its current size */
     .tm-site-icon {
-        width: 32px;  /* 48px * 2/3 ≈ 32px */
+        width: 32px;
         height: 32px;
     }
     /* Reduce the font size of the title and nav links */
     .tm-site-title,
     .nav-link {
-        font-size: 0.8em; /* 2/3 of the inherited font-size */
+        font-size: 0.7em;
     }
   </style>
