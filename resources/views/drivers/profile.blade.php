@@ -17,7 +17,6 @@
                         <div class="row">
                             <div class="col-24">
                                 <h2 class="tm-block-title">Driver Account Details</h2>
-                                <!-- Display user's details -->
                                 Name: {{ $user->first_name }} {{ $user->last_name }}
                                 <br>
                                 Email: {{ $user->email }}
