@@ -74,16 +74,27 @@
                                 <td>{{ $cylinder->user ? $cylinder->user->first_name . ' ' . $cylinder->user->last_name : 'Not Assigned' }}
                                 </td>
                             </tr>
-                            <tr>
-                                @php
-                                    $delivery = $deliveries->firstWhere('cylinder', $cylinder->id);
-                                @endphp
+                            @php
+                                $delivery = isset($deliveries)
+                                    ? $deliveries->firstWhere('cylinder', (int) $cylinder->id)
+                                    : null;
+                                $pickup = isset($pickups)
+                                    ? $pickups->firstWhere('cylinder', (int) $cylinder->id)
+                                    : null;
+                            @endphp
 
-                                @if ($delivery)
-                            <tr>
-                                <td><strong>Driver</strong></td>
-                                <td>{{ $delivery->driver }}</td>
-                            </tr>
+                            @if ($delivery)
+                                <tr>
+                                    <td><strong>Driver</strong></td>
+                                    <td>{{ $delivery->driver }}</td>
+                                </tr>
+                            @endif
+
+                            @if ($pickup)
+                                <tr>
+                                    <td><strong>Pick Up Location</strong></td>
+                                    <td>{{ $pickup->location }}</td>
+                                </tr>
                             @endif
                         </tbody>
                     </table>
@@ -139,7 +150,7 @@
                                 id="pickupLocation" class="form-control" style="height: 4rem;">
                                 @foreach ($warehouses as $warehouse)
                                     <option value="{{ $warehouse->name }}">{{ $warehouse->name }}</option>
-                                    @endforeach
+                                @endforeach
                             </select> </div>
                         <div class="form-group"> <label for="pickupDate">Pick-Up Date:</label> <input type="date"
                                 id="pickupDate" class="form-control"> </div>
@@ -229,19 +240,19 @@
                             if (response.length === 0) {
                                 dropdown.append(
                                     '<div class="dropdown-item text-muted">No matches found</div>'
-                                    );
+                                );
                             } else {
                                 response.forEach(user => {
                                     let item = $('<div class="dropdown-item"></div>')
                                         .text(user.first_name + ' ' + user.last_name)
                                         .attr('data-id', user.id).on('click',
-                                    function() {
-                                            $(inputSelector).val($(this).text());
-                                            $(hiddenInputSelector).val($(this).attr(
-                                                'data-id'));
-                                            dropdown.hide();
-                                            enableAssignButton();
-                                        });
+                                            function() {
+                                                $(inputSelector).val($(this).text());
+                                                $(hiddenInputSelector).val($(this).attr(
+                                                    'data-id'));
+                                                dropdown.hide();
+                                                enableAssignButton();
+                                            });
                                     dropdown.append(item);
                                 });
                             }
