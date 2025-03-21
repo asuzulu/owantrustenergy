@@ -262,6 +262,14 @@ label {
     border-color: #9f1321;
 }
 
+#state {
+    height: 60px;
+}
+
+#city {
+    height: 60px;
+}
+
 .custom-file-input {
     cursor: pointer;
 }

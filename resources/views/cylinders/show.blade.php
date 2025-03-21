@@ -76,14 +76,14 @@
                             </tr>
                             <tr>
                                 @php
-                                $delivery = $deliveries->firstWhere('cylinder', $cylinder->id);
-                            @endphp
+                                    $delivery = $deliveries->firstWhere('cylinder', $cylinder->id);
+                                @endphp
 
-                            @if ($delivery)
-                                <tr>
-                                    <td><strong>Driver</strong></td>
-                                    <td>{{ $delivery->driver }}</td>
-                                </tr>
+                                @if ($delivery)
+                            <tr>
+                                <td><strong>Driver</strong></td>
+                                <td>{{ $delivery->driver }}</td>
+                            </tr>
                             @endif
                         </tbody>
                     </table>
@@ -105,92 +105,66 @@
     </div>
 
     <!-- Assign Cylinder Modal -->
-    <div class="modal fade" id="assignCylinderModal" tabindex="-1" role="dialog"
-        aria-labelledby="assignCylinderModalLabel" aria-hidden="true">
+    <div class="modal fade" id="assignCylinderModal" tabindex="-1" role="dialog"aria-labelledby="assignCylinderModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="assignCylinderModalLabel">Assign Cylinder to Customer</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 class="modal-title" id="assignCylinderModalLabel">Assign Cylinder to Customer</h5> <button
+                        type="button" class="close" data-dismiss="modal" aria-label="Close"> <span
+                            aria-hidden="true">&times;</span> </button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group search-container">
-                        <label for="customerSearch">Search Customer:</label>
-                        <input type="text" id="customerSearch" class="form-control" placeholder="Type customer name...">
+                    <div class="form-group search-container"> <label for="customerSearch">Search Customer:</label> <input
+                            type="text" id="customerSearch" class="form-control" placeholder="Type customer name...">
                         <div id="customerDropdown" class="dropdown-menu w-100"></div>
-                    </div>
-                    <input type="hidden" id="selectedUserId">
-                    <div class="form-group">
-                        <label>Assignment Type:</label>
-                        <div>
-                            <input type="radio" id="deliveryOption" name="assignmentType" value="delivery"> <label
-                                for="deliveryOption">Delivery</label>
-                            <input type="radio" id="pickupOption" name="assignmentType" value="pickup"> <label
-                                for="pickupOption">Pick-Up</label>
-                        </div>
+                    </div> <input type="hidden" id="selectedUserId">
+                    <div class="form-group"> <label>Assignment Type:</label>
+                        <div> <input type="radio" id="deliveryOption" name="assignmentType" value="delivery"> <label
+                                for="deliveryOption">Delivery</label> <input type="radio" id="pickupOption"
+                                name="assignmentType" value="pickup"> <label for="pickupOption">Pick-Up</label> </div>
                     </div>
                     <div id="deliveryFields" style="display: none;">
-                        <div class="form-group search-container">
-                            <label for="driverSearch">Assign Driver:</label>
-                            <input type="text" id="driverSearch" class="form-control" placeholder="Type driver name...">
+                        <div class="form-group search-container"> <label for="driverSearch">Assign Driver:</label> <input
+                                type="text" id="driverSearch" class="form-control" placeholder="Type driver name...">
                             <div id="driverDropdown" class="dropdown-menu w-100"></div>
-                        </div>
-                        <input type="hidden" id="selectedDriverId">
-                        <div class="form-group">
-                            <label for="deliveryDate">Delivery Date:</label>
-                            <input type="date" id="deliveryDate" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="deliveryTime">Delivery Time:</label>
-                            <input type="time" id="deliveryTime" class="form-control">
-                        </div>
+                        </div> <input type="hidden" id="selectedDriverId">
+                        <div class="form-group"> <label for="deliveryDate">Delivery Date:</label> <input type="date"
+                                id="deliveryDate" class="form-control"> </div>
+                        <div class="form-group"> <label for="deliveryTime">Delivery Time:</label> <input type="time"
+                                id="deliveryTime" class="form-control"> </div>
                     </div>
                     <div id="pickupFields" style="display: none;">
-                        <div class="form-group">
-                            <label for="pickupLocation">Pick Up Location:</label>
-                            <select id="pickupLocation" class="form-control" style="height: 4rem;">
+                        <div class="form-group"> <label for="pickupLocation">Pick Up Location:</label> <select
+                                id="pickupLocation" class="form-control" style="height: 4rem;">
                                 @foreach ($warehouses as $warehouse)
                                     <option value="{{ $warehouse->name }}">{{ $warehouse->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="pickupDate">Pick-Up Date:</label>
-                            <input type="date" id="pickupDate" class="form-control">
-                        </div>
+                                    @endforeach
+                            </select> </div>
+                        <div class="form-group"> <label for="pickupDate">Pick-Up Date:</label> <input type="date"
+                                id="pickupDate" class="form-control"> </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" id="assignCylinderBtn" class="btn btn-primary" disabled>Assign
-                        Cylinder</button>
-                </div>
+                <div class="modal-footer"> <button type="button" class="btn btn-secondary"
+                        data-dismiss="modal">Close</button> <button type="button" id="assignCylinderBtn"
+                        class="btn btn-primary" disabled>Assign Cylinder</button> </div>
             </div>
         </div>
-    </div>
-
-    <!-- Delete Cylinder Modal -->
-    <div class="modal fade" id="deleteCylinderModal" tabindex="-1" role="dialog"
-        aria-labelledby="deleteCylinderModalLabel" aria-hidden="true">
+    </div> <!-- Delete Cylinder Modal -->
+    <div class="modal fade" id="deleteCylinderModal" tabindex="-1"
+        role="dialog"aria-labelledby="deleteCylinderModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteCylinderModalLabel">Confirm Delete</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                    <h5 class="modal-title" id="deleteCylinderModalLabel">Confirm Delete</h5> <button type="button"
+                        class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    Are you sure you want to delete this cylinder?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <form action="{{ route('cylinders.destroy', $cylinder->id) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <div class="tm-table-actions-col-right">
+                <div class="modal-body"> Are you sure you want to delete this cylinder? </div>
+                <div class="modal-footer"> <button type="button" class="btn btn-secondary"
+                        data-dismiss="modal">Cancel</button>
+                    <form action="{{ route('cylinders.destroy', $cylinder->id) }}" method="POST"> @csrf
+                        @method('DELETE') <div class="tm-table-actions-col-right">
                             @if (Auth::user()->position === 'Manager')
                                 <button type="button" class="btn btn-danger" data-toggle="modal"
                                     data-target="#deleteCylinderModal">Delete Cylinder</button>
@@ -201,7 +175,6 @@
             </div>
         </div>
     </div>
-
     <style>
         .search-container {
             position: relative;
@@ -222,23 +195,18 @@
             width: 50%;
         }
     </style>
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     <script>
         $(document).ready(function() {
             function enableAssignButton() {
                 let isCustomerSelected = $('#selectedUserId').val() ? $('#selectedUserId').val().length > 0 : false;
                 let isAssignmentTypeSelected = $('input[name="assignmentType"]:checked').length > 0;
-
                 let isValid = isCustomerSelected && isAssignmentTypeSelected;
-
                 if ($('input[name="assignmentType"]:checked').val() === 'delivery') {
                     let isDriverSelected = $('#selectedDriverId').val() ? $('#selectedDriverId').val().length > 0 :
                         false;
                     isValid = isValid && isDriverSelected;
                 }
-
                 $('#assignCylinderBtn').prop('disabled', !isValid);
             }
 
@@ -246,12 +214,10 @@
                 $(inputSelector).on('input', function() {
                     let query = $(this).val().trim();
                     let dropdown = $(dropdownSelector);
-
                     if (query.length === 0) {
                         dropdown.hide();
                         return;
                     }
-
                     $.ajax({
                         url: route,
                         type: "GET",
@@ -263,13 +229,13 @@
                             if (response.length === 0) {
                                 dropdown.append(
                                     '<div class="dropdown-item text-muted">No matches found</div>'
-                                );
+                                    );
                             } else {
                                 response.forEach(user => {
                                     let item = $('<div class="dropdown-item"></div>')
                                         .text(user.first_name + ' ' + user.last_name)
-                                        .attr('data-id', user.id)
-                                        .on('click', function() {
+                                        .attr('data-id', user.id).on('click',
+                                    function() {
                                             $(inputSelector).val($(this).text());
                                             $(hiddenInputSelector).val($(this).attr(
                                                 'data-id'));
@@ -283,11 +249,9 @@
                     });
                 });
             }
-
             setupSearch('#customerSearch', '#customerDropdown', "{{ route('search.customers') }}",
                 '#selectedUserId');
             setupSearch('#driverSearch', '#driverDropdown', "{{ route('search.drivers') }}", '#selectedDriverId');
-
             $('input[name="assignmentType"]').on('change', function() {
                 if ($('#deliveryOption').is(':checked')) {
                     $('#deliveryFields').show();
@@ -298,7 +262,6 @@
                 }
                 enableAssignButton();
             });
-
             $('#assignCylinderBtn').on('click', function() {
                 let userId = $('#selectedUserId').val().trim();
                 if (!userId) {
@@ -306,7 +269,6 @@
                     return;
                 }
             });
-
             $('#assignCylinderBtn').on('click', function() {
                 let userId = $('#selectedUserId').val().trim();
                 let cylinderId = {{ $cylinder->id }};
@@ -316,17 +278,14 @@
                 let deliveryTime = $('#deliveryTime').val();
                 let pickupLocation = $('#pickupLocation').val();
                 let pickupDate = $('#pickupDate').val();
-
                 if (!userId) {
                     alert("Please select a customer before assigning the cylinder.");
                     return;
                 }
-
                 if (assignmentType === 'delivery' && !driverId) {
                     alert("Please select a driver before assigning a delivery.");
                     return;
                 }
-
                 $.post("{{ route('cylinders.assign') }}", {
                     _token: "{{ csrf_token() }}",
                     user_id: userId,
@@ -338,20 +297,19 @@
                         cylinder_id: cylinderId,
                         customer_id: userId
                     };
-
                     if (assignmentType === 'delivery') {
                         postData.driver_id = driverId;
                         postData.delivery_date = deliveryDate;
                         postData.delivery_time = deliveryTime;
-                        $.post("{{ route('deliveries.store') }}", postData)
-                            .done(() => location.reload())
-                            .fail(xhr => alert('Delivery record failed: ' + xhr.responseText));
+                        $.post("{{ route('deliveries.store') }}", postData).done(() => location
+                            .reload()).fail(xhr => alert('Delivery record failed: ' + xhr
+                            .responseText));
                     } else {
                         postData.pickup_location = pickupLocation;
                         postData.pick_up_date = pickupDate;
-                        $.post("{{ route('pickups.store') }}", postData)
-                            .done(() => location.reload())
-                            .fail(xhr => alert('Pickup record failed: ' + xhr.responseText));
+                        $.post("{{ route('pickups.store') }}", postData).done(() => location
+                            .reload()).fail(xhr => alert('Pickup record failed: ' + xhr
+                            .responseText));
                     }
                 }).fail(xhr => alert('Cylinder assignment failed: ' + xhr.responseText));
             });
