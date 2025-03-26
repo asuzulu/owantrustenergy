@@ -56,8 +56,8 @@
                 <div class="tm-col tm-col-big">
                     <div class="bg-white tm-block text-center">
                         <h2 class="tm-block-title">Assigned Cylinders</h2>
-                        <p>Total Cylinders in Warehouse: {{ $warehouseCylinders->count() }}</p>
-                        <p>Cylinders Assigned to User: {{ \App\Models\Cylinder::where('user_id', $user->id)->count() }}</p>
+                        <p>Total Cylinders in Warehouse: { { $warehouseCylinders->count() }}</p>
+                        <p>Cylinders Assigned to User: { { \App\Models\Cylinder::where('user_id', $user->id)->count() }}</p>
                     </div>
                 </div>
             </!--div-->

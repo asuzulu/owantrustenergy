@@ -126,25 +126,25 @@ class UserController extends Controller
 
     // Handle NIN image upload
     public function uploadNin(Request $request, $id)
-    {
-        $request->validate([
-            'nin_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
+     {
+         $request->validate([
+             'nin_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+         ]);
 
-        $user = User::findOrFail($id);
-        $imageName = $user->id . '.jpg';
+         $user = User::findOrFail($id);
+         $imageName = $user->id . '.jpg';
 
-        $path = $request->file('nin_image')->storeAs('nin-images', $imageName);
+         $path = $request->file('nin_image')->storeAs('nin-images', $imageName);
 
-        $user->photo_id = $imageName;
-        $user->save();
+         $user->photo_id = $imageName;
+         $user->save();
 
-        return response()->json([
-            'success' => true,
-            'photo_id' => $imageName,
-            'preview_url' => asset('storage/nin-images/' . $imageName),
-        ]);
-    }
+         return response()->json([
+             'success' => true,
+             'photo_id' => $imageName,
+             'preview_url' => asset('storage/nin-images/' . $imageName),
+         ]);
+     }
 
     private function redirectUserByPosition($user)
     {
