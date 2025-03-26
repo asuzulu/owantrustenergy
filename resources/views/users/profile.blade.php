@@ -189,49 +189,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
-            $("#nin_image, #update_nin_image").on("change", function() {
-                let fileName = $(this).val().split("\\").pop();
-                $(this).next("p").text(fileName);
-            });
-
-            function handleNinUpload(form, update = false) {
-                let formData = new FormData(form);
-                let actionUrl = $(form).attr("action");
-
-                $.ajax({
-                    url: actionUrl,
-                    type: "POST",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        if (response.success) {
-                            $("#ninImagePreview").attr("src", response.preview_url + "?t=" + new Date()
-                                .getTime());
-                            $("#updateNinBtn").show();
-                            if (update) {
-                                $("#updateNinModal").modal("hide");
-                            } else {
-                                $("#uploadNinModal").modal("hide");
-                            }
-                        }
-                    },
-                    error: function() {
-                        alert("Upload failed. Please try again.");
-                    }
-                });
-            }
-
-            $("#ninUploadForm").on("submit", function(e) {
-                e.preventDefault();
-                handleNinUpload(this);
-            });
-
-            $("#updateNinForm").on("submit", function(e) {
-                e.preventDefault();
-                handleNinUpload(this, true);
-            });
-
             // Distribution inputs calculation
             $('.distribution-input').on('input', function() {
                 let sizeId = $(this).data('size');

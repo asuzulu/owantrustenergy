@@ -114,8 +114,8 @@
                             </div>
                             <div class="form-group">
                                 <label for="editPhoneNumber">Phone Number</label>
-                                <input type="tel" class="form-control" id="editPhoneNumber" name="phoneNumber" maxlength="10"
-                                    value="{{ $user->phone_number }}" required>
+                                <input type="tel" class="form-control" id="editPhoneNumber" name="phoneNumber"
+                                    maxlength="10" value="{{ $user->phone_number }}" required>
                             </div>
                             <div class="form-group">
                                 <label>Gender</label><br>
@@ -171,93 +171,40 @@
             </div>
         </div>
 
-        <!-- Upload NIN Modal -->
-        <div class="modal fade" id="uploadNinModal" tabindex="-1" role="dialog" aria-labelledby="uploadNinModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="uploadNinModalLabel">Upload NIN</h5>
-                    </div>
-                    <div class="modal-body text-center">
-                        <!-- NIN Preview -->
-                        <div id="ninPreviewContainer">
-                            @if ($user->photo_id && Storage::disk('public')->exists('nin-images/' . $user->photo_id))
-                                <img id="ninImagePreview" class="img-fluid rounded mb-3"
-                                    src="{{ asset('storage/nin-images/' . $user->photo_id) }}" alt="NIN Image">
-                                <br>
-                                <button id="updateNinBtn" class="btn btn-success mt-3" data-bs-toggle="modal"
-                                    data-bs-target="#updateNinModal">Change Image</button>
-                            @else
-                                <p class="text-danger">No NIN image available.</p>
-                                <form id="ninUploadForm" action="{{ route('upload.nin', ['id' => $user->id]) }}"
-                                    method="POST" enctype="multipart/form-data">
-                                    @csrf
-                                    <input type="file" name="nin_image" id="nin_image" accept="image/*"
-                                        class="form-control">
-                                    <button type="submit" class="btn btn-primary mt-3">Upload</button>
-                                </form>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @include('partials.dashboard.nin-modal')
 
-
-        <!-- Update NIN Modal -->
-        <div class="modal fade" id="updateNinModal" tabindex="-1" role="dialog" aria-labelledby="updateNinModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="updateNinModalLabel">Update NIN Image</h5>
-                    </div>
-                    <div class="modal-body text-center">
-                        <form id="updateNinForm" action="{{ route('upload.nin', ['id' => $user->id]) }}" method="POST"
-                            enctype="multipart/form-data">
-                            @csrf
-                            <input type="file" name="nin_image" id="update_nin_image" accept="image/*"
-                                class="form-control">
-                            <p id="update-file-chosen">No file selected</p>
-                            <button type="submit" class="btn btn-success mt-3">Upload</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
     @endsection
 
     @section('scripts')
-        <script>
-            $(document).ready(function() {
-                $("#editDriverForm").on("submit", function(e) {
-                    e.preventDefault(); // Prevent normal form submission
+    <script>
+        $(document).ready(function() {
+            $("#editDriverForm").on("submit", function(e) {
+                e.preventDefault(); // Prevent normal form submission
 
-                    let formData = $(this).serialize(); // Serialize form data
-                    let actionUrl = $(this).attr("action");
+                let formData = $(this).serialize(); // Serialize form data
+                let actionUrl = $(this).attr("action");
 
-                    $.ajax({
-                        url: actionUrl,
-                        type: "POST",
-                        data: formData,
-                        success: function(response) {
-                            if (response.success) {
-                                // Close the modal
-                                $("#editDriverModal").modal("hide");
+                $.ajax({
+                    url: actionUrl,
+                    type: "POST",
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            // Close the modal
+                            $("#editDriverModal").modal("hide");
 
-                                // Update user details on the page dynamically
-                                $("#editFirstName").val(response.user.first_name);
-                                $("#editLastName").val(response.user.last_name);
-                                $("#editPhoneNumber").val(response.user.phone_number);
-                                $("#editStreet").val(response.user.street);
-                                $("#editCity").val(response.user.city);
-                                $("#editState").val(response.user.state);
-                                $("#editEmail").val(response.user.email);
-                                $("#editDob").val(response.user.dob);
+                            // Update user details on the page dynamically
+                            $("#editFirstName").val(response.user.first_name);
+                            $("#editLastName").val(response.user.last_name);
+                            $("#editPhoneNumber").val(response.user.phone_number);
+                            $("#editStreet").val(response.user.street);
+                            $("#editCity").val(response.user.city);
+                            $("#editState").val(response.user.state);
+                            $("#editEmail").val(response.user.email);
+                            $("#editDob").val(response.user.dob);
 
-                                // Update displayed profile details
-                                $(".tm-block").html(`
+                            // Update displayed profile details
+                            $(".tm-block").html(`
                                 Name: ${response.user.first_name} ${response.user.last_name}<br>
                                 Email: ${response.user.email}<br>
                                 Gender: ${response.user.gender}<br>
@@ -266,84 +213,19 @@
                                 City: ${response.user.city}<br>
                                 State: ${response.user.state}<br>
                                 Age: ${response.user.age}<br>
-                    `);
+                            `);
 
-                                alert("Profile updated successfully!");
-                            } else {
-                                alert("Something went wrong. Please try again.");
-                            }
-                        },
-                        error: function(xhr) {
-                            alert("Error updating profile: " + xhr.responseJSON.message);
+                            alert("Profile updated successfully!");
+                        } else {
+                            alert("Something went wrong. Please try again.");
                         }
-                    });
-                });
-
-                // Handle file name display for both upload and update inputs
-                $("#nin_image, #update_nin_image").on("change", function() {
-                    let fileName = $(this).val().split("\\").pop();
-                    $(this).next("p").text(fileName);
-                });
-
-                // Upload NIN
-                $("#ninUploadForm").on("submit", function(e) {
-                    e.preventDefault(); // Prevent default form submission
-                    let formData = new FormData(this);
-                    let actionUrl = $(this).attr("action");
-
-                    $.ajax({
-                        url: actionUrl,
-                        type: "POST",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        success: function(response) {
-                            if (response.success) {
-                                // Close the modal
-                                $("#uploadNinModal").modal("hide");
-
-                                // Update NIN preview
-                                $("#ninPreviewContainer").html(`
-                        <img id="ninImagePreview" class="img-fluid rounded mb-3"
-                            src="${response.nin_url}" alt="NIN Image">
-                        <br>
-                        <button id="updateNinBtn" class="btn btn-success mt-3" data-bs-toggle="modal"
-                            data-bs-target="#updateNinModal">Change Image</button>
-                    `);
-                            }
-                        },
-                        error: function(xhr) {
-                            alert("Error uploading NIN. Please try again.");
-                        }
-                    });
-                });
-
-                // Update NIN
-                $("#updateNinForm").on("submit", function(e) {
-                    e.preventDefault();
-                    let formData = new FormData(this);
-                    let actionUrl = $(this).attr("action");
-
-                    $.ajax({
-                        url: actionUrl,
-                        type: "POST",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        success: function(response) {
-                            if (response.success) {
-                                // Close the modal
-                                $("#updateNinModal").modal("hide");
-
-                                // Update NIN preview
-                                $("#ninImagePreview").attr("src", response.nin_url);
-                            }
-                        },
-                        error: function(xhr) {
-                            alert("Error updating NIN. Please try again.");
-                        }
-                    });
+                    },
+                    error: function(xhr) {
+                        alert("Error updating profile: " + xhr.responseJSON.message);
+                    }
                 });
             });
-        </script>
-    @endsection
+        });
+    </script>
+@endsection
+

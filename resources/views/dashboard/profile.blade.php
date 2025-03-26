@@ -84,52 +84,5 @@
 
 @section('scripts')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $("#nin_image, #update_nin_image").on("change", function() {
-                let fileName = $(this).val().split("\\").pop();
-                $(this).next("p").text(fileName || "No file selected");
-            });
-
-            function handleNinUpload(form, update = false) {
-                let formData = new FormData(form);
-                let actionUrl = $(form).attr("action");
-
-                $.ajax({
-                    url: actionUrl,
-                    type: "POST",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        if (response.success) {
-                            $("#ninImagePreview").attr("src", response.preview_url + "?t=" + new Date()
-                                .getTime());
-                            $("#updateNinBtn").show();
-
-                            if (update) {
-                                $("#updateNinModal").modal("hide");
-                            } else {
-                                $("#uploadNinModal").modal("hide");
-                            }
-                        }
-                    },
-                    error: function(xhr) {
-                        alert("Upload failed. Please try again.");
-                    }
-                });
-            }
-
-            $("#ninUploadForm").on("submit", function(e) {
-                e.preventDefault();
-                handleNinUpload(this);
-            });
-
-            $("#updateNinForm").on("submit", function(e) {
-                e.preventDefault();
-                handleNinUpload(this, true);
-            });
-        });
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 @endsection
