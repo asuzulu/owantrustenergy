@@ -3,7 +3,7 @@
     (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' :
     (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.user-dashboard'))
 )
-
+?>
 @section('content')
     <div class="container">
         <div class="row tm-content-row tm-mt-big">
@@ -34,7 +34,12 @@
                             Age: {{ $user->dob ? \Carbon\Carbon::parse($user->dob)->age : 'N/A' }}<br>
                             <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary mt-3">Edit Profile</a>
                             @if (Auth::user()->position === 'Manager' || !$user->photo_id)
-                            <button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal" data-bs-target="#uploadNinModal">Upload NIN</button>
+                                <button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal"
+                                    data-bs-target="#uploadNinModal">Upload NIN</button>
+                            @endif
+                            @if ($user->position === 'Agent')
+                                <button type="button" class="btn btn-info mt-3" data-bs-toggle="modal"
+                                    data-bs-target="#distributeCylindersModal">Distribute Cylinders</button>
                             @endif
                         </div>
                     </div>
@@ -48,68 +53,143 @@
         </div>
 
         <!--div class="row tm-content-row tm-mt-small justify-content-center align-items-center">
-            <div class="tm-col tm-col-big">
-                <div class="bg-white tm-block text-center">
-                    <h2 class="tm-block-title">Assigned Cylinders</h2>
-                    <p>Total Cylinders in Warehouse: {{ $warehouseCylinders->count() }}</p>
-                    <p>Cylinders Assigned to User: {{ \App\Models\Cylinder::where('user_id', $user->id)->count() }}</p>
-                </div>
-            </div>
-        </!--div-->
-    </div>
-
-    <!-- Upload NIN Modal -->
-    <div class="modal fade" id="uploadNinModal" tabindex="-1" role="dialog" aria-labelledby="uploadNinModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="uploadNinModalLabel">Upload NIN</h5>
-                </div>
-                <div class="modal-body text-center">
-                    <div id="ninPreviewContainer">
-                        @if ($user->photo_id && Storage::disk('public')->exists('nin-images/' . $user->photo_id))
-                            <img id="ninImagePreview" class="img-fluid rounded mb-3" src="{{ asset('storage/nin-images/' . $user->photo_id) }}" alt="NIN Image">
-                            <br>
-                            <button id="updateNinBtn" class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#updateNinModal">Change Image</button>
-                        @else
-                            <p class="text-danger">No NIN image available.</p>
-                            <form id="ninUploadForm" action="{{ route('upload.nin', ['id' => $user->id]) }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <input type="file" name="nin_image" id="nin_image" accept="image/*" class="form-control">
-                                <button type="submit" class="btn btn-primary mt-3">Upload</button>
-                            </form>
-                        @endif
+                <div class="tm-col tm-col-big">
+                    <div class="bg-white tm-block text-center">
+                        <h2 class="tm-block-title">Assigned Cylinders</h2>
+                        <p>Total Cylinders in Warehouse: {{ $warehouseCylinders->count() }}</p>
+                        <p>Cylinders Assigned to User: {{ \App\Models\Cylinder::where('user_id', $user->id)->count() }}</p>
                     </div>
                 </div>
-            </div>
-        </div>
+            </!--div-->
     </div>
 
-    <!-- Update NIN Modal -->
-    <div class="modal fade" id="updateNinModal" tabindex="-1" role="dialog" aria-labelledby="updateNinModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="updateNinModalLabel">Update NIN Image</h5>
-                </div>
-                <div class="modal-body text-center">
-                    <form id="updateNinForm" action="{{ route('upload.nin', ['id' => $user->id]) }}" method="POST" enctype="multipart/form-data">
+    @include('partials.dashboard.nin-modal')
+
+    @if ($user->position === 'Agent')
+        <!-- Distribute Cylinders Modal -->
+        <div class="modal fade" id="distributeCylindersModal" tabindex="-1" role="dialog"
+            aria-labelledby="distributeCylindersModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document" style="max-width:80%;">
+                <div class="modal-content">
+                    <form id="cylinderDistributionForm" action="{{ route('cylinders.distribute', ['id' => $user->id]) }}"
+                        method="POST">
                         @csrf
-                        <input type="file" name="nin_image" id="update_nin_image" accept="image/*" class="form-control">
-                        <button type="submit" class="btn btn-success mt-3">Upload</button>
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="distributeCylindersModalLabel">Distribute Cylinders</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            @php
+                                $cylinderSizes = [
+                                    [
+                                        'id' => 'small',
+                                        'size' => 'small',
+                                        'weight' => '3kg',
+                                        'label' => 'Small (3kg)',
+                                        'image' => 'dashboard/img/3kg.jpg',
+                                    ],
+                                    [
+                                        'id' => 'medium',
+                                        'size' => 'medium',
+                                        'weight' => '5kg',
+                                        'label' => 'Medium (5kg)',
+                                        'image' => 'dashboard/img/5kg.jpg',
+                                    ],
+                                    [
+                                        'id' => 'large',
+                                        'size' => 'large',
+                                        'weight' => '12kg',
+                                        'label' => 'Large (12kg)',
+                                        'image' => 'dashboard/img/12kg.jpg',
+                                    ],
+                                    [
+                                        'id' => 'xl',
+                                        'size' => 'extra large',
+                                        'weight' => '25kg',
+                                        'label' => 'XL (25kg)',
+                                        'image' => 'dashboard/img/25kg.jpg',
+                                    ],
+                                ];
+                                $warehouses = \App\Models\Warehouse::all();
+                            @endphp
+                            @foreach ($cylinderSizes as $cylinder)
+                                <div class="row mb-4 border p-3">
+                                    <div class="col-md-3 text-center">
+                                        <h5>{{ $cylinder['label'] }}</h5>
+                                        <img src="{{ asset($cylinder['image']) }}" alt="{{ $cylinder['label'] }}"
+                                            class="img-fluid" style="width: 80%; height: auto;">
+                                        @php
+                                            $totalForSize = \App\Models\Cylinder::where('size', $cylinder['size'])
+                                                ->whereIn('location', $warehouses->pluck('name'))
+                                                ->count();
+                                        @endphp
+                                        <p class="mt-2">Total in Warehouses: <span
+                                                id="total-{{ $cylinder['id'] }}">{{ $totalForSize }}</span></p>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <h6>Distribution per Warehouse</h6>
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Warehouse</th>
+                                                    <th>Available Cylinders</th>
+                                                    <th>Assign Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($warehouses as $warehouse)
+                                                    @php
+                                                        $warehouseTotal = \App\Models\Cylinder::where(
+                                                            'size',
+                                                            $cylinder['size'],
+                                                        )
+                                                            ->where('location', $warehouse->name)
+                                                            ->count();
+                                                    @endphp
+                                                    <tr>
+                                                        <td>{{ $warehouse->name }}</td>
+                                                        <td>{{ $warehouseTotal }}</td>
+                                                        <td>
+                                                            <input type="number" min="0"
+                                                                max="{{ $warehouseTotal }}"
+                                                                name="distribution[{{ $cylinder['size'] }}][{{ $warehouse->id }}]"
+                                                                class="form-control distribution-input"
+                                                                data-size="{{ $cylinder['id'] }}"
+                                                                data-warehouse-max="{{ $warehouseTotal }}">
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                        <div class="text-end">
+                                            <strong>Subtotal for {{ $cylinder['label'] }}: </strong>
+                                            <span id="subtotal-{{ $cylinder['id'] }}">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <h4>Total Cylinders to be Distributed: <span id="grandTotal">0</span></h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Distribute</button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
-    </div>
-
+    @endif
 @endsection
 
 @section('scripts')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function () {
-            $("#nin_image, #update_nin_image").on("change", function () {
+        $(document).ready(function() {
+            $("#nin_image, #update_nin_image").on("change", function() {
                 let fileName = $(this).val().split("\\").pop();
                 $(this).next("p").text(fileName);
             });
@@ -124,9 +204,10 @@
                     data: formData,
                     processData: false,
                     contentType: false,
-                    success: function (response) {
+                    success: function(response) {
                         if (response.success) {
-                            $("#ninImagePreview").attr("src", response.preview_url + "?t=" + new Date().getTime());
+                            $("#ninImagePreview").attr("src", response.preview_url + "?t=" + new Date()
+                                .getTime());
                             $("#updateNinBtn").show();
                             if (update) {
                                 $("#updateNinModal").modal("hide");
@@ -135,20 +216,39 @@
                             }
                         }
                     },
-                    error: function () {
+                    error: function() {
                         alert("Upload failed. Please try again.");
                     }
                 });
             }
 
-            $("#ninUploadForm").on("submit", function (e) {
+            $("#ninUploadForm").on("submit", function(e) {
                 e.preventDefault();
                 handleNinUpload(this);
             });
 
-            $("#updateNinForm").on("submit", function (e) {
+            $("#updateNinForm").on("submit", function(e) {
                 e.preventDefault();
                 handleNinUpload(this, true);
+            });
+
+            // Distribution inputs calculation
+            $('.distribution-input').on('input', function() {
+                let sizeId = $(this).data('size');
+                let subtotal = 0;
+                $('input.distribution-input[data-size="' + sizeId + '"]').each(function() {
+                    let val = parseInt($(this).val());
+                    if (!isNaN(val)) {
+                        subtotal += val;
+                    }
+                });
+                $('#subtotal-' + sizeId).text(subtotal);
+                // Calculate grand total
+                let grandTotal = 0;
+                $('[id^="subtotal-"]').each(function() {
+                    grandTotal += parseInt($(this).text()) || 0;
+                });
+                $('#grandTotal').text(grandTotal);
             });
         });
     </script>

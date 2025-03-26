@@ -167,31 +167,30 @@ class UserController extends Controller
         return view('dashboard.profile', compact('cylinders', 'totalCylinders'));
     }
 
+    // Update the profile image
     public function updateProfileImage(Request $request, $id)
     {
         $request->validate([
-            'cropped_image' => 'required', // Ensure the cropped image is provided
+            'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $user = User::findOrFail($id);
 
-        // Delete the old image if it exists
+        // Delete old image if it exists
         if ($user->profile_image) {
             Storage::disk('public')->delete('profile-images/' . $user->profile_image);
         }
 
-        // Generate new filename using existing naming logic
-        $filename = $user->first_name . '_' . $user->last_name . '_' . now()->format('Ymd') . '.jpg';
+        // Create new filename format: firstName_lastName_YYYYMMDD.extension
+        $filename = $user->first_name . '_' . $user->last_name . '_' . now()->format('Ymd') . '.' . $request->file('profile_image')->getClientOriginalExtension();
 
-        // Decode the base64 cropped image
-        $imageData = $request->input('cropped_image');
-        $image = Image::make($imageData)->encode('jpg', 90); // Convert to JPEG with 90% quality
+        // Store image
+        $imagePath = $request->file('profile_image')->storeAs('profile-images', $filename, 'public');
 
-        // Save the image in the public storage
-        Storage::disk('public')->put('profile-images/' . $filename, $image);
-
-        // Update the user profile with the new image filename
-        $user->update(['profile_image' => $filename]);
+        // Update user record
+        $user->update([
+            'profile_image' => $filename,
+        ]);
 
         return redirect()->route('profile.view', $user->id)->with('success', 'Profile image updated successfully.');
     }

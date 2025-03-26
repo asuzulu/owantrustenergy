@@ -21,6 +21,7 @@ use App\Http\Controllers\{
     DeliveryController,
     PickupController,
     OrdersController,
+    CylinderDistributionController
 };
 
 // Public pages
@@ -61,7 +62,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/users/{id}/update-profile-image', [UserController::class, 'updateProfileImage'])->name('users.update-profile-image');
     Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
-    Route::get('/users/{id}', [UserController::class, 'profile'])->name('users.profile');
+    Route::get('/users/{id}/profile', [UserController::class, 'profile'])->name('users.profile');
 });
 
 // Cylinder management routes
@@ -156,6 +157,9 @@ Route::get('/management/cylinders', [ManagementController::class, 'cylindersPage
 Route::get('/management/cylinders/{id}', [ManagementController::class, 'showCylinder'])
     ->name('management.cylinders.show')
     ->middleware(['auth']);
+Route::get('/cylinders/warehouse/data', [CylinderController::class, 'warehouseData'])->name('cylinders.warehouse.data');
+Route::post('/cylinders/distribute', [CylinderDistributionController::class, 'distribute'])
+    ->name('cylinders.distribute');
 
 // Statistics charts data
 Route::get('/statistics/data', [StatisticsController::class, 'getStatisticsData']);
