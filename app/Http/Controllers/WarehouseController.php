@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Warehouse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class WarehouseController extends Controller
@@ -44,9 +45,14 @@ class WarehouseController extends Controller
     public function show($id)
     {
         $warehouse = Warehouse::findOrFail($id); // Fetch the warehouse or throw a 404
-        return view('warehouses.show', compact('warehouse'));
-    }
 
+        $distributedCylinders = DB::table('agent_cylinders_distribution')
+            ->where('warehouse', $warehouse->name) // Ensure warehouse matches
+            ->get();
+
+        return view('warehouses.show', compact('warehouse', 'distributedCylinders'));
+    }
+    
     // Update the warehouse
     public function update(Request $request, $id)
     {
@@ -78,6 +84,22 @@ class WarehouseController extends Controller
         ]);
 
         return redirect()->route('warehouses.show', $warehouse->id)->with('success', 'Warehouse updated successfully.');
+    }
+
+    public function confirmAgentPickup(Request $request, $warehouseId)
+    {
+        $request->validate([
+            'cylinders' => 'required|array',
+            'cylinders.*' => 'exists:agent_cylinders_distribution,id',
+        ]);
+
+        // Mark selected cylinders as picked up (you can also move them to another table if needed)
+        DB::table('agent_cylinders_distribution')
+            ->whereIn('id', $request->cylinders)
+            ->delete(); // Or update status instead of deleting
+
+        return redirect()->route('warehouses.show', $warehouseId)
+            ->with('success', 'Selected cylinders have been confirmed as picked up.');
     }
 
     public function destroy($id)

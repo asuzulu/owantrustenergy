@@ -20,6 +20,7 @@ class CreateAgentCylindersDistributionTable extends Migration
             $table->string('cylinder_weight');
             $table->string('warehouse');
             $table->date('pick_up_date')->nullable();
+            $table->string('passcode')->nullable();
             $table->timestamps();
         });
     }

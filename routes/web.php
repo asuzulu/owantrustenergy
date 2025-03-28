@@ -164,6 +164,10 @@ Route::get('/cylinders/warehouse/data', [CylinderDistributionController::class, 
 Route::post('/cylinders/distribute/{id}', [CylinderDistributionController::class, 'distribute'])
     ->name('cylinders.distribute');
 
+// Pick up distributed cylinder from warehouse by agent
+Route::post('/warehouses/{warehouse}/confirm-agent-pickup', [WarehouseController::class, 'confirmAgentPickup'])
+    ->name('warehouses.confirmAgentPickup');
+
 // Statistics charts data
 Route::get('/statistics/data', [StatisticsController::class, 'getStatisticsData']);
 
