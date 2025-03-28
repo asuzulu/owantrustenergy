@@ -3,7 +3,6 @@
 <script src="{{ asset('dashboard/js/utils.js') }}"></script>
 <script src="{{ asset('dashboard/js/Chart.min.js') }}"></script>
 <script src="{{ asset('dashboard/js/fullcalendar.min.js') }}"></script>
-<script src="{{ asset('dashboard/js/bootstrap.min.js') }}"></script>
 
 <!-- Bootstrap JS and Popper.js -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>

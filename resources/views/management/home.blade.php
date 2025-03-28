@@ -71,14 +71,14 @@
                             @endforeach
                         </tbody>
                     </table>
+                    {{-- Pagination Links --}}
+                    @if ($cylinders->hasPages())
+                        <div class="d-flex justify-content-center mt-3">
+                            {{ $cylinders->links('pagination::bootstrap-4') }}
+                        </div>
+                    @endif
                 </div>
             </div>
-            {{-- Pagination Links --}}
-            @if ($cylinders->hasPages())
-                <div style="text-align: center; margin-top: 20px;">
-                    {{ $cylinders->links('pagination::bootstrap-4') }}
-                </div>
-            @endif
         </div>
     </div>
 

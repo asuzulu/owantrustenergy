@@ -1,9 +1,5 @@
-@extends(
-    Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' :
-    (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' :
-    (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.user-dashboard'))
-)
-?>
+@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.user-dashboard')))
+
 @section('content')
     <div class="container">
         <div class="row tm-content-row tm-mt-big">
@@ -52,161 +48,51 @@
             </div>
         </div>
 
-        <!--div class="row tm-content-row tm-mt-small justify-content-center align-items-center">
-                <div class="tm-col tm-col-big">
-                    <div class="bg-white tm-block text-center">
-                        <h2 class="tm-block-title">Assigned Cylinders</h2>
-                        <p>Total Cylinders in Warehouse: { { $warehouseCylinders->count() }}</p>
-                        <p>Cylinders Assigned to User: { { \App\Models\Cylinder::where('user_id', $user->id)->count() }}</p>
-                    </div>
-                </div>
-            </!--div-->
-    </div>
+        @include('partials.dashboard.nin-modal')
 
-    @include('partials.dashboard.nin-modal')
-
-    @if ($user->position === 'Agent')
-        <!-- Distribute Cylinders Modal -->
-        <div class="modal fade" id="distributeCylindersModal" tabindex="-1" role="dialog"
-            aria-labelledby="distributeCylindersModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document" style="max-width:80%;">
-                <div class="modal-content">
-                    <form id="cylinderDistributionForm" action="{{ route('cylinders.distribute', ['id' => $user->id]) }}"
-                        method="POST">
-                        @csrf
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="distributeCylindersModalLabel">Distribute Cylinders</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            @php
-                                $cylinderSizes = [
-                                    [
-                                        'id' => 'small',
-                                        'size' => 'small',
-                                        'weight' => '3kg',
-                                        'label' => 'Small (3kg)',
-                                        'image' => 'dashboard/img/3kg.jpg',
-                                    ],
-                                    [
-                                        'id' => 'medium',
-                                        'size' => 'medium',
-                                        'weight' => '5kg',
-                                        'label' => 'Medium (5kg)',
-                                        'image' => 'dashboard/img/5kg.jpg',
-                                    ],
-                                    [
-                                        'id' => 'large',
-                                        'size' => 'large',
-                                        'weight' => '12kg',
-                                        'label' => 'Large (12kg)',
-                                        'image' => 'dashboard/img/12kg.jpg',
-                                    ],
-                                    [
-                                        'id' => 'xl',
-                                        'size' => 'extra large',
-                                        'weight' => '25kg',
-                                        'label' => 'XL (25kg)',
-                                        'image' => 'dashboard/img/25kg.jpg',
-                                    ],
-                                ];
-                                $warehouses = \App\Models\Warehouse::all();
-                            @endphp
-                            @foreach ($cylinderSizes as $cylinder)
-                                <div class="row mb-4 border p-3">
-                                    <div class="col-md-3 text-center">
-                                        <h5>{{ $cylinder['label'] }}</h5>
-                                        <img src="{{ asset($cylinder['image']) }}" alt="{{ $cylinder['label'] }}"
-                                            class="img-fluid" style="width: 80%; height: auto;">
-                                        @php
-                                            $totalForSize = \App\Models\Cylinder::where('size', $cylinder['size'])
-                                                ->whereIn('location', $warehouses->pluck('name'))
-                                                ->count();
-                                        @endphp
-                                        <p class="mt-2">Total in Warehouses: <span
-                                                id="total-{{ $cylinder['id'] }}">{{ $totalForSize }}</span></p>
-                                    </div>
-                                    <div class="col-md-9">
-                                        <h6>Distribution per Warehouse</h6>
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th>Warehouse</th>
-                                                    <th>Available Cylinders</th>
-                                                    <th>Assign Amount</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($warehouses as $warehouse)
-                                                    @php
-                                                        $warehouseTotal = \App\Models\Cylinder::where(
-                                                            'size',
-                                                            $cylinder['size'],
-                                                        )
-                                                            ->where('location', $warehouse->name)
-                                                            ->count();
-                                                    @endphp
-                                                    <tr>
-                                                        <td>{{ $warehouse->name }}</td>
-                                                        <td>{{ $warehouseTotal }}</td>
-                                                        <td>
-                                                            <input type="number" min="0"
-                                                                max="{{ $warehouseTotal }}"
-                                                                name="distribution[{{ $cylinder['size'] }}][{{ $warehouse->id }}]"
-                                                                class="form-control distribution-input"
-                                                                data-size="{{ $cylinder['id'] }}"
-                                                                data-warehouse-max="{{ $warehouseTotal }}">
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                        <div class="text-end">
-                                            <strong>Subtotal for {{ $cylinder['label'] }}: </strong>
-                                            <span id="subtotal-{{ $cylinder['id'] }}">0</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                            <div class="row">
-                                <div class="col-12 text-center">
-                                    <h4>Total Cylinders to be Distributed: <span id="grandTotal">0</span></h4>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Distribute</button>
-                        </div>
-                    </form>
+        @if ($user->position === 'Agent')
+            @include('partials.dashboard.distribute-cylinders-modal', ['user' => $user])
+            <div class="row tm-content-row tm-mt-big">
+                <div class="bg-white tm-block">
+                    <h3 class="tm-block-title" style="text-align: center">Cylinders Distributed</h3>
+                    @php
+                        $distributed = \Illuminate\Support\Facades\DB::table('agent_cylinders_distribution')
+                            ->where('agent_id', $user->id)
+                            ->orderBy('created_at', 'desc')
+                            ->get();
+                    @endphp
+                    @if ($distributed->isNotEmpty())
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Cylinder #</th>
+                                    <th>Size</th>
+                                    <th>Weight</th>
+                                    <th>Warehouse</th>
+                                    <th>Pick Up Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($distributed as $item)
+                                    <tr style="cursor: pointer;">
+                                        <td>{{ str_pad($item->cylinder_id, 9, '0', STR_PAD_LEFT) }}</td>
+                                        <td>{{ $item->cylinder_size }}</td>
+                                        <td>{{ $item->cylinder_weight }}</td>
+                                        <td>{{ $item->warehouse }}</td>
+                                        <td>{{ $item->pick_up_date ? \Carbon\Carbon::parse($item->pick_up_date)->format('d-m-Y') : 'N/A' }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @else
+                        <p style="text-align: center">No cylinders distributed to this agent.</p>
+                    @endif
                 </div>
             </div>
-        </div>
-    @endif
+        @endif
+    </div>
 @endsection
 
 @section('scripts')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Distribution inputs calculation
-            $('.distribution-input').on('input', function() {
-                let sizeId = $(this).data('size');
-                let subtotal = 0;
-                $('input.distribution-input[data-size="' + sizeId + '"]').each(function() {
-                    let val = parseInt($(this).val());
-                    if (!isNaN(val)) {
-                        subtotal += val;
-                    }
-                });
-                $('#subtotal-' + sizeId).text(subtotal);
-                // Calculate grand total
-                let grandTotal = 0;
-                $('[id^="subtotal-"]').each(function() {
-                    grandTotal += parseInt($(this).text()) || 0;
-                });
-                $('#grandTotal').text(grandTotal);
-            });
-        });
-    </script>
 @endsection

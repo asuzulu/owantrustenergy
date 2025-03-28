@@ -157,8 +157,11 @@ Route::get('/management/cylinders', [ManagementController::class, 'cylindersPage
 Route::get('/management/cylinders/{id}', [ManagementController::class, 'showCylinder'])
     ->name('management.cylinders.show')
     ->middleware(['auth']);
-Route::get('/cylinders/warehouse/data', [CylinderController::class, 'warehouseData'])->name('cylinders.warehouse.data');
-Route::post('/cylinders/distribute', [CylinderDistributionController::class, 'distribute'])
+
+// Distribute cylinders to Agents
+Route::get('/cylinders/warehouse/data', [CylinderDistributionController::class, 'warehouseData'])
+    ->name('cylinders.warehouse.data');
+Route::post('/cylinders/distribute/{id}', [CylinderDistributionController::class, 'distribute'])
     ->name('cylinders.distribute');
 
 // Statistics charts data

@@ -37,12 +37,17 @@
         </ul>
         <ul class="navbar-nav">
             <li class="nav-item">
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                    @csrf
-                </form>
-                <a class="nav-link d-flex" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    <i class="far fa-user mr-2 tm-logout-icon"></i>Logout
-                </a>
+                @if(Auth::check())
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                        @csrf
+                    </form>
+                    <a class="nav-link d-flex" href="#"
+                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <i class="far fa-user mr-2 tm-logout-icon"></i>Logout
+                    </a>
+                @else
+                    <a class="nav-link" href="/">Home</a>
+                @endif
             </li>
         </ul>
     </div>
