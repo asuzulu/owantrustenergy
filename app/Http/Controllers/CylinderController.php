@@ -35,10 +35,7 @@ class CylinderController extends Controller
         try {
             $cylinders = Cylinder::when($user->position === 'Customer', function ($query) use ($user) {
                 return $query->where('user_id', $user->id);
-            })
-            ->orderBy('allocated_date', 'asc')
-            ->orderByRaw("FIELD(size, 'Small', 'Medium', 'Large', 'Extra Large')")
-            ->paginate(10);
+            })->paginate(10);
         } catch (\Exception $e) {
             Log::debug('Error retrieving Cylinders: ', ['error' => $e->getMessage()]);
             abort(500, 'Failed to retrieve cylinders.');
