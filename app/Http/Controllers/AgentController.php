@@ -27,6 +27,14 @@ class AgentController extends Controller
         return view('management.agents', compact('agents', 'states'));
     }
 
+    // Added dashboard method to fix the error
+    public function dashboard()
+    {
+        $user = Auth::user();
+        $warehouseCylinders = collect(); // Adjust or load data as needed
+        return view('users.profile', compact('user', 'warehouseCylinders'));
+    }
+
     public function show($id)
     {
         $user = User::findOrFail($id);

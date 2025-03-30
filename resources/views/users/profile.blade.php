@@ -33,7 +33,8 @@
                                 <button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal"
                                     data-bs-target="#uploadNinModal">Upload NIN</button>
                             @endif
-                            @if ($user->position === 'Agent')
+                            {{-- Distribute Cylinders button is only for Employee and Manager --}}
+                            @if (in_array(Auth::user()->position, ['Employee', 'Manager']))
                                 <button type="button" class="btn btn-info mt-3" data-bs-toggle="modal"
                                     data-bs-target="#distributeCylindersModal">Distribute Cylinders</button>
                             @endif
@@ -50,8 +51,13 @@
 
         @include('partials.dashboard.nin-modal')
 
-        @if ($user->position === 'Agent')
+        {{-- Show Distribute Cylinders modal only if user is not Customer (for Employee and Manager) --}}
+        @if (in_array(Auth::user()->position, ['Employee', 'Manager']))
             @include('partials.dashboard.distribute-cylinders-modal', ['user' => $user])
+        @endif
+
+        {{-- Cylinders Distributed section shows for Employee, Manager, and Agent (not Customer) --}}
+        @if (in_array(Auth::user()->position, ['Employee', 'Manager', 'Agent']))
             <div class="row tm-content-row tm-mt-big">
                 <div class="bg-white tm-block">
                     <h3 class="tm-block-title" style="text-align: center">Cylinders Distributed</h3>
@@ -70,6 +76,9 @@
                                     <th>Weight</th>
                                     <th>Warehouse</th>
                                     <th>Pick Up Date</th>
+                                    @if (Auth::user()->position === 'Agent')
+                                        <th>Passcode</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -79,7 +88,11 @@
                                         <td>{{ $item->cylinder_size }}</td>
                                         <td>{{ $item->cylinder_weight }}</td>
                                         <td>{{ $item->warehouse }}</td>
-                                        <td>{{ $item->pick_up_date ? \Carbon\Carbon::parse($item->pick_up_date)->format('d-m-Y') : 'N/A' }}</td>
+                                        <td>{{ $item->pick_up_date ? \Carbon\Carbon::parse($item->pick_up_date)->format('d-m-Y') : 'N/A' }}
+                                        </td>
+                                        @if (Auth::user()->position === 'Agent')
+                                            <td>{{ $item->passcode }}</td>
+                                        @endif
                                     </tr>
                                 @endforeach
                             </tbody>

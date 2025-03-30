@@ -8,6 +8,7 @@ use App\Models\Warehouse;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CylinderDistributionController extends Controller
 {
@@ -36,6 +37,10 @@ class CylinderDistributionController extends Controller
             'extra large' => '25kg'
         ];
 
+        // Generate a 7-character alphanumeric passcode (upper-case)
+        $passcode = strtoupper(Str::random(7));
+        Log::info("Generated passcode: {$passcode}");
+
         DB::beginTransaction();
         try {
             $totalDistributed = 0;
@@ -53,7 +58,7 @@ class CylinderDistributionController extends Controller
                             continue;
                         }
 
-                        // Count cylinders in that warehouse by size using case-insensitive matching (works in both MySQL and SQLite)
+                        // Count cylinders in that warehouse by size using case-insensitive matching
                         $available = Cylinder::whereRaw('LOWER(size) = ?', [strtolower($size)])
                             ->whereRaw('LOWER(location) = ?', [strtolower(trim($warehouse->name))])
                             ->count();
@@ -80,7 +85,7 @@ class CylinderDistributionController extends Controller
                             $cylinder->save();
                             Log::info("Cylinder ID {$cylinder->id} assigned to agent {$agent->id}");
 
-                            // Insert into agent_cylinders_distribution table
+                            // Insert into agent_cylinders_distribution table with passcode
                             DB::table('agent_cylinders_distribution')->insert([
                                 'agent_name'      => $agent->first_name . ' ' . $agent->last_name,
                                 'agent_id'        => $agent->id,
@@ -88,6 +93,7 @@ class CylinderDistributionController extends Controller
                                 'cylinder_size'   => $cylinder->size,
                                 'cylinder_weight' => isset($weightMapping[$size]) ? $weightMapping[$size] : '',
                                 'warehouse'       => $warehouse->name,
+                                'passcode'        => $passcode,
                                 'pick_up_date'    => null,
                                 'created_at'      => now(),
                                 'updated_at'      => now()
@@ -102,7 +108,7 @@ class CylinderDistributionController extends Controller
 
             DB::commit();
             Log::info("Distribution process completed successfully. Total distributed: {$totalDistributed}");
-            return redirect()->back()->with('success', 'Successfully distributed ' . $totalDistributed . ' cylinders.');
+            return redirect()->back()->with('success', 'Successfully distributed ' . $totalDistributed . ' cylinders. Passcode: ' . $passcode);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("Distribution failed: " . $e->getMessage());
