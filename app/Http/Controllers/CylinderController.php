@@ -36,14 +36,8 @@ class CylinderController extends Controller
             $cylinders = Cylinder::when($user->position === 'Customer', function ($query) use ($user) {
                 return $query->where('user_id', $user->id);
             })
-            ->orderBy('allocated_date', 'desc')
-            ->orderByRaw("CASE
-                WHEN size = 'Extra Large' THEN 1
-                WHEN size = 'Large' THEN 2
-                WHEN size = 'Medium' THEN 3
-                WHEN size = 'Small' THEN 4
-                ELSE 5
-            END")
+            ->orderBy('allocated_date', 'asc')
+            ->orderByRaw("FIELD(size, 'Small', 'Medium', 'Large', 'Extra Large')")
             ->paginate(10);
         } catch (\Exception $e) {
             Log::debug('Error retrieving Cylinders: ', ['error' => $e->getMessage()]);
