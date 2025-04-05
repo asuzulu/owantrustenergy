@@ -27,7 +27,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'firstName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'lastName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-            'phoneNumber' => 'required|string|regex:/^0[789][01]\d{8}$/',
+            'phoneNumber' => 'required|digits|max:10',
             'gender' => 'required|string|in:male,female',
             'street' => 'required|string|max:255',
             'city' => 'required|string|max:255',
@@ -51,7 +51,7 @@ class UserController extends Controller
         ], [
             'dob.before' => 'You must be at least 18 years old to register.',
             'password.regex' => 'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
-            'phoneNumber.regex' => 'Phone number must be a valid Nigerian number (e.g., 08012345678).',
+            'phoneNumber.regex' => 'Phone number must be a valid number (e.g., 08012345678).',
             'firstName.regex' => 'First name can only contain letters and spaces.',
             'lastName.regex' => 'Last name can only contain letters and spaces.',
         ]);
@@ -95,7 +95,7 @@ class UserController extends Controller
         $validatedData = $request->validate([
             'firstName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'lastName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-            'phoneNumber' => 'required|string|regex:/^0[789][01]\d{8}$/',
+            'phoneNumber' => 'required|digits|max:10',
             'gender' => 'required|string|in:male,female',
             'street' => 'required|string|max:255',
             'city' => 'required|string|max:255',
@@ -119,7 +119,7 @@ class UserController extends Controller
         ], [
             'dob.before' => 'You must be at least 18 years old to register.',
             'password.regex' => 'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
-            'phoneNumber.regex' => 'Phone number must be a valid Nigerian number (e.g., 08012345678).',
+            'phoneNumber.regex' => 'Phone number must be a valid number (e.g., 08012345678).',
             'firstName.regex' => 'First name can only contain letters and spaces.',
             'lastName.regex' => 'Last name can only contain letters and spaces.',
         ]);
