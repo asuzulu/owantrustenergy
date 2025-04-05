@@ -27,7 +27,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'firstName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'lastName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-            'phoneNumber' => 'required|digits|max:10',
+            'phoneNumber' => 'required|digits:10',
             'gender' => 'required|string|in:male,female',
             'street' => 'required|string|max:255',
             'city' => 'required|string|max:255',
@@ -95,7 +95,7 @@ class UserController extends Controller
         $validatedData = $request->validate([
             'firstName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'lastName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-            'phoneNumber' => 'required|digits|max:10',
+            'phoneNumber' => 'required|digits:10',
             'gender' => 'required|string|in:male,female',
             'street' => 'required|string|max:255',
             'city' => 'required|string|max:255',
