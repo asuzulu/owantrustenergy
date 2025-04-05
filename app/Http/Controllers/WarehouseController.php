@@ -22,8 +22,10 @@ class WarehouseController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            // Common address rules: required string with maximum length
             'address' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:15',
+            // Phone number must be numeric and exactly 10 digits long
+            'phone_number' => 'required|numeric|digits:10',
         ]);
 
         // Create the new warehouse
@@ -52,7 +54,7 @@ class WarehouseController extends Controller
 
         return view('warehouses.show', compact('warehouse', 'distributedCylinders'));
     }
-    
+
     // Update the warehouse
     public function update(Request $request, $id)
     {
@@ -69,7 +71,7 @@ class WarehouseController extends Controller
         $request->validate([
             'name' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:255',
-            'phone_number' => 'nullable|string|max:15',
+            'phone_number' => 'nullable|numeric|digits:10',
         ]);
 
         // Update only the fields that are provided

@@ -7,10 +7,12 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Cylinder;
 use App\Models\Warehouse;
+use Carbon\Carbon;
 
 class UserController extends Controller
 {
@@ -22,74 +24,43 @@ class UserController extends Controller
 
     public function registerModal(Request $request)
     {
-        $validatedData = $request->validate([
-            'firstName' => 'required|string|max:255',
-            'lastName' => 'required|string|max:255',
-            'phoneNumber' => 'required|string|max:15',
-            'email' => 'required|email|unique:users,email',
-            'dob' => 'required|date',
-            'gender' => 'required|in:male,female',
+        $validator = Validator::make($request->all(), [
+            'firstName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'lastName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'phoneNumber' => 'required|string|regex:/^0[789][01]\d{8}$/',
+            'gender' => 'required|string|in:male,female',
             'street' => 'required|string|max:255',
             'city' => 'required|string|max:255',
             'state' => 'required|exists:states,id',
             'bvn' => 'required|digits:11',
             'nin' => 'required|digits:11',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
-
-        // Create the user
-        try {
-            $user = User::create([
-                'first_name' => $validatedData['firstName'],
-                'last_name' => $validatedData['lastName'],
-                'phone_number' => $validatedData['phoneNumber'],
-                'email' => $validatedData['email'],
-                'dob' => $validatedData['dob'],
-                'gender' => $validatedData['gender'],
-                'street' => $validatedData['street'],
-                'city' => $validatedData['city'],
-                'state' => State::find($validatedData['state'])->name,
-                'bvn' => $validatedData['bvn'],
-                'nin' => $validatedData['nin'],
-                'password' => Hash::make($validatedData['password']),
-                'position' => 'Customer',
-            ]);
-
-            if ($request->ajax()) {
-                return response()->json(['success' => true, 'message' => 'User registered successfully!']);
-            } else {
-                return redirect()->route('managemnt.accounts')->with('success', 'Registration successful.');
-            }
-        } catch (\Exception $e) {
-            if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => 'Failed to register user.'], 500);
-            } else {
-                return back()->with('error', 'Registration failed, please try again later.');
-            }
-        }
-    }
-
-
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'firstName' => 'required|string|max:255',
-            'lastName' => 'required|string|max:255',
-            'phoneNumber' => 'required|string|max:15',
-            'gender' => 'required|string',
-            'street' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'state' => 'required|exists:states,id',
-            'bvn' => 'required|digits:11',
-            'nin' => 'required|digits:11',
-            'email' => 'required|email|unique:users,email',
-            'dob' => 'required|date|before:today',
-            'password' => 'required|string|min:8|confirmed',
+            'email' => ['required', 'email', 'max:255', 'email:rfc,dns', 'unique:users,email'],
+            'dob' => ['required', 'date', 'before:' . now()->subYears(18)->toDateString()],
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/[A-Z]/',       // At least one uppercase
+                'regex:/[a-z]/',       // At least one lowercase
+                'regex:/[0-9]/',       // At least one number
+                'regex:/[@$!%*?&]/'     // At least one special character
+            ],
             'position' => 'nullable|string|max:255',
             'photo_id' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'dob.before' => 'You must be at least 18 years old to register.',
+            'password.regex' => 'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
+            'phoneNumber.regex' => 'Phone number must be a valid Nigerian number (e.g., 08012345678).',
+            'firstName.regex' => 'First name can only contain letters and spaces.',
+            'lastName.regex' => 'Last name can only contain letters and spaces.',
         ]);
 
-        // Set default position to "Customer" (capital C)
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $validatedData = $validator->validated();
         $position = $validatedData['position'] ?? 'Customer';
 
         try {
@@ -109,42 +80,96 @@ class UserController extends Controller
                 'position'     => $position,
             ]);
 
-            if ($request->ajax()) {
-                return response()->json(['success' => true, 'message' => 'User registered successfully!']);
-            } else {
-                return redirect()->route('dashboard.profile')->with('success', 'Registration successful.');
-            }
+            return response()->json(['success' => true, 'message' => 'User registered successfully!']);
         } catch (\Exception $e) {
-            if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => 'Failed to register user.'], 500);
-            } else {
-                return back()->with('error', 'Registration failed, please try again later.');
+            \Log::error('Registration error: ' . $e->getMessage());
+            if (config('app.debug')) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
             }
+            return response()->json(['success' => false, 'message' => 'Failed to register user.'], 500);
         }
     }
 
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'firstName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'lastName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'phoneNumber' => 'required|string|regex:/^0[789][01]\d{8}$/',
+            'gender' => 'required|string|in:male,female',
+            'street' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'state' => 'required|exists:states,id',
+            'bvn' => 'required|digits:11',
+            'nin' => 'required|digits:11',
+            'email' => ['required', 'email', 'max:255', 'email:rfc,dns', 'unique:users,email'],
+            'dob' => ['required', 'date', 'before:' . now()->subYears(18)->toDateString()],
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/[A-Z]/',       // At least one uppercase
+                'regex:/[a-z]/',       // At least one lowercase
+                'regex:/[0-9]/',       // At least one number
+                'regex:/[@$!%*?&]/'    // At least one special character
+            ],
+            'position' => 'nullable|string|max:255',
+            'photo_id' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'dob.before' => 'You must be at least 18 years old to register.',
+            'password.regex' => 'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
+            'phoneNumber.regex' => 'Phone number must be a valid Nigerian number (e.g., 08012345678).',
+            'firstName.regex' => 'First name can only contain letters and spaces.',
+            'lastName.regex' => 'Last name can only contain letters and spaces.',
+        ]);
+
+        $position = $validatedData['position'] ?? 'Customer';
+
+        try {
+            $user = User::create([
+                'first_name'   => $validatedData['firstName'],
+                'last_name'    => $validatedData['lastName'],
+                'phone_number' => $validatedData['phoneNumber'],
+                'gender'       => $validatedData['gender'],
+                'street'       => $validatedData['street'],
+                'city'         => $validatedData['city'],
+                'state'        => State::where('id', $validatedData['state'])->value('name'),
+                'bvn'          => $validatedData['bvn'],
+                'nin'          => $validatedData['nin'],
+                'email'        => $validatedData['email'],
+                'dob'          => $validatedData['dob'],
+                'password'     => Hash::make($validatedData['password']),
+                'position'     => $position,
+            ]);
+
+            return redirect()->route('dashboard.profile')->with('success', 'Registration successful.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Registration failed, please try again later.');
+        }
+    }
 
     // Handle NIN image upload
     public function uploadNin(Request $request, $id)
-     {
-         $request->validate([
-             'nin_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-         ]);
+    {
+        $request->validate([
+            'nin_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
 
-         $user = User::findOrFail($id);
-         $imageName = $user->id . '.jpg';
+        $user = User::findOrFail($id);
+        $imageName = $user->id . '.jpg';
 
-         $path = $request->file('nin_image')->storeAs('nin-images', $imageName);
+        $path = $request->file('nin_image')->storeAs('nin-images', $imageName);
 
-         $user->photo_id = $imageName;
-         $user->save();
+        $user->photo_id = $imageName;
+        $user->save();
 
-         return response()->json([
-             'success' => true,
-             'photo_id' => $imageName,
-             'preview_url' => asset('storage/nin-images/' . $imageName),
-         ]);
-     }
+        return response()->json([
+            'success' => true,
+            'photo_id' => $imageName,
+            'preview_url' => asset('storage/nin-images/' . $imageName),
+        ]);
+    }
 
     private function redirectUserByPosition($user)
     {
@@ -199,7 +224,7 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $cylinders = Cylinder::where('user_id', $id)->get();
-        $user->age = \Carbon\Carbon::parse($user->dob)->age;
+        $user->age = Carbon::parse($user->dob)->age;
         $warehouseCylinders = collect();
 
         if (in_array(Auth::user()->position, ['Manager', 'Employee'])) {

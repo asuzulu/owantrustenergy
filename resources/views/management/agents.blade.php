@@ -6,7 +6,11 @@
     @php exit; @endphp
 @endif
 
-@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.default-dashboard')))
+@if (Auth::user()->position === null)
+    <script>window.location.href = "/";</script>
+@endif
+
+@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.app')))
 
 @section('content')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

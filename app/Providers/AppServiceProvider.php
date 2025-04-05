@@ -2,27 +2,22 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
-use App\Models\Cylinder;
-use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\Auth;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
+    public function boot()
+    {
+        if (app()->environment('local')) {
+            DB::listen(function ($query) {
+                \Log::info("Query executed: " . $query->sql);
+            });
+        }
+    }
+
     public function register()
     {
         //
     }
-
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
-
 }
