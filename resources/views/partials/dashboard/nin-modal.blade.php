@@ -54,65 +54,51 @@
  </div>
 
  <script>
-     $(document).ready(function() {
-         // Handle file name display for both upload and update inputs
-         $("#nin_image, #update_nin_image").on("change", function() {
-             let fileName = $(this).val().split("\\").pop();
-             $(this).next("p").text(fileName);
-         });
+    $(document).ready(function() {
+        $("#nin_image, #update_nin_image").on("change", function() {
+            let fileName = $(this).val().split("\\").pop();
+            $(this).next("p").text(fileName || "No file selected");
+        });
 
-         // Upload NIN
-         $("#ninUploadForm").on("submit", function(e) {
-             e.preventDefault(); // Prevent default form submission
-             let formData = new FormData(this);
-             let actionUrl = $(this).attr("action");
+        function handleNinUpload(form, update = false) {
+            let formData = new FormData(form);
+            let actionUrl = $(form).attr("action");
 
-             $.ajax({
-                 url: actionUrl,
-                 type: "POST",
-                 data: formData,
-                 processData: false,
-                 contentType: false,
-                 success: function(response) {
-                     if (response.success) {
-                         // Close the modal
-                         $("#uploadNinModal").modal("hide");
+            $.ajax({
+                url: actionUrl,
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        $("#ninImagePreview").attr("src", response.preview_url + "?t=" + new Date().getTime());
+                        $("#updateNinBtn").show();
 
-                         // Reload the page to reflect changes
-                         location.reload();
-                     }
-                 },
-                 error: function(xhr) {
-                     alert("Error uploading NIN. Please try again.");
-                 }
-             });
-         });
+                        if (update) {
+                            $("#updateNinModal").modal("hide");
+                        } else {
+                            $("#uploadNinModal").modal("hide");
+                        }
 
-         // Update NIN
-         $("#updateNinForm").on("submit", function(e) {
-             e.preventDefault();
-             let formData = new FormData(this);
-             let actionUrl = $(this).attr("action");
+                        // Redirect to dashboard.profile after successful upload
+                        window.location.href = "{{ route('dashboard.profile') }}";
+                    }
+                },
+                error: function(xhr) {
+                    alert("Upload failed. Please try again.");
+                }
+            });
+        }
 
-             $.ajax({
-                 url: actionUrl,
-                 type: "POST",
-                 data: formData,
-                 processData: false,
-                 contentType: false,
-                 success: function(response) {
-                     if (response.success) {
-                         // Close the modal
-                         $("#updateNinModal").modal("hide");
+        $("#ninUploadForm").on("submit", function(e) {
+            e.preventDefault();
+            handleNinUpload(this);
+        });
 
-                         // Reload the page to reflect changes
-                         location.reload();
-                     }
-                 },
-                 error: function(xhr) {
-                     alert("Error updating NIN. Please try again.");
-                 }
-             });
-         });
-     });
- </script>
+        $("#updateNinForm").on("submit", function(e) {
+            e.preventDefault();
+            handleNinUpload(this, true);
+        });
+    });
+</script>
