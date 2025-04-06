@@ -1,4 +1,12 @@
-@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.user-dashboard')))
+@if (Auth::user()->position === 'Customer')
+    <script>
+        window.location.href = "{{ route('dashboard.profile') }}";
+    </script>
+@else
+    @extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' :
+             (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' :
+             (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.user-dashboard')))
+@endif
 
 @section('content')
     <div class="container">

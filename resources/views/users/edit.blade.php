@@ -1,4 +1,15 @@
-@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.user-dashboard')))
+@if (Auth::user()->position === 'Customer')
+    <script>
+        window.location.href = "{{ route('dashboard') }}"; // Redirect to a safe page
+    </script>
+    @php exit; @endphp
+@endif
+
+@if (Auth::user()->position === null)
+    <script>window.location.href = "/";</script>
+@endif
+
+@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : 'layouts.app')))
 
 @section('content')
     <div class="container">
