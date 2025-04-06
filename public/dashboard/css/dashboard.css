@@ -158,6 +158,10 @@ a:focus {
 
 .tm-col-small {
     width: 21.95%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 }
 
 .tm-link-black {
