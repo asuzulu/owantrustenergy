@@ -54,6 +54,8 @@ class StatesTableSeeder extends Seeder
             ['name' => 'FCT'] // Federal Capital Territory
         ];
 
-        DB::table('states')->insert($states);
+        foreach ($states as $state) {
+            \App\Models\State::firstOrCreate(['name' => $state['name']]);
+        }
     }
 }
