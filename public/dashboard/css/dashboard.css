@@ -157,19 +157,7 @@ a:focus {
 }
 
 .tm-col-small {
-    width: 25%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px; /* Adjust padding as needed */
-}
-
-.tm-col-small img {
-    max-width: 100%;     /* Ensures the image doesn't exceed the container width */
-    max-height: 100%;    /* Ensures the image doesn't exceed the container height */
-    object-fit: contain; /* Makes sure the image shrinks to fit while maintaining aspect ratio */
-    object-position: center; /* Centers the image */
-    display: block;      /* Removes any bottom margin/whitespace under the image */
+    width: 21.95%;
 }
 
 .tm-link-black {

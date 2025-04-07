@@ -25,9 +25,13 @@
                 </div>
             </div>
             <div class="tm-col tm-col-small">
-                <div class="bg-white tm-block">
-                    @include('partials.dashboard.profile-image.display')
-                    @include('partials.dashboard.profile-image.upload')
+                <div class="bg-white tm-block" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0 10px !important; padding-left: 5px !important; padding-right: 5px !important;">
+                    <div style="flex-shrink: 1 !important; max-width: fit-content !important;">
+                        @include('partials.dashboard.profile-image.display')
+                    </div>
+                    <div style="flex-shrink: 1 !important; max-width: fit-content !important;">
+                        @include('partials.dashboard.profile-image.upload')
+                    </div>
                 </div>
             </div>
         </div>
