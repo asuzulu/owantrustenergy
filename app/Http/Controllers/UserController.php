@@ -163,7 +163,7 @@ class UserController extends Controller
             }
 
             // Generate new filename
-            $filename = strtolower($user->first_name . '-' . $user->last_name . '-' . time() . '.' . $file->getClientOriginalExtension());
+            $filename = strtolower($user->last_name . '-' . $user->first_name . '-' . $user->id . '.' . $file->getClientOriginalExtension());
 
             // Store image
             $file->storeAs('nin-images', $filename, 'public');
