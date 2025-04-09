@@ -166,7 +166,7 @@ class UserController extends Controller
             $filename = strtolower($user->first_name . '-' . $user->last_name . '-' . time() . '.' . $file->getClientOriginalExtension());
 
             // Store image
-            $file->storeAs('public/nin-images', $filename);
+            $file->storeAs('nin-images', $filename, 'public');
 
             // Update database
             $user->photo_id = $filename;
