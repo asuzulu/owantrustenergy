@@ -36,6 +36,7 @@
         </div>
     </div>
 
+    @stack('scripts')
     @include('partials.dashboard.scripts')
 </body>
 

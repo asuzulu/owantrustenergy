@@ -1,17 +1,11 @@
 @extends(auth()->check() && auth()->user()->position === 'Manager' ? 'layouts.management-dashboard' : (auth()->check() && auth()->user()->position === 'Employee' ? 'layouts.employee-dashboard' : (auth()->check() && auth()->user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.app')))
 
-@if (auth()->check() && auth()->user()->position === 'Customer')
-    <script>
-        window.location.href = "{{ route('dashboard') }}";
-    </script>
-    @php exit; @endphp
-@endif
-
-@if (!auth()->check())
-    <script>
-        window.location.href = "{{ url('/') }}";
-    </script>
-@endif
+@php
+    if (!auth()->check()) {
+        header('Location: ' . url('/'));
+        exit();
+    }
+@endphp
 
 @section('content')
     <div class="container">
@@ -70,6 +64,7 @@
     </div>
 
     <!-- Add Customer Registration Modal -->
+    <!-- Add Customer Registration Modal -->
     <div class="modal fade" id="addCustomerModal" tabindex="-1" role="dialog" aria-labelledby="addCustomerModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -81,9 +76,9 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="registerForm" action="{{ route('register.modal') }}" method="POST"
-                        enctype="multipart/form-data">
+                    <form id="registerForm" method="POST" enctype="multipart/form-data">
                         @csrf
+                        <!-- Fields (unchanged) -->
                         <div class="form-group">
                             <label for="firstName">First Name</label>
                             <input type="text" class="form-control" id="firstName" name="firstName" required
@@ -164,7 +159,11 @@
                             <input type="password" class="form-control" id="password_confirmation"
                                 name="password_confirmation" required placeholder="Confirm Password">
                         </div>
-                        <button type="submit" class="btn btn-primary">Register</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none" role="status"
+                                aria-hidden="true"></span>
+                            Register
+                        </button>
                     </form>
                 </div>
             </div>
@@ -183,7 +182,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Your action was successful.</p>
+                    <p>Customer registration was successful.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -194,50 +193,83 @@
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="{{ asset('dashboard/js/moment.min.js') }}"></script>
     <script>
         $(document).ready(function() {
-            $('#registerForm').on('submit', function(e) {
-                e.preventDefault(); // Prevent default form submission
-                $('.text-danger').remove(); // Clear any previous inline error messages
+            const form = $('#registerForm');
+            form.attr('action', '{{ route('register.modal') }}'); // set action via JS after DOM is ready
 
-                var submitButton = $('#registerForm button[type="submit"]');
-                submitButton.prop('disabled', true).text('Registering...');
-                var formData = new FormData(this);
+            form.on('submit', function(e) {
+                e.preventDefault();
+
+                form.find('.form-control').removeClass('is-invalid');
+                form.find('.text-danger').remove();
+
+                let submitButton = form.find('button[type="submit"]');
+                let spinner = submitButton.find('.spinner-border');
+                spinner.removeClass('d-none');
+                submitButton.prop('disabled', true).contents().last()[0].textContent = ' Registering...';
+
+                $('#okButton').on('click', function() {
+                    location.reload();
+                });
+
+
+                const formData = new FormData(this);
 
                 $.ajax({
-                    url: '{{ route('register.modal') }}',
+                    url: form.attr('action'),
                     type: 'POST',
                     data: formData,
                     processData: false,
                     contentType: false,
                     success: function(response) {
-                        alert(response.message);
+                        $('#successModal').modal('show');
                         $('#addCustomerModal').modal('hide');
+                        form[0].reset();
                     },
                     error: function(xhr) {
+                        submitButton.prop('disabled', false).text('Register');
+
                         if (xhr.status === 422 && xhr.responseJSON.errors) {
-                            var errors = xhr.responseJSON.errors;
+                            let errors = xhr.responseJSON.errors;
                             $.each(errors, function(key, messages) {
-                                var input = $('#' + key);
-                                if (input.length) {
-                                    input.after('<div class="text-danger">' + messages[
-                                        0] + '</div>');
+                                let input = form.find(`[name="${key}"]`);
+                                input.addClass('is-invalid');
+
+                                // Avoid duplicates
+                                if (input.next('.text-danger').length === 0) {
+                                    input.after(
+                                        `<span class="text-danger">${messages[0]}</span>`
+                                    );
                                 }
                             });
                         } else {
-                            alert('Something went wrong.');
+                            alert('An unexpected error occurred. Please try again.');
                         }
-                        submitButton.prop('disabled', false).text('Register');
+                        let firstErrorField = form.find('.is-invalid').first();
+                        if (firstErrorField.length) {
+                            $('#addCustomerModal').animate({
+                                scrollTop: firstErrorField.offset().top - $(
+                                    '#addCustomerModal').offset().top
+                            }, 500);
+                        }
                     }
                 });
-            });
+                $.each(errors, function(key, messages) {
+                    let input = form.find(`[name="${key}"]`);
+                    input.addClass('is-invalid');
 
-            $('#okButton').on('click', function() {
-                window.location.href = '{{ route('management.accounts') }}';
+                    if (input.next('.text-danger').length === 0) {
+                        messages.forEach(msg => {
+                            input.after(`<span class="text-danger">${msg}</span>`);
+                        });
+                    }
+                });
+
             });
         });
     </script>
-@endsection
+@endpush

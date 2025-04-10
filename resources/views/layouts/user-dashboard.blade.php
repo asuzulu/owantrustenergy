@@ -39,6 +39,7 @@
     </div>
 
     {{-- Global Scripts --}}
+    @stack('scripts')
     @include('partials.dashboard.scripts')
 
     {{-- Page-Specific Scripts --}}

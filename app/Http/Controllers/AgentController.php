@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -42,27 +43,46 @@ class AgentController extends Controller
         return view('users.profile', compact('user', 'warehouseCylinders'));
     }
 
+    // Register Agent Modal
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'firstName'         => 'required|string|max:255',
-            'lastName'          => 'required|string|max:255',
-            'phoneNumber'       => 'required|string|max:15',
-            'gender'            => 'required|string',
-            'street'            => 'required|string|max:255',
-            'city'              => 'required|string|max:255',
-            'state'             => 'required|exists:states,id',
-            'bvn'               => 'required|digits:11',
-            'nin'               => 'required|digits:11',
-            'email'             => 'required|email|unique:users,email',
-            'dob'               => 'required|date|before:today',
-            'password'          => 'required|string|min:8|confirmed',
-            'position'          => 'required|string|in:Agent',
+        $validator = Validator::make($request->all(), [
+            'firstName'   => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'lastName'    => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'phoneNumber' => 'required|digits:10',
+            'gender'      => 'required|string|in:male,female',
+            'street'      => 'required|string|max:255',
+            'city'        => 'required|string|max:255',
+            'state'       => 'required|exists:states,id',
+            'bvn'         => 'required|digits:11',
+            'nin'         => 'required|digits:11',
+            'email'       => ['required', 'email', 'max:255', 'email:rfc,dns', 'unique:users,email'],
+            'dob'         => ['required', 'date', 'before:' . now()->subYears(18)->toDateString()],
+            'password'    => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/[A-Z]/', // At least one uppercase
+                'regex:/[a-z]/', // At least one lowercase
+                'regex:/[0-9]/', // At least one number
+                'regex:/[@$!%*?&]/' // At least one special character
+            ],
+        ], [
+            'dob.before'      => 'You must be at least 18 years old to register.',
+            'password.regex'  => 'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
+            'phoneNumber.regex' => 'Phone number must be a valid number (e.g., 08012345678).',
+            'firstName.regex' => 'First name can only contain letters and spaces.',
+            'lastName.regex'  => 'Last name can only contain letters and spaces.',
         ]);
 
-        try {
-            $stateName = State::where('id', $validatedData['state'])->value('name');
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
+        $validatedData = $validator->validated();
+
+        try {
             $agent = User::create([
                 'first_name'   => $validatedData['firstName'],
                 'last_name'    => $validatedData['lastName'],
@@ -70,19 +90,22 @@ class AgentController extends Controller
                 'gender'       => $validatedData['gender'],
                 'street'       => $validatedData['street'],
                 'city'         => $validatedData['city'],
-                'state'        => $stateName,
+                'state'        => State::where('id', $validatedData['state'])->value('name'),
                 'bvn'          => $validatedData['bvn'],
                 'nin'          => $validatedData['nin'],
                 'email'        => $validatedData['email'],
                 'dob'          => $validatedData['dob'],
                 'password'     => Hash::make($validatedData['password']),
-                'position'     => $validatedData['position'],
+                'position'     => 'Agent',
             ]);
 
-            return redirect()->route('agents.index')->with('success', 'Agent added successfully.');
+            return response()->json(['success' => true, 'message' => 'Agent registered successfully!']);
         } catch (\Exception $e) {
-            Log::debug('Error adding Agent: ', ['error' => $e->getMessage()]);
-            return redirect()->back()->with('error', 'Failed to add agent.');
+            \Log::error('Agent registration error: ' . $e->getMessage());
+            if (config('app.debug')) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            }
+            return response()->json(['success' => false, 'message' => 'Failed to register agent.'], 500);
         }
     }
 

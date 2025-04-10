@@ -131,6 +131,7 @@ Route::middleware(['auth'])->prefix('management')->name('management.')->group(fu
 Route::get('/management/dashboard', [ManagementController::class, 'index'])->name('dashboard.management');
 Route::get('/management/statistics', [StatisticsController::class, 'index'])->name('management.statistics');
 Route::get('/management/accounts', [ManagementController::class, 'accounts'])->name('management.accounts');
+Route::post('/management/accounts', [ManagementController::class, 'store']);
 Route::get('/management/employees', [ManagementController::class, 'employees'])->name('management.employees');
 Route::get('/management/agents', [ManagementController::class, 'agents'])->name('management.agents');
 Route::get('management/drivers', [ManagementController::class, 'drivers'])->name('management.drivers');
@@ -212,7 +213,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/agents/{id}', [AgentController::class, 'show'])->name('agents.show');
 
     // Store a new agent (from the modal form)
-    Route::post('/agents', [AgentController::class, 'store'])->name('agents.store');
+    Route::post('/agents/add', [AgentController::class, 'store'])->name('agents.store');
 
     // Delete an agent (only Manager authorized)
     Route::delete('/agents/{id}', [AgentController::class, 'destroy'])->name('agents.destroy');
