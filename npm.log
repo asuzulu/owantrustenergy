@@ -13,3 +13,6 @@ nohup: ignoring input
 
   ➜  APP_URL: https://ec2-44-212-42-151.compute-1.amazonaws.com/
 10:59:27 PM [vite] full reload routes/web.php
+4:45:18 AM [vite] full reload resources/views/home.blade.php
+4:45:18 AM [vite] full reload resources/views/layouts/app.blade.php
+4:45:18 AM [vite] full reload resources/views/products.blade.php
