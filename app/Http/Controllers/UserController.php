@@ -295,7 +295,11 @@ class UserController extends Controller
             $user->delete();
             \Log::info('User deleted: ' . $user->id);
 
-            return response()->json(['success' => true]);
+            return response()->json([
+                'success' => true,
+                'message' => 'User deleted successfully.',
+                'redirect' => route('management.cylinders')  // Correct redirect route
+            ]);
         } catch (\Throwable $e) {
             \Log::error('User deletion failed: ' . $e->getMessage());
             \Log::error($e);
