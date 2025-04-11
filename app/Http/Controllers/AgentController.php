@@ -108,23 +108,4 @@ class AgentController extends Controller
             return response()->json(['success' => false, 'message' => 'Failed to register agent.'], 500);
         }
     }
-
-    public function destroy($id)
-    {
-        $agent = User::findOrFail($id);
-
-        if (Auth::user()->position !== 'Manager') {
-            return redirect()->route('agents.index')->with('error', 'Unauthorized action.');
-        }
-
-        DB::beginTransaction();
-        try {
-            $agent->delete();
-            DB::commit();
-            return redirect()->route('agents.index')->with('success', 'Agent deleted successfully.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Failed to delete agent.');
-        }
-    }
 }

@@ -149,26 +149,7 @@ class DriversController extends Controller
 
         return redirect()->back()->with('success', 'Profile updated successfully!');
     }
-
-    public function destroy($id)
-    {
-        $driver = User::findOrFail($id);
-
-        if (Auth::user()->position !== 'Manager') {
-            return redirect()->route('drivers.index')->with('error', 'Unauthorized action.');
-        }
-
-        DB::beginTransaction();
-        try {
-            $driver->delete();
-            DB::commit();
-            return redirect()->route('drivers.index')->with('success', 'Driver deleted successfully.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Failed to delete driver.');
-        }
-    }
-
+    
     public function dashboard()
     {
         $user = Auth::user();

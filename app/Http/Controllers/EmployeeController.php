@@ -81,23 +81,4 @@ class EmployeeController extends Controller
             return redirect()->back()->with('error', 'Failed to add employee.');
         }
     }
-
-    public function destroy($id)
-    {
-        $employee = User::findOrFail($id);
-
-        if (Auth::user()->position !== 'Manager') {
-            return redirect()->route('employees.index')->with('error', 'Unauthorized action.');
-        }
-
-        DB::beginTransaction();
-        try {
-            $employee->delete();
-            DB::commit();
-            return redirect()->route('employees.index')->with('success', 'Employee deleted successfully.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Failed to delete employee.');
-        }
-    }
 }
