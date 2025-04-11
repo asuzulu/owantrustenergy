@@ -3,9 +3,7 @@
         window.location.href = "{{ route('dashboard.profile') }}";
     </script>
 @else
-    @extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' :
-             (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' :
-             (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.user-dashboard')))
+    @extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.user-dashboard')))
 @endif
 
 @section('content')
@@ -41,8 +39,8 @@
                                 <button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal"
                                     data-bs-target="#uploadNinModal">Upload NIN</button>
                             @endif
-                            {{-- Distribute Cylinders button is only for Employee and Manager --}}
-                            @if (in_array(Auth::user()->position, ['Employee', 'Manager']))
+                            {{-- Distribute Cylinders button is only visible to Manager and Employee if viewed user is Agent --}}
+                            @if ($user->position === 'Agent' && in_array(Auth::user()->position, ['Manager', 'Employee']))
                                 <button type="button" class="btn btn-info mt-3" data-bs-toggle="modal"
                                     data-bs-target="#distributeCylindersModal">Distribute Cylinders</button>
                             @endif
