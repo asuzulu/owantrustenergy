@@ -273,6 +273,29 @@ class UserController extends Controller
             $user->update($updateData);
         }
 
-        return redirect()->route('users.profile', $id)->with('success', 'User details updated successfully.');
+        // Return the response as JSON with a success message and redirect URL
+        return response()->json([
+            'success' => true,
+            'message' => 'User details updated successfully.',
+            'redirect' => route('users.profile', $id),
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+
+        // Detach related data
+        Cylinder::where('user_id', $user->id)->update(['user_id' => null]);
+
+        // Delete the user
+        $user->delete();
+
+        // Return JSON response with redirect URL
+        return response()->json([
+            'success' => true,
+            'message' => 'User deleted successfully.',
+            'redirect' => route('management.cylinders')  // Redirect to management cylinders page
+        ]);
     }
 }

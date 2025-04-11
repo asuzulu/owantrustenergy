@@ -1,15 +1,10 @@
-@if (Auth::user()->position === 'Customer')
+@if (Auth::user()->position === 'Customer' || Auth::user()->position === 'Agent')
     <script>
-        window.location.href = "{{ route('dashboard') }}"; // Redirect to a safe page
+        window.location.href = "{{ route('dashboard.profile') }}";
     </script>
-    @php exit; @endphp
+@else
+    @extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : 'layouts.app'))
 @endif
-
-@if (Auth::user()->position === null)
-    <script>window.location.href = "/";</script>
-@endif
-
-@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : 'layouts.app')))
 
 @section('content')
     <div class="container">
@@ -79,8 +74,28 @@
                                 value="{{ $user->email }}" required>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </form>
+                    </form> <!-- CLOSE editUserForm HERE -->
+
+                    @if (Auth::user()->position === 'Manager')
+                        <div class="d-flex justify-content-start align-items-center gap-2 mt-3">
+                            {{-- Save Changes Button (outside the form) --}}
+                            <button type="button" id="saveChangesBtn" class="btn btn-primary">Save Changes</button>
+
+                            {{-- Delete button form (separate) --}}
+                            <form id="deleteUserForm" action="{{ route('users.destroy', $user->id) }}" method="POST"
+                                class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger"
+                                    onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                                    Delete
+                                </button>
+                            </form>
+
+                            {{-- Cancel button --}}
+                            <a href="{{ route('users.profile', $user->id) }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -93,13 +108,14 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
-            $("#editUserForm").submit(function(event) {
-                event.preventDefault(); // Prevent default form submission
+            // Handle Save Changes button click
+            $("#saveChangesBtn").click(function(event) {
+                event.preventDefault(); // Prevent default button behavior
 
-                let formData = $(this).serialize();
+                let formData = $("#editUserForm").serialize();
 
                 $.ajax({
-                    url: $(this).attr('action'),
+                    url: $("#editUserForm").attr('action'),
                     type: "POST",
                     data: formData,
                     headers: {
@@ -118,6 +134,36 @@
                         alert("An error occurred while updating the user profile.");
                     }
                 });
+            });
+
+            // Handle Delete User button click
+            $("#deleteUserForm").submit(function(event) {
+                event.preventDefault(); // Prevent default form submission
+
+                if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                    let formData = $(this).serialize();
+
+                    $.ajax({
+                        url: $(this).attr('action'),
+                        type: "POST",
+                        data: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                alert(response.message);
+                                window.location.href = response
+                                .redirect; // Redirect to management cylinders page
+                            } else {
+                                alert("Error: " + response.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            alert("An error occurred while deleting the user.");
+                        }
+                    });
+                }
             });
         });
     </script>

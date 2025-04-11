@@ -3,7 +3,7 @@
     <script>
         window.location.href = "{{ route('dashboard') }}"; // Redirect to a safe page
     </script>
-    @php exit;
+    @php exit; @endphp
 @endif
 
 @extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : 'layouts.drivers-dashboard')
@@ -32,9 +32,7 @@
                                 State: {{ $user->state }}
                                 <br>
                                 Age: {{ $user->dob ? \Carbon\Carbon::parse($user->dob)->age : 'N/A' }}<br>
-                                <button type="button" class="btn btn-primary mt-3" data-toggle="modal"
-                                    data-target="#editDriverModal">Edit
-                                    Profile</button>
+                                <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary mt-3">Edit Profile</a>
                                 @if (Auth::user()->position === 'Manager' || !$user->photo_id)
                                     <button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal"
                                         data-bs-target="#uploadNinModal">Upload NIN</button>
@@ -89,88 +87,6 @@
             </div>
         </div>
 
-        <!-- Edit Driver Modal -->
-        <div class="modal fade" id="editDriverModal" tabindex="-1" role="dialog" aria-labelledby="editDriverModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Edit Driver Profile</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="editDriverForm" action="{{ route('drivers.update', $user->id) }}" method="POST">
-                            @csrf
-                            @method('PUT')
-                            <div class="form-group">
-                                <label for="editFirstName">First Name</label>
-                                <input type="text" class="form-control" id="editFirstName" name="firstName"
-                                    value="{{ $user->first_name }}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="editLastName">Last Name</label>
-                                <input type="text" class="form-control" id="editLastName" name="lastName"
-                                    value="{{ $user->last_name }}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="editPhoneNumber">Phone Number</label>
-                                <input type="tel" class="form-control" id="editPhoneNumber" name="phoneNumber"
-                                    maxlength="10" value="{{ $user->phone_number }}" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Gender</label><br>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="gender" id="editMale"
-                                        value="male" {{ $user->gender == 'male' ? 'checked' : '' }} required>
-                                    <label class="form-check-label" for="editMale">Male</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="gender" id="editFemale"
-                                        value="female" {{ $user->gender == 'female' ? 'checked' : '' }} required>
-                                    <label class="form-check-label" for="editFemale">Female</label>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="editStreet">Street Address</label>
-                                <input type="text" class="form-control" id="editStreet" name="street"
-                                    value="{{ $user->street }}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="editCity">City</label>
-                                <input type="text" class="form-control" id="editCity" name="city"
-                                    value="{{ $user->city }}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="editState">State</label>
-                                <select class="form-control" id="editState" name="state" required>
-                                    <option value="" disabled>Select State</option>
-                                    @foreach ($states as $state)
-                                        <option value="{{ $state->id }}"
-                                            {{ $user->state == $state->name ? 'selected' : '' }}>{{ $state->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="editEmail">Email</label>
-                                <input type="email" class="form-control" id="editEmail" name="email"
-                                    value="{{ $user->email }}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="editDob">Date of Birth</label>
-                                <input type="date" class="form-control" id="editDob" name="dob"
-                                    value="{{ \Carbon\Carbon::parse($user->dob)->format('Y-m-d') }}" required>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         @include('partials.dashboard.nin-modal')
 
     @endsection
@@ -204,15 +120,15 @@
                             $("#editDob").val(response.user.dob);
 
                             // Update displayed profile details
-                            $(".tm-block").html(`
-                                Name: ${response.user.first_name} ${response.user.last_name}<br>
-                                Email: ${response.user.email}<br>
-                                Gender: ${response.user.gender}<br>
-                                Phone: ${response.user.phone_number}<br>
-                                Street: ${response.user.street}<br>
-                                City: ${response.user.city}<br>
-                                State: ${response.user.state}<br>
-                                Age: ${response.user.age}<br>
+                            $(".tm-block").html(`\
+                                Name: ${response.user.first_name} ${response.user.last_name}<br>\
+                                Email: ${response.user.email}<br>\
+                                Gender: ${response.user.gender}<br>\
+                                Phone: ${response.user.phone_number}<br>\
+                                Street: ${response.user.street}<br>\
+                                City: ${response.user.city}<br>\
+                                State: ${response.user.state}<br>\
+                                Age: ${response.user.age}<br>\
                             `);
 
                             alert("Profile updated successfully!");
@@ -228,4 +144,3 @@
         });
     </script>
 @endsection
-

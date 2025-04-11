@@ -61,12 +61,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile/{id}', [UserController::class, 'profile'])->name('profile.view');
     Route::post('/users/{id}/update-profile-image', [UserController::class, 'updateProfileImage'])->name('users.update-profile-image');
     Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
     Route::get('/users/{id}/profile', [UserController::class, 'profile'])->name('users.profile');
 });
 
 // Cylinder management routes
-Route::middleware(['auth'])->prefix('management/cylinders')->name('management.cylinders.')->group(function () {
+Route::middleware(['auth'])->prefix('management/cylinders')->name('management.cylinders')->group(function () {
     Route::get('/', [ManagementController::class, 'cylindersPage'])->name('index');
     Route::get('/{id}', [ManagementController::class, 'showCylinder'])->name('show');
     Route::delete('cylinders/destroy/{id}', [CylinderController::class, 'destroyCustom'])->name('cylinders.destroy.custom');
