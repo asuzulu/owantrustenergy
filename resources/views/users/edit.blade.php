@@ -86,8 +86,7 @@
                                 class="d-inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger"
-                                    onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                                <button type="submit" class="btn btn-danger";>
                                     Delete
                                 </button>
                             </form>
