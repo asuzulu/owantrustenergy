@@ -64,7 +64,6 @@
     </div>
 
     <!-- Add Customer Registration Modal -->
-    <!-- Add Customer Registration Modal -->
     <div class="modal fade" id="addCustomerModal" tabindex="-1" role="dialog" aria-labelledby="addCustomerModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -78,92 +77,162 @@
                 <div class="modal-body">
                     <form id="registerForm" method="POST" enctype="multipart/form-data">
                         @csrf
-                        <!-- Fields (unchanged) -->
-                        <div class="form-group">
-                            <label for="firstName">First Name</label>
-                            <input type="text" class="form-control" id="firstName" name="firstName" required
-                                placeholder="Enter First Name" pattern="^(?!.*[;'\"]).+$"
-                                title="Cannot contain semicolons or quotes">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="firstName">First Name</label>
+                                <input type="text" class="form-control" id="firstName" name="firstName" required
+                                    placeholder="Enter First Name" value="{{ old('firstName') }}"
+                                    aria-label="First Name" />
+                                @error('firstName')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="lastName">Last Name</label>
+                                <input type="text" class="form-control" id="lastName" name="lastName" required
+                                    placeholder="Enter Last Name" value="{{ old('lastName') }}" aria-label="Last Name" />
+                                @error('lastName')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="lastName">Last Name</label>
-                            <input type="text" class="form-control" id="lastName" name="lastName" required
-                                placeholder="Enter Last Name" pattern="^(?!.*[;'\"]).+$"
-                                title="Cannot contain semicolons or quotes">
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="phoneNumber">Phone Number</label>
+                                <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" required
+                                    placeholder="Enter Phone Number" maxlength="10" value="{{ old('phoneNumber') }}"
+                                    aria-label="Phone Number" />
+                                @error('phoneNumber')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required
+                                    placeholder="Enter Email Address" value="{{ old('email') }}" aria-label="Email" />
+                                @error('email')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="phoneNumber">Phone Number</label>
-                            <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" maxlength="10"
-                                required placeholder="Enter Phone Number">
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="dob">Date of Birth</label>
+                                <input type="date" class="form-control" id="dob" name="dob" required
+                                    value="{{ old('dob') }}" aria-label="Date of Birth" />
+                                @error('dob')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="gender">Gender</label>
+                                <div class="form-check form-check-inline" style="margin-top: 2rem;">
+                                    <input class="form-check-input" type="radio" name="gender" id="male"
+                                        value="male" required {{ old('gender') == 'male' ? 'checked' : '' }}
+                                        aria-label="Male" />
+                                    <label class="form-check-label" for="male">Male</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="gender" id="female"
+                                        value="female" required {{ old('gender') == 'female' ? 'checked' : '' }}
+                                        aria-label="Female" />
+                                    <label class="form-check-label" for="female">Female</label>
+                                </div>
+                                @error('gender')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required
-                                placeholder="example@domain.com" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-                                title="Enter a valid email address like example@domain.com" inputmode="email"
-                                autocomplete="email">
-                        </div>
-                        <div class="form-group">
-                            <label for="dob">Date of Birth</label>
-                            <input type="date" class="form-control" id="dob" name="dob" required
-                                max="{{ \Carbon\Carbon::now()->subYears(18)->format('Y-m-d') }}">
-                        </div>
-                        <div class="form-group">
-                            <label>Gender</label><br>
-                            <label class="radio-inline">
-                                <input type="radio" name="gender" value="male" required> Male
-                            </label>
-                            <label class="radio-inline">
-                                <input type="radio" name="gender" value="female" required> Female
-                            </label>
-                        </div>
+
                         <div class="form-group">
                             <label for="street">Street Address</label>
                             <input type="text" class="form-control" id="street" name="street" required
-                                pattern="^(?!.*[;'\"]).+$" title="Cannot contain semicolons or quotes"
-                                placeholder="Enter Street Address">
+                                placeholder="Enter Street Address" value="{{ old('street') }}"
+                                aria-label="Street Address" />
+                            @error('street')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
-                        <div class="form-group">
-                            <label for="city">City</label>
-                            <input type="text" class="form-control" id="city" name="city" required
-                                placeholder="Enter City" pattern="^(?!.*[;'\"]).+$"
-                                title="Cannot contain semicolons or quotes">
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="city">City</label>
+                                <input type="text" class="form-control" id="city" name="city" required
+                                    placeholder="Enter City" value="{{ old('city') }}" aria-label="City" />
+                                @error('city')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="state">State</label>
+                                <select class="form-control" id="state" name="state" required aria-label="State">
+                                    <option value="" disabled selected>Select State</option>
+                                    @foreach ($states as $state)
+                                        <option value="{{ $state->id }}"
+                                            {{ old('state') == $state->id ? 'selected' : '' }}>{{ $state->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('state')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="state">State</label>
-                            <select class="form-control" id="state" name="state" required
-                                style="height: calc(4rem);">
-                                <option value="" disabled selected>Select State</option>
-                                @foreach ($states as $state)
-                                    <option value="{{ $state->id }}">{{ $state->name }}</option>
-                                @endforeach
-                            </select>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="bvn">BVN (Bank Verification Number)</label>
+                                <input type="text" class="form-control" id="bvn" name="bvn" required
+                                    placeholder="Enter 11-digit BVN" pattern="\d{11}"
+                                    title="Please enter exactly 11 digits" maxlength="11" value="{{ old('bvn') }}"
+                                    aria-label="BVN" />
+                                @error('bvn')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="nin">NIN (National Identification Number)</label>
+                                <input type="text" class="form-control" id="nin" name="nin" required
+                                    placeholder="Enter 11-digit NIN" pattern="\d{11}"
+                                    title="Please enter exactly 11 digits" maxlength="11" value="{{ old('nin') }}"
+                                    aria-label="NIN" />
+                                @error('nin')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="bvn">BVN</label>
-                            <input type="text" class="form-control" id="bvn" name="bvn" required
-                                placeholder="Enter 11 Digit BVN Number" pattern="\d{11}" maxlength="11">
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="password">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" required
+                                    placeholder="At least 8 characters" aria-label="Password" />
+                                @error('password')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="password_confirmation">Confirm Password</label>
+                                <input type="password" class="form-control" id="password_confirmation"
+                                    name="password_confirmation" required placeholder="Confirm Password"
+                                    aria-label="Confirm Password" />
+                                @error('password_confirmation')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="nin">NIN</label>
-                            <input type="text" class="form-control" id="nin" name="nin" required
-                                placeholder="Enter 11 Digit NIN Number" pattern="\d{11}" maxlength="11">
+
+                        <input type="hidden" name="position" value="Customer" />
+
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-primary" aria-label="Submit Add Customer">
+                                <span class="spinner-border spinner-border-sm d-none" role="status"
+                                    aria-hidden="true"></span>
+                                Add Customer
+                            </button>
                         </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required
-                                placeholder="Create Strong Password">
-                        </div>
-                        <div class="form-group">
-                            <label for="password_confirmation">Confirm Password</label>
-                            <input type="password" class="form-control" id="password_confirmation"
-                                name="password_confirmation" required placeholder="Confirm Password">
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <span class="spinner-border spinner-border-sm d-none" role="status"
-                                aria-hidden="true"></span>
-                            Register
-                        </button>
                     </form>
                 </div>
             </div>
