@@ -61,12 +61,13 @@ class OrdersController extends Controller
     //Customer order requests
     public function requests(Request $request)
     {
-        $orders = Order::select('id', 'cylinder_size', 'weight', 'order_type', 'retrieval', 'created_at')
+        $orders = Order::select('id', 'first_name', 'last_name', 'cylinder_size', 'weight', 'order_type', 'retrieval', 'created_at')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         return view('orders.requests', compact('orders'));
     }
+
 
     public function pickup()
     {
