@@ -86,7 +86,7 @@
                                 class="d-inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger";>
+                                <button type="submit" class="btn btn-danger">
                                     Delete
                                 </button>
                             </form>
@@ -123,7 +123,8 @@
                     success: function(response) {
                         if (response.success) {
                             alert(response.message);
-                            window.location.href = response.redirect; // Redirect to profile page
+                            window.location.href = response
+                            .redirect; // Redirect to profile page
                         } else {
                             alert("Error: " + response.message);
                         }
@@ -151,7 +152,8 @@
                         success: function(response) {
                             if (response.success) {
                                 alert(response.message);
-                                window.location.href = response.redirect; // Redirect to management cylinders page
+                                window.location.href = response
+                                .redirect; // Redirect to management cylinders page
                             } else {
                                 alert("Error: " + response.message);
                             }
