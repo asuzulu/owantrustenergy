@@ -285,7 +285,7 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        // Detach related data
+        // Detach related data (set user_id to null for related cylinders)
         Cylinder::where('user_id', $user->id)->update(['user_id' => null]);
 
         // Delete the user
