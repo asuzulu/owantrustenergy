@@ -283,30 +283,23 @@ class UserController extends Controller
 
     public function destroy($id)
     {
+        \Log::info('Entered destroy method for user ID: ' . $id);
+
         try {
             $user = User::findOrFail($id);
+            \Log::info('Found user: ' . $user->id);
 
-            // Set related cylinders' user_id to null
             Cylinder::where('user_id', $user->id)->update(['user_id' => null]);
+            \Log::info('Unlinked cylinders from user ID: ' . $user->id);
 
-            // Delete the user
             $user->delete();
+            \Log::info('User deleted: ' . $user->id);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'User deleted successfully.',
-                'redirect' => route('management.cylinders')
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('User Deletion Failed: ' . $e->getMessage(), [
-                'user_id' => $id,
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['success' => true]);
+        } catch (\Throwable $e) {
+            \Log::error('User deletion failed: ' . $e->getMessage());
+            \Log::error($e);
+            return response()->json(['error' => 'Something went wrong.'], 500);
         }
     }
 }
