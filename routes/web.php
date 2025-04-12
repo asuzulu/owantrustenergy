@@ -21,7 +21,8 @@ use App\Http\Controllers\{
     DeliveryController,
     PickupController,
     OrdersController,
-    CylinderDistributionController
+    CylinderDistributionController,
+    GlobalSettingsController
 };
 
 // Public pages
@@ -234,3 +235,9 @@ Route::post('/order/place', [OrdersController::class, 'placeOrder'])->name('orde
 Route::delete('/orders/delete', [OrdersController::class, 'destroy'])->name('orders.destroy');
 Route::delete('/orders', [OrdersController::class, 'destroy'])->name('orders.delete');
 Route::get('/orders/requests', [OrdersController::class, 'requests'])->name('orders.requests');
+
+// Admin settings page routes
+Route::middleware(['auth', 'role:Manager'])->group(function () {
+    Route::get('/manager/global-settings', [GlobalSettingsController::class, 'index'])->name('manager.settings.index');
+    Route::post('/manager/global-settings/update', [GlobalSettingsController::class, 'update'])->name('manager.settings.update');
+});

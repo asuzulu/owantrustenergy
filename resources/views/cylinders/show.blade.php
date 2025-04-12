@@ -146,12 +146,15 @@
                                 id="deliveryTime" class="form-control"> </div>
                     </div>
                     <div id="pickupFields" style="display: none;">
-                        <div class="form-group"> <label for="pickupLocation">Pick Up Location:</label> <select
-                                id="pickupLocation" class="form-control" style="height: 4rem;">
+                        <div class="form-group"> <label for="pickupLocation">Pick Up Location:</label>
+                            <select id="pickupLocation" class="form-control" style="height: 4rem;">
                                 @foreach ($warehouses as $warehouse)
-                                    <option value="{{ $warehouse->name }}">{{ $warehouse->name }}</option>
+                                    <option value="{{ $warehouse->name }}" {{ $cylinder->location === $warehouse->name ? 'selected' : '' }}>
+                                        {{ $warehouse->name }}
+                                    </option>
                                 @endforeach
-                            </select> </div>
+                            </select>
+                        </div>
                         <div class="form-group"> <label for="pickupDate">Pick-Up Date:</label> <input type="date"
                                 id="pickupDate" class="form-control"> </div>
                     </div>
@@ -182,6 +185,26 @@
                             @endif
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Success Modal -->
+    <div class="modal fade" id="assignSuccessModal" tabindex="-1" role="dialog"
+        aria-labelledby="assignSuccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="assignSuccessModalLabel">Success</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Cylinder has been successfully assigned.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-dismiss="modal">OK</button>
                 </div>
             </div>
         </div>
@@ -303,6 +326,7 @@
                     cylinder_id: cylinderId,
                     assignment_type: assignmentType
                 }).done(function() {
+                    alert("Cylinder assignment successful.");
                     let postData = {
                         _token: "{{ csrf_token() }}",
                         cylinder_id: cylinderId,
