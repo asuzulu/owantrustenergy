@@ -165,34 +165,42 @@
      </div>
   </div>
 </div>
+@endif
+
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     $(document).ready(function(){
-         $('#errorModal').modal('show');
-    });
-</script>
-@endif
-<script>
-    $(document).ready(function() {
-        // Distribution inputs calculation and available subtraction
+        @if(session('success'))
+            $('#successModal').modal('show');
+        @endif
+
+        @if(session('error'))
+            $('#errorModal').modal('show');
+        @endif
+
+        // Distribution inputs calculation
         $('.distribution-input').on('input', function() {
             let max = parseInt($(this).attr('max'));
             let currentVal = parseInt($(this).val()) || 0;
-            // Clamp input to maximum value
             if (currentVal > max) {
                 $(this).val(max);
                 currentVal = max;
             }
+
             let sizeId = $(this).data('size');
             let subtotal = 0;
             $('input.distribution-input[data-size="' + sizeId + '"]').each(function() {
                 let val = parseInt($(this).val()) || 0;
                 subtotal += val;
                 let original = parseInt($(this).data('warehouse-max'));
-                // Calculate remaining ensuring it doesn't go negative
                 let remaining = Math.max(0, original - val);
                 $(this).closest('tr').find('.available-count').text(remaining);
             });
             $('#subtotal-' + sizeId).text(subtotal);
+
             let grandTotal = 0;
             $('[id^="subtotal-"]').each(function() {
                 grandTotal += parseInt($(this).text()) || 0;
@@ -201,3 +209,4 @@
         });
     });
 </script>
+@endpush
