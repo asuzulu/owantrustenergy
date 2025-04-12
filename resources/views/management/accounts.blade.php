@@ -254,7 +254,6 @@
                     <p>Customer registration was successful.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" id="okButton">OK</button>
                 </div>
             </div>
@@ -282,9 +281,8 @@
                 submitButton.prop('disabled', true).contents().last()[0].textContent = ' Registering...';
 
                 $('#okButton').on('click', function() {
-                    location.reload();
+                    location.href = 'management.accounts';
                 });
-
 
                 const formData = new FormData(this);
 

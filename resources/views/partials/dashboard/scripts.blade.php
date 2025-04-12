@@ -1,17 +1,26 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<meta name="csrf-token" content="{{ csrf_token() }}"><script src="{{ asset('dashboard/js/moment.min.js') }}"></script>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<script src="{{ asset('dashboard/js/moment.min.js') }}"></script>
 <script src="{{ asset('dashboard/js/utils.js') }}"></script>
 <script src="{{ asset('dashboard/js/Chart.min.js') }}"></script>
 <script src="{{ asset('dashboard/js/fullcalendar.min.js') }}"></script>
 
 <!-- Bootstrap JS and Popper.js -->
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+@if (!isset($useBootstrap5) || !$useBootstrap5)
+    {{-- Use Bootstrap 4 --}}
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+@else
+    {{-- Use Bootstrap 5 --}}
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+@endif
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-@if(isset($cylindersAssignedChart) && isset($customerRegistrationsChart))
+@if (isset($cylindersAssignedChart) && isset($customerRegistrationsChart))
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             let cylinderData = @json($cylindersAssignedChart);
             let customerData = @json($customerRegistrationsChart);
 
@@ -22,11 +31,11 @@
             let customerCounts = customerData.map(item => item.count || 0);
 
             if (cylinderData.length > 0) {
-                drawLineChart("cylinders-chart", cylinderCounts, cylinderLabels, "Cylinders Assigned");
+                drawLineChart("cylinders-chart", cylinderCounts, cylinderLabels);
             }
 
             if (customerData.length > 0) {
-                drawBarChart("customers-chart", customerCounts, customerLabels, "New Customers");
+                drawBarChart("customers-chart", customerCounts, customerLabels);
             }
         });
 
@@ -78,34 +87,44 @@
     </script>
 
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             let croppieInstance;
 
-            $("#fileInput").on("change", function (event) {
+            $("#fileInput").on("change", function(event) {
                 let reader = new FileReader();
-                reader.onload = function (e) {
+                reader.onload = function(e) {
                     $("#image-crop-container").show();
                     if (croppieInstance) {
                         croppieInstance.destroy();
                     }
                     croppieInstance = new Croppie(document.getElementById("croppie"), {
-                        viewport: { width: 200, height: 200, type: "circle" },
-                        boundary: { width: 300, height: 300 },
+                        viewport: {
+                            width: 200,
+                            height: 200,
+                            type: "circle"
+                        },
+                        boundary: {
+                            width: 300,
+                            height: 300
+                        },
                         showZoomer: true
                     });
-                    croppieInstance.bind({ url: e.target.result });
+                    croppieInstance.bind({
+                        url: e.target.result
+                    });
                 };
                 reader.readAsDataURL(event.target.files[0]);
             });
 
-            $("#cropImageBtn").on("click", function () {
-                croppieInstance.result({ type: "base64", size: "viewport" }).then(function (base64) {
+            $("#cropImageBtn").on("click", function() {
+                croppieInstance.result({
+                    type: "base64",
+                    size: "viewport"
+                }).then(function(base64) {
                     $("#croppedImage").val(base64);
                     $("#submitCroppedImage").show();
                 });
             });
         });
     </script>
-
 @endif
-
