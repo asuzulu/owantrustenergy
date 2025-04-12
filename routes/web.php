@@ -3,11 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\RedirectIfNotAuthenticated;
 use App\Http\Controllers\{
-    UserController,
-    DashboardController,
     Auth\PasswordController,
     Auth\SignInController,
-    Auth\AuthController,
+    Auth\RegisterController,
+    UserController,
+    DashboardController,
     CylinderController,
     ManagementController,
     CustomerController,
@@ -33,8 +33,8 @@ Route::view('/contact', 'contact')->name('contact');
 
 // Authentication routes
 Auth::routes(['register' => false]);
-Route::get('/register', [UserController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [UserController::class, 'store'])->name('register.store');
+Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 Route::get('/sign-in', [SignInController::class, 'showSignInForm'])->name('signin.form');
 Route::post('/signin', [SignInController::class, 'store'])->name('signin.store');
 Route::post('/logout', [SignInController::class, 'customLogout'])->name('logout');
@@ -76,7 +76,7 @@ Route::middleware(['auth'])->prefix('management/cylinders')->name('management.cy
     Route::get('/cylinders', [CylinderController::class, 'index'])->name('cylinders.index');
     Route::post('/management/assign-cylinder/{user}', [CylinderController::class, 'assignCylinder'])->name('management.assign-cylinder');
 });
-Route::post('/register-modal', [UserController::class, 'registerModal'])->name('register.modal');
+Route::post('/register-modal', [RegisterController::class, 'registerModal'])->name('register.modal');
 
 // Cylinder detail routes
 Route::prefix('cylinders')->name('cylinders.')->group(function () {
