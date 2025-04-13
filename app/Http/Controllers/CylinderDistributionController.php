@@ -37,8 +37,11 @@ class CylinderDistributionController extends Controller
             'extra large' => '25kg'
         ];
 
-        // Generate a 7-character alphanumeric passcode (upper-case)
-        $passcode = strtoupper(Str::random(7));
+        // Secure 7-character alphanumeric with at least 1 number and 1 letter
+        $passcode = strtoupper(Str::random(5)) . random_int(0, 9) . chr(random_int(65, 90));
+        $passcode = str_shuffle($passcode);
+
+
         Log::info("Generated passcode: {$passcode}");
 
         DB::beginTransaction();
@@ -108,7 +111,7 @@ class CylinderDistributionController extends Controller
 
             DB::commit();
             Log::info("Distribution process completed successfully. Total distributed: {$totalDistributed}");
-            return redirect()->back()->with('success', 'Successfully distributed ' . $totalDistributed . ' cylinders. Passcode: ' . $passcode);
+            return redirect()->back()->with('success', 'Successfully distributed ' . $totalDistributed . ' cylinders.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("Distribution failed: " . $e->getMessage());

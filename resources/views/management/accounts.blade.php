@@ -22,13 +22,12 @@
                         </div>
                     </div>
                     <table class="table table-striped"
-                        style="margin: 0 auto !important; width: 100% !important; font-size: 13px !important;">
+                        style="margin: 0 auto !important; width: 100% !important;">
                         <thead>
-                            <tr>
+                            <tr style="font-size: 17px !important; font-weight: 1000 !important;">
                                 <th>Name</th>
                                 <th>Phone</th>
                                 <th>Email</th>
-                                <th>Position</th>
                                 <th>City</th>
                                 <th>State</th>
                                 <th>Age</th>
@@ -41,7 +40,6 @@
                                     <td>{{ $user->first_name }} {{ $user->last_name }}</td>
                                     <td>{{ $user->phone_number }}</td>
                                     <td>{{ $user->email }}</td>
-                                    <td>{{ $user->position }}</td>
                                     <td>{{ $user->city }}</td>
                                     <td>{{ $user->state }}</td>
                                     <td>{{ $user->dob ? \Carbon\Carbon::parse($user->dob)->age : 'N/A' }}</td>

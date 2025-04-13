@@ -37,7 +37,6 @@
                                 <th scope="col">Name</th>
                                 <th scope="col">Phone Number</th>
                                 <th scope="col">Email</th>
-                                <th scope="col">Position</th>
                                 <th scope="col">City</th>
                                 <th scope="col">State</th>
                                 <th scope="col">Age</th>
@@ -50,7 +49,6 @@
                                     <td>{{ $agent->first_name }} {{ $agent->last_name }}</td>
                                     <td>{{ $agent->phone_number }}</td>
                                     <td>{{ $agent->email }}</td>
-                                    <td>{{ $agent->position }}</td>
                                     <td>{{ $agent->city }}</td>
                                     <td>{{ $agent->state }}</td>
                                     <td>{{ $agent->dob ? \Carbon\Carbon::parse($agent->dob)->age : 'N/A' }}</td>

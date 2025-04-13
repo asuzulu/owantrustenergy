@@ -112,9 +112,10 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Agent-specific routes
-Route::get('/agent/dashboard', [AgentController::class, 'dashboard'])->name('dashboard.agent');
+Route::get('/agent/dashboard', [AgentController::class, 'dashboard'])->name('agent.dashboard');
 Route::get('/agent/cylinders', [AgentController::class, 'cylindersPage'])->name('agent.cylinders');
-Route::get('/agent/accounts', [AgentController::class, 'accounts'])->name('agent.accounts');
+Route::get('/agent/customers', [AgentController::class, 'customers'])->name('agent.customers');
+Route::get('/agent/profile', [AgentController::class, 'dashboard'])->name('agent.profile');
 
 //Driver-specific routes
 Route::get('/drivers/{id}/profile', [DriversController::class, 'driverProfile'])->name('drivers.profile');

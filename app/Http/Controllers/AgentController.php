@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
+use App\Models\Cylinder;
 use App\Models\State;
 
 class AgentController extends Controller
@@ -28,7 +29,22 @@ class AgentController extends Controller
         return view('management.agents', compact('agents', 'states'));
     }
 
-    // Added dashboard method to fix the error
+    public function cylindersPage()
+    {
+        $cylinders = Cylinder::orderBy('id')->paginate(10);
+        return view('management.home', compact('cylinders'));
+    }
+    public function customers()
+    {
+        // Fetch all users with the role 'customer'
+        $users = User::where('position', 'Customer')->paginate(10);
+
+        // Fetch states for the Add Customer form
+        $states = State::all();
+
+        return view('management.accounts', compact('users', 'states'));
+    }
+
     public function dashboard()
     {
         $user = Auth::user();

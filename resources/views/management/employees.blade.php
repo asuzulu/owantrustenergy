@@ -30,7 +30,6 @@
                                 <th scope="col">Name</th>
                                 <th scope="col">Phone Number</th>
                                 <th scope="col">Email</th>
-                                <th scope="col">Position</th>
                                 <th scope="col">City</th>
                                 <th scope="col">State</th>
                                 <th scope="col">Age</th>
@@ -43,7 +42,6 @@
                                     <td>{{ $employee->first_name }} {{ $employee->last_name }}</td>
                                     <td>{{ $employee->phone_number }}</td>
                                     <td>{{ $employee->email }}</td>
-                                    <td>{{ $employee->position }}</td>
                                     <td>{{ $employee->city }}</td>
                                     <td>{{ $employee->state }}</td>
                                     <td>{{ $employee->dob ? \Carbon\Carbon::parse($employee->dob)->age : 'N/A' }}</td>

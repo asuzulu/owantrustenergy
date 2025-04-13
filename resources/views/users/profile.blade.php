@@ -66,7 +66,7 @@
         @if (in_array(Auth::user()->position, ['Employee', 'Manager', 'Agent']))
             <div class="row tm-content-row tm-mt-big">
                 <div class="bg-white tm-block">
-                    <h3 class="tm-block-title" style="text-align: center">Cylinders Distributed</h3>
+                    <h3 class="tm-block-title" style="text-align: center">Cylinders Distributed to Agent</h3>
                     @php
                         $distributed = \Illuminate\Support\Facades\DB::table('agent_cylinders_distribution')
                             ->where('agent_id', $user->id)
@@ -81,7 +81,7 @@
                                     <th>Size</th>
                                     <th>Weight</th>
                                     <th>Warehouse</th>
-                                    <th>Pick Up Date</th>
+                                    <th>Date Picked Up</th>
                                     @if (Auth::user()->position === 'Agent')
                                         <th>Passcode</th>
                                     @endif
