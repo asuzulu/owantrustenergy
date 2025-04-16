@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Cylinder;
 use App\Models\User;
 use App\Models\Delivery;
+use App\Models\Warehouse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -52,7 +53,7 @@ class CylinderController extends Controller
         $deliveries = Delivery::where('cylinder', $cylinder->id)->get();
         $warehouses = DB::table('warehouses')->get();
 
-        return view('cylinders.show', compact('cylinder', 'warehouses', 'deliveries' ));
+        return view('cylinders.show', compact('cylinder', 'warehouses', 'deliveries'));
     }
 
     public function store(Request $request)
@@ -106,6 +107,26 @@ class CylinderController extends Controller
             Log::error('Error adding cylinder: ' . $e->getMessage());
             return redirect()->route('cylinders.index')->with('error', 'Failed to add cylinder.');
         }
+    }
+
+    public function showUnassigned()
+    {
+        $cylinders = Cylinder::where('location', 'Unassigned')->paginate(15);
+        $warehouses = Warehouse::all();
+        return view('cylinders.unassigned', compact('cylinders', 'warehouses'));
+    }
+
+    public function assignWarehouses(Request $request)
+    {
+        $data = $request->input('warehouses', []);
+
+        foreach ($data as $cylinderId => $warehouseName) {
+            Cylinder::where('id', $cylinderId)->update([
+                'location' => $warehouseName,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Cylinders assigned successfully.');
     }
 
     // Assign a cylinder to a user from User page

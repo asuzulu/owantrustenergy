@@ -1,4 +1,3 @@
-<!--script src="https://code.jquery.com/jquery-3.6.0.min.js"></script--->
 @if (Auth::user()->position === 'Customer')
     <script>
         window.location.href = "{{ route('dashboard') }}"; // Redirect to a safe page

@@ -86,7 +86,10 @@ Route::prefix('cylinders')->name('cylinders.')->group(function () {
     Route::get('detail/{id}', [CylinderController::class, 'show'])->name('show.detail');
     Route::delete('destroy/{id}', [CylinderController::class, 'destroyCustom'])->name('destroy.custom');
 });
-Route::resource('cylinders', CylinderController::class)->parameters(['cylinder' => 'id']);
+
+// Unassigned cylinders list page
+Route::get('/cylinders/unassigned', [CylinderController::class, 'showUnassigned'])
+    ->name('cylinders.unassigned');
 
 // Customer-specific routes
 Route::middleware(['auth'])->group(function () {
@@ -112,7 +115,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/employee/statistics', [EmployeeController::class, 'statistics'])->name('employee.statistics');
     Route::get('/employee/cylinders', [ManagementController::class, 'cylindersPage'])->name('employee.cylinders');
 });
-
 Route::get('/employee/profile', [EmployeeController::class, 'profile'])->name('employee.profile')->middleware('auth');
 
 // Agent-specific routes
@@ -146,7 +148,6 @@ Route::get('/management/deliveries', [DeliveryController::class, 'index'])->name
 Route::delete('/management/deliveries/delete', [DeliveryController::class, 'destroy'])->name('management.deliveries.delete');
 
 // Warehouse management routes
-Route::resource('warehouses', WarehouseController::class)->except(['show']);
 Route::get('/warehouses/{id}', [WarehouseController::class, 'show'])->name('warehouses.show');
 
 // Location routes
@@ -246,3 +247,11 @@ Route::middleware(['auth', 'role:Manager'])->group(function () {
     Route::get('/manager/global-settings', [GlobalSettingsController::class, 'index'])->name('manager.settings.index');
     Route::post('/manager/global-settings/update', [GlobalSettingsController::class, 'update'])->name('manager.settings.update');
 });
+
+// Unassigned cylinders assignment form
+Route::get('/cylinders/unassigned', [CylinderController::class, 'showUnassigned'])->name('cylinders.unassigned');
+Route::post('/cylinders/assign', [CylinderController::class, 'assignWarehouses'])->name('cylinders.assign');
+
+// Resource routes
+Route::resource('cylinders', CylinderController::class)->parameters(['cylinder' => 'id']);
+Route::resource('warehouses', WarehouseController::class)->except(['show']);

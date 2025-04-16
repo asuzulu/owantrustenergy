@@ -34,7 +34,9 @@
                             City: {{ $user->city }}<br>
                             State: {{ $user->state }}<br>
                             Age: {{ $user->dob ? \Carbon\Carbon::parse($user->dob)->age : 'N/A' }}<br>
-                            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary mt-3">Edit Profile</a>
+                            @if (!(Auth::user()->position === 'Employee' && $user->position === 'Employee'))
+                                <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary mt-3">Edit Profile</a>
+                            @endif
                             @if (Auth::user()->position === 'Manager' || !$user->photo_id)
                                 <button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal"
                                     data-bs-target="#uploadNinModal">Upload NIN</button>
@@ -64,7 +66,7 @@
 
         {{-- Cylinders Distributed section shows for Employee, Manager, and Agent (not Customer) --}}
         @if ($user->position === 'Agent' && in_array(Auth::user()->position, ['Employee', 'Manager', 'Agent']))
-        <div class="row tm-content-row tm-mt-big">
+            <div class="row tm-content-row tm-mt-big">
                 <div class="bg-white tm-block">
                     <h3 class="tm-block-title" style="text-align: center">Cylinders Distributed to Agent</h3>
                     @php

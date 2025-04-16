@@ -20,5 +20,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UsersTableSeeder::class,
         ]);
+
+        // Call the WarehouseSeeder
+        $this->call(WarehouseSeeder::class);
     }
 }

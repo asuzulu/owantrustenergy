@@ -22,14 +22,12 @@
                         <div class="col-md-9 col-sm-12">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex">
-                                    <a href="{{ route('management.orders.requests') }}" class="btn btn-primary">Customers'
-                                        Requests</a>
-                                    <a href="{{ route('orders.pickup') }}" class="btn btn-primary ms-3">Pick Up Orders</a>
-                                    <a href="{{ route('management.deliveries') }}"
-                                        class="btn btn-primary ms-3">Deliveries</a>
+                                    <a href="{{ route('cylinders.unassigned') }}" class="btn btn-primary ms-3">Unassigned</a>
+                                    <a href="{{ route('management.orders.requests') }}" class="btn btn-primary">Customers' Requests</a>
+                                    <a href="{{ route('orders.pickup') }}" class="btn btn-primary ms-3">Pick Ups</a>
+                                    <a href="{{ route('management.deliveries') }}" class="btn btn-primary ms-3">Deliveries</a>
+                                    <button class="btn btn-small btn-primary ms-3" data-toggle="modal" data-target="#addCylinderModal">Add Cylinder</button>
                                 </div>
-                                <button class="btn btn-small btn-primary ms-3" data-toggle="modal"
-                                    data-target="#addCylinderModal">Add Cylinder</button>
                             </div>
                         </div>
                     @endif
