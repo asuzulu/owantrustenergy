@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\RedirectIfNotAuthenticated;
+use App\Http\Middleware\AuthMiddleware;
+use App\Models\User;
 use App\Http\Controllers\{
     Auth\PasswordController,
     Auth\SignInController,
@@ -105,11 +107,13 @@ Route::middleware(['auth'])->group(function () {
 // Employee-specific routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/employee/dashboard', [ManagementController::class, 'index'])->name('dashboard.employee');
-    Route::get('/employee/accounts', [EmployeeController::class, 'accounts'])->name('employee.accounts');
-    Route::get('/employee/agents', [EmployeeController::class, 'agents'])->name('employee.agents');
+    Route::get('/employee/accounts', [ManagementController::class, 'accounts'])->name('employee.accounts');
+    Route::get('/employee/agents', [ManagementController::class, 'agents'])->name('employee.agents');
     Route::get('/employee/statistics', [EmployeeController::class, 'statistics'])->name('employee.statistics');
-    Route::get('/employee/cylinders', [EmployeeController::class, 'cylindersPage'])->name('employee.cylinders');
+    Route::get('/employee/cylinders', [ManagementController::class, 'cylindersPage'])->name('employee.cylinders');
 });
+
+Route::get('/employee/profile', [EmployeeController::class, 'profile'])->name('employee.profile')->middleware('auth');
 
 // Agent-specific routes
 Route::get('/agent/dashboard', [AgentController::class, 'dashboard'])->name('agent.dashboard');

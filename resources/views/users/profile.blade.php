@@ -63,8 +63,8 @@
         @endif
 
         {{-- Cylinders Distributed section shows for Employee, Manager, and Agent (not Customer) --}}
-        @if (in_array(Auth::user()->position, ['Employee', 'Manager', 'Agent']))
-            <div class="row tm-content-row tm-mt-big">
+        @if ($user->position === 'Agent' && in_array(Auth::user()->position, ['Employee', 'Manager', 'Agent']))
+        <div class="row tm-content-row tm-mt-big">
                 <div class="bg-white tm-block">
                     <h3 class="tm-block-title" style="text-align: center">Cylinders Distributed to Agent</h3>
                     @php

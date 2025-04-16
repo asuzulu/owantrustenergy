@@ -11,6 +11,9 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mx-auto">
+            <li class="nav-item {{ request()->routeIs('employee.profile') ? 'active' : '' }}">
+                <a href="{{ route('employee.profile') }}" class="nav-link">Profile</a>
+            </li>
             <li class="nav-item {{ request()->routeIs('employee.cylinders') ? 'active' : '' }}">
                 <a href="{{ route('employee.cylinders') }}" class="nav-link">Cylinders</a>
             </li>

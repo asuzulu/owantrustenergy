@@ -105,4 +105,10 @@ class EmployeeController extends Controller
             return response()->json(['success' => false, 'message' => 'Failed to register user.'], 500);
         }
     }
+
+    public function profile()
+    {
+        $user = Auth::user();
+        return view('users.profile', compact('user'));
+    }
 }

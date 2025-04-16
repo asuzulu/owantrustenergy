@@ -102,7 +102,7 @@
                 <div class="carousel-item active">
                     <div class="client_section_2">
                         <div class="row">
-                            <div class="col-md-4 offset-md-2"> <!-- Added offset to move content to the right -->
+                            <div class="col-md-4 offset-md-2">
                                 <div class="client_icon">
                                     <img src="{{ asset('images/client-icon.png') }}" alt="Client">
                                     <h1 class="carklo_text">Chinonso A.</h1>
@@ -184,6 +184,8 @@
     </div>
 </div>
 <!-- client section end -->
+@stack('scripts')
+    @include('partials.dashboard.scripts')
 <style>
     /* This style override will ensure the navbar touches the very top of the viewport on this page */
     .navbar {
