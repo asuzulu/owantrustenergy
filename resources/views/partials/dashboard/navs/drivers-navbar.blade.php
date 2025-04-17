@@ -16,7 +16,7 @@
                 <a href="{{ route('drivers.cylinders') }}" class="nav-link">Cylinders</a>
             </li>
 
-            <!-- Profile Link (Updated to use the drivers profile page with matching styling) -->
+            <!-- Profile Link -->
             <li class="nav-item {{ request()->routeIs('drivers.profile') ? 'active' : '' }}">
                 <a href="{{ route('drivers.profile', ['id' => $user->id]) }}" class="nav-link">
                     <i class="fas fa-user-circle mr-2"></i>Profile
