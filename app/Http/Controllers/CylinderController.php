@@ -17,34 +17,40 @@ class CylinderController extends Controller
 {
     public function index($userId = null)
     {
-        Log::debug('Index Method triggered');
         $userId = $userId ?? Auth::id();
 
         if (!$userId) {
-            Log::debug('User ID not provided and no authenticated user found.');
             abort(400, 'User ID is required.');
         }
 
-        try {
-            $user = User::findOrFail($userId);
-            Log::debug('User Data Retrieved: ', $user->toArray());
-        } catch (\Exception $e) {
-            Log::debug('Error retrieving User: ', ['error' => $e->getMessage()]);
-            abort(404, 'User not found.');
+        $user = User::findOrFail($userId);
+
+        // Build the query with filtering options
+        $query = Cylinder::query();
+
+        if ($user->position === 'Customer') {
+            $query->where('user_id', $user->id);
         }
 
-        try {
-            $cylinders = Cylinder::when($user->position === 'Customer', function ($query) use ($user) {
-                return $query->where('user_id', $user->id);
-            })->paginate(10);
-        } catch (\Exception $e) {
-            Log::debug('Error retrieving Cylinders: ', ['error' => $e->getMessage()]);
-            abort(500, 'Failed to retrieve cylinders.');
+        // Apply warehouse filter if set
+        if ($warehouse = request('warehouse')) {
+            $query->where('location', $warehouse);
         }
+
+        // Apply size filter if set
+        if ($size = request('size')) {
+            $query->where('size', $size);
+        }
+
+        // Paginate the results
+        $cylinders = $query->paginate(10);
 
         return ($user->position === 'Customer')
             ? view('dashboard.cylinder', compact('cylinders', 'user'))
-            : view('management.home', compact('cylinders'));
+            : view('management.home', [
+                'cylinders' => $cylinders,
+                'warehouses' => Warehouse::all(),
+            ]);
     }
 
     public function show($id)
@@ -59,76 +65,53 @@ class CylinderController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'size'     => 'required|string',
+            'size' => 'required|string',
             'location' => 'required|string',
-            'amount'   => 'required|integer|min:1',
         ]);
 
-        // Map sizes to weights if you ever need to store or log weight
-        $weightMap = [
-            'Small'       => 3,
-            'Medium'      => 5,
-            'Large'       => 12,
-            'Extra Large' => 25,
-        ];
+        $cylinderId = $this->generateUniqueCylinderId();
+        $qrFileName = "cylinder_{$cylinderId}.svg";
+        $qrPath = "qrcodes/{$qrFileName}";
 
+        // Ensure the directory exists
+        Storage::makeDirectory('public/qrcodes');
+
+        // Generate QR Code with URL to the cylinder details page
+        $qrCode = QrCode::format('svg')
+            ->size(300)
+            ->generate(route('cylinders.show', $cylinderId));
+
+        // Save the QR Code file
+        Storage::put("public/{$qrPath}", $qrCode);
+
+        // Begin database transaction
         DB::beginTransaction();
-
         try {
-            $createdCount = 0;
+            $cylinder = Cylinder::create([
+                'id' => $cylinderId,
+                'size' => $validated['size'],
+                'location' => $validated['location'],
+                'allocated_date' => now(),
+                'user_id' => Auth::id(),
+                'qr_code_path' => $qrPath,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-            for ($i = 0; $i < $validated['amount']; $i++) {
-                // 1) Generate unique cylinder ID
-                $cylinderId = $this->generateUniqueCylinderId();
-
-                // 2) Prepare QR code file path
-                $qrFileName = "cylinder_{$cylinderId}.svg";
-                $qrPath     = "qrcodes/{$qrFileName}";
-                Storage::makeDirectory('public/qrcodes');
-
-                // 3) Generate and save the QR code
-                $qrCode = QrCode::format('svg')
-                    ->size(300)
-                    ->generate(route('cylinders.show', $cylinderId));
-                Storage::put("public/{$qrPath}", $qrCode);
-
-                // 4) Create the cylinder record
-                Cylinder::create([
-                    'id'           => $cylinderId,
-                    'size'         => $validated['size'],
-                    'location'     => $validated['location'],
-                    'allocated_date' => now(),
-                    'user_id'      => Auth::id(),
-                    'qr_code_path' => $qrPath,
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
-                ]);
-
-                // 5) Log the creation
-                Log::channel('cylinder_creation')->info('Cylinder Added', [
-                    'user'        => Auth::user()->first_name . ' ' . Auth::user()->last_name,
-                    'cylinder_id' => $cylinderId,
-                    'size'        => $validated['size'],
-                    'location'    => $validated['location'],
-                    // optional: 'weight' => $weightMap[$validated['size']] ?? null,
-                ]);
-
-                $createdCount++;
-            }
+            // Log the creation of the new cylinder
+            Log::channel('cylinder_creation')->info('Cylinder Added', [
+                'user' => Auth::user()->first_name . ' ' . Auth::user()->last_name,
+                'cylinder_id' => $cylinderId,
+                'size' => $validated['size'],
+                'location' => $validated['location']
+            ]);
 
             DB::commit();
-
-            return redirect()
-                ->route('cylinders.index')
-                ->with('success', "{$createdCount} cylinder(s) added successfully.");
+            return redirect()->route('cylinders.index')->with('success', 'Cylinder added successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-
-            Log::error('Error adding cylinders: ' . $e->getMessage());
-
-            return redirect()
-                ->route('cylinders.index')
-                ->with('error', 'Failed to add cylinders.');
+            Log::error('Error adding cylinder: ' . $e->getMessage());
+            return redirect()->route('cylinders.index')->with('error', 'Failed to add cylinder.');
         }
     }
 

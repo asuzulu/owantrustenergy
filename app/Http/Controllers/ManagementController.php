@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Cylinder;
+use App\Models\Warehouse;
 use App\Models\State;
 use App\Models\Delivery;
 use App\Models\Pickup;
@@ -53,12 +54,39 @@ class ManagementController extends Controller
         return view('management.agents', compact('agents', 'states'));
     }
 
-    public function cylindersPage()
+    /**
+     * Display a paginated list of cylinders, with optional warehouse & size filters.
+     */
+    public function cylindersPage(Request $request)
     {
-        $cylinders = Cylinder::orderBy('id')->paginate(10);
-        return view('management.home', compact('cylinders'));
-    }
+        // Redirect customers back to home
+        if (! Auth::check() || Auth::user()->position === 'Customer') {
+            return redirect()->route('home');
+        }
 
+        // All warehouses for the dropdown
+        $warehouses = Warehouse::all();
+
+        // Base query
+        $query = Cylinder::orderBy('id', 'asc');
+
+        // Apply warehouse filter if provided
+        if ($request->filled('warehouse')) {
+            $query->where('location', $request->input('warehouse'));
+        }
+
+        // Apply size filter if provided
+        if ($request->filled('size')) {
+            $query->where('size', $request->input('size'));
+        }
+
+        // Paginate 10 per page, append filters so links keep them
+        $cylinders = $query
+            ->paginate(10)
+            ->appends($request->only(['warehouse', 'size']));
+
+        return view('management.home', compact('cylinders', 'warehouses'));
+    }
 
     public function assignCylinder(Request $request, User $user)
     {

@@ -30,12 +30,49 @@
                                     <a href="{{ route('cylinders.unassigned') }}"
                                         class="btn btn-primary ms-3">Unassigned</a>
                                     <button class="btn btn-small btn-primary ms-3" data-toggle="modal"
-                                        data-target="#addCylinderModal">Add Cylinder</button>
+                                        data-target="#addCylinderModal">
+                                        Add Cylinder
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     @endif
                 </div>
+
+                {{-- FILTER FORM --}}
+                <form id="filterForm" method="GET" action="{{ route('cylinders.index') }}">
+                    <div class="row mt-4 mb-2">
+                        <div class="col-md-4">
+                            <label for="warehouseFilter"><strong>Warehouse:</strong></label>
+                            <select name="warehouse" id="warehouseFilter" class="form-control" style="height: 60px;"
+                                onchange="this.form.submit()">
+                                <option value="">All Warehouses</option>
+                                @foreach ($warehouses as $warehouseOption)
+                                    <option value="{{ $warehouseOption->name }}"
+                                        {{ request('warehouse') === $warehouseOption->name ? 'selected' : '' }}>
+                                        {{ $warehouseOption->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="sizeFilter"><strong>Size:</strong></label>
+                            <select name="size" id="sizeFilter" class="form-control" style="height: 60px;"
+                                onchange="this.form.submit()">
+                                <option value="">All Sizes</option>
+                                <option value="Small" {{ request('size') === 'Small' ? 'selected' : '' }}>Small</option>
+                                <option value="Medium" {{ request('size') === 'Medium' ? 'selected' : '' }}>Medium</option>
+                                <option value="Large" {{ request('size') === 'Large' ? 'selected' : '' }}>Large</option>
+                                <option value="Extra Large" {{ request('size') === 'Extra Large' ? 'selected' : '' }}>Extra
+                                    Large</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            {{-- Keep any other controls here --}}
+                        </div>
+                    </div>
+                </form>
+
                 <div class="table-responsive">
                     <table class="table table-hover table-striped tm-table-striped-even mt-3">
                         <thead>
@@ -48,24 +85,32 @@
                             </tr>
                         </thead>
                         <tbody>
-                        <tbody>
                             @foreach ($cylinders as $cylinder)
-                                <tr onclick="window.location='{{ route('management.cylinders.show', $cylinder->id) }}'"
+                                <tr onclick="window.location='{{ route('management.cylinders.show', $cylinder->id) }}';"
                                     style="cursor: pointer;">
                                     <td>{{ str_pad($cylinder->id, 9, '0', STR_PAD_LEFT) }}</td>
                                     <td>{{ $cylinder->size }}</td>
                                     <td>
-                                        @if ($cylinder->size == 'Small')
-                                            3 kg
-                                        @elseif($cylinder->size == 'Medium')
-                                            5 kg
-                                        @elseif($cylinder->size == 'Large')
-                                            12 kg
-                                        @elseif($cylinder->size == 'Extra Large')
-                                            25 kg
-                                        @else
-                                            N/A
-                                        @endif
+                                        @switch($cylinder->size)
+                                            @case('Small')
+                                                3 kg
+                                            @break
+
+                                            @case('Medium')
+                                                5 kg
+                                            @break
+
+                                            @case('Large')
+                                                12 kg
+                                            @break
+
+                                            @case('Extra Large')
+                                                25 kg
+                                            @break
+
+                                            @default
+                                                N/A
+                                        @endswitch
                                     </td>
                                     <td>{{ $cylinder->location }}</td>
                                     <td>{{ $cylinder->allocated_date->format('d-m-Y') }}</td>
@@ -73,10 +118,10 @@
                             @endforeach
                         </tbody>
                     </table>
-                    {{-- Pagination Links --}}
+
                     @if ($cylinders->hasPages())
                         <div class="d-flex justify-content-center mt-3">
-                            {{ $cylinders->links('pagination::bootstrap-4') }}
+                            {{ $cylinders->appends(request()->only(['warehouse', 'size']))->links('pagination::bootstrap-4') }}
                         </div>
                     @endif
                 </div>
@@ -97,7 +142,7 @@
                         @csrf
                         <div class="form-group">
                             <label for="size">Cylinder Size</label>
-                            <select class="form-control" id="size" name="size" required style="height: calc(4rem);">
+                            <select class="form-control" id="size" name="size" required style="height: 60px;">
                                 <option value="Small">3kg (Small)</option>
                                 <option value="Medium">5kg (Medium)</option>
                                 <option value="Large">12kg (Large)</option>
@@ -108,7 +153,7 @@
                         <div class="form-group">
                             <label for="location">Warehouse Location</label>
                             <select class="form-control" id="location" name="location" required
-                                style="height: calc(4rem);"></select>
+                                style="height: 60px;"></select>
                         </div>
 
                         <div class="form-group">
@@ -131,8 +176,8 @@
         $(document).ready(function() {
             // Fetch warehouse locations dynamically
             $.get("{{ route('locations.getWarehouses') }}", function(data) {
-                $("#location").empty().append(data.map(warehouse =>
-                    `<option value="${warehouse.name}">${warehouse.name}</option>`
+                $("#location").empty().append(data.map(wh =>
+                    `<option value="${wh.name}">${wh.name}</option>`
                 ));
             });
 
@@ -143,11 +188,11 @@
                     type: "POST",
                     data: $(this).serialize(),
                     success: function(response) {
-                        alert("Cylinder added successfully!");
+                        alert("Cylinder(s) added successfully!");
                         location.reload();
                     },
                     error: function(xhr) {
-                        alert("Error adding cylinder.");
+                        alert("Error adding cylinder(s).");
                     }
                 });
             });
