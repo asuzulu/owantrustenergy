@@ -16,6 +16,9 @@
             <div class="row tm-content-row tm-mt-big">
                 @yield('content')
             </div>
+            <div class="row tm-content-row tm-mt-big">
+                @yield('content2')
+            </div>
 
             @php
                 $allowedPositions = ['Customer', 'Employee', 'Manager', 'Agent', 'Driver'];

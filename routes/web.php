@@ -149,6 +149,8 @@ Route::delete('/management/deliveries/delete', [DeliveryController::class, 'dest
 
 // Warehouse management routes
 Route::get('/warehouses/{id}', [WarehouseController::class, 'show'])->name('warehouses.show');
+Route::get('/warehouses/{warehouse}/agent-cylinders', [WarehouseController::class, 'loadAgentCylinders'])->name('warehouses.agentCylinders');
+Route::get('/warehouses/{warehouse}/warehouse-cylinders', [WarehouseController::class, 'loadWarehouseCylinders'])->name('warehouses.warehouseCylinders');
 
 // Location routes
 Route::get('/locations/warehouses', [LocationController::class, 'getWarehouses'])->name('locations.getWarehouseLocations');

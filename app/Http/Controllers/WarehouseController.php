@@ -44,48 +44,114 @@ class WarehouseController extends Controller
     }
 
     // Show a single warehouse
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $warehouse = Warehouse::findOrFail($id); // Fetch the warehouse or throw a 404
+        $warehouse = Warehouse::findOrFail($id);
 
-        $distributedCylinders = DB::table('agent_cylinders_distribution')
-            ->where('warehouse', $warehouse->name) // Ensure warehouse matches
-            ->get();
+        // Agent cylinders (always paginated and ordered)
+        $agentCylinders = DB::table('agent_cylinders_distribution')
+            ->where('warehouse', $warehouse->name)
+            ->orderBy('agent_name')
+            ->orderByRaw("
+            CASE cylinder_size
+                WHEN 'Small' THEN 1
+                WHEN 'Medium' THEN 2
+                WHEN 'Large' THEN 3
+                WHEN 'Extra Large' THEN 4
+                ELSE 5
+            END
+        ")
+            ->paginate(10, ['*'], 'agent_page');
 
-        return view('warehouses.show', compact('warehouse', 'distributedCylinders'));
+        // Warehouse cylinders, with optional size filter
+        $warehouseCylindersQuery = DB::table('cylinders')
+            ->where('location', $warehouse->name);
+
+        if ($request->filled('size')) {
+            $warehouseCylindersQuery->where('size', $request->input('size'));
+        }
+
+        $warehouseCylinders = $warehouseCylindersQuery
+            ->orderByRaw("
+            CASE size
+                WHEN 'Small' THEN 1
+                WHEN 'Medium' THEN 2
+                WHEN 'Large' THEN 3
+                WHEN 'Extra Large' THEN 4
+                ELSE 5
+            END
+        ")
+            ->paginate(10, ['*'], 'cylinder_page');
+
+        // AJAX request handling
+        if ($request->ajax()) {
+            $table = $request->input('table');
+
+            if ($table === 'agent') {
+                return view('partials.dashboard.agent-distribution-table', compact('agentCylinders'))->render();
+            }
+
+            if ($table === 'warehouse') {
+                // Handle filtered size (if any) and return HTML snippet
+                return response()->json([
+                    'html' => view('partials.dashboard.warehouse-cylinders-size-table', compact('warehouseCylinders'))->render()
+                ]);
+            }
+        }
+
+        // Full page load
+        return view('warehouses.show', compact('warehouse', 'agentCylinders', 'warehouseCylinders'));
     }
 
-    // Update the warehouse
     public function update(Request $request, $id)
     {
         $warehouse = Warehouse::findOrFail($id);
 
-        // Get the previous details for logging
-        $previousData = [
-            'name' => $warehouse->name,
-            'address' => $warehouse->address,
-            'phone_number' => $warehouse->phone_number,
-        ];
-
-        // Validate the request
         $request->validate([
-            'name' => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:255',
-            'phone_number' => 'nullable|numeric|digits:10',
+            'name' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'phone_number' => 'required|digits:10',
         ]);
 
-        // Update only the fields that are provided
         $warehouse->update($request->only(['name', 'address', 'phone_number']));
 
-        // Log the update details with user info
-        $user = Auth::user();
         Log::channel('warehouse_update')->info('Warehouse Updated', [
-            'user' => $user->first_name . ' ' . $user->last_name,
-            'previous_data' => $previousData,
+            'user' => Auth::user()->first_name . ' ' . Auth::user()->last_name,
+            'warehouse_id' => $warehouse->id,
             'new_data' => $request->only(['name', 'address', 'phone_number']),
         ]);
 
-        return redirect()->route('warehouses.show', $warehouse->id)->with('success', 'Warehouse updated successfully.');
+        $message = 'Warehouse updated successfully.';
+
+        if ($request->ajax()) {
+            return response()->json(
+                array_merge((array) $warehouse->only(['name', 'address', 'phone_number']), ['message' => $message])
+            );
+        }
+
+        return redirect()->route('warehouses.show', $warehouse->id)->with('success', $message);
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $warehouse = Warehouse::findOrFail($id);
+
+        if (Auth::user()->position !== 'Manager') {
+            $msg = 'Unauthorized action.';
+            if ($request->ajax()) {
+                return response()->json(['message' => $msg], 403);
+            }
+            return redirect()->route('warehouses.index')->with('error', $msg);
+        }
+
+        $warehouse->delete();
+        $message = 'Warehouse deleted successfully.';
+
+        if ($request->ajax()) {
+            return response()->json(['message' => $message]);
+        }
+
+        return redirect()->route('warehouses.index')->with('success', $message);
     }
 
     public function confirmAgentPickup(Request $request, $warehouseId)
@@ -102,17 +168,5 @@ class WarehouseController extends Controller
 
         return redirect()->route('warehouses.show', $warehouseId)
             ->with('success', 'Selected cylinders have been confirmed as picked up.');
-    }
-
-    public function destroy($id)
-    {
-        $warehouse = Warehouse::findOrFail($id);
-
-        if (Auth::user()->position !== 'Manager') {
-            return redirect()->route('warehouses.index')->with('error', 'Unauthorized action.');
-        }
-
-        $warehouse->delete();
-        return redirect()->route('warehouses.index')->with('success', 'Warehouse deleted successfully.');
     }
 }

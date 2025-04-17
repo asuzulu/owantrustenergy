@@ -13,8 +13,7 @@ class LocationController extends Controller
 {
     public function getWarehouses()
     {
-        $warehouses = Warehouse::pluck('name'); // Fetch unique warehouse names
+        $warehouses = Warehouse::where('id', '!=', 1)->get(['id', 'name']);
         return response()->json($warehouses);
     }
 }
-

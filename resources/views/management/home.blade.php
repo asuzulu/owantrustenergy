@@ -22,11 +22,15 @@
                         <div class="col-md-9 col-sm-12">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex">
-                                    <a href="{{ route('cylinders.unassigned') }}" class="btn btn-primary ms-3">Unassigned</a>
-                                    <a href="{{ route('management.orders.requests') }}" class="btn btn-primary">Customers' Requests</a>
+                                    <a href="{{ route('management.orders.requests') }}" class="btn btn-primary">Customers'
+                                        Requests</a>
                                     <a href="{{ route('orders.pickup') }}" class="btn btn-primary ms-3">Pick Ups</a>
-                                    <a href="{{ route('management.deliveries') }}" class="btn btn-primary ms-3">Deliveries</a>
-                                    <button class="btn btn-small btn-primary ms-3" data-toggle="modal" data-target="#addCylinderModal">Add Cylinder</button>
+                                    <a href="{{ route('management.deliveries') }}"
+                                        class="btn btn-primary ms-3">Deliveries</a>
+                                    <a href="{{ route('cylinders.unassigned') }}"
+                                        class="btn btn-primary ms-3">Unassigned</a>
+                                    <button class="btn btn-small btn-primary ms-3" data-toggle="modal"
+                                        data-target="#addCylinderModal">Add Cylinder</button>
                                 </div>
                             </div>
                         </div>
@@ -90,7 +94,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="cylinderForm">
-                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        @csrf
                         <div class="form-group">
                             <label for="size">Cylinder Size</label>
                             <select class="form-control" id="size" name="size" required style="height: calc(4rem);">
@@ -100,11 +104,19 @@
                                 <option value="Extra Large">25kg (XL)</option>
                             </select>
                         </div>
+
                         <div class="form-group">
                             <label for="location">Warehouse Location</label>
                             <select class="form-control" id="location" name="location" required
                                 style="height: calc(4rem);"></select>
                         </div>
+
+                        <div class="form-group">
+                            <label for="amount">How many?</label>
+                            <input type="number" min="1" step="1" id="amount" name="amount"
+                                class="form-control" required placeholder="Enter quantity">
+                        </div>
+
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-primary">Add</button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -119,7 +131,9 @@
         $(document).ready(function() {
             // Fetch warehouse locations dynamically
             $.get("{{ route('locations.getWarehouses') }}", function(data) {
-                $("#location").empty().append(data.map(name => `<option value="${name}">${name}</option>`));
+                $("#location").empty().append(data.map(warehouse =>
+                    `<option value="${warehouse.name}">${warehouse.name}</option>`
+                ));
             });
 
             $("#cylinderForm").submit(function(event) {
