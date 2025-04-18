@@ -43,10 +43,10 @@
                 <form id="filterForm" method="GET" action="{{ route('cylinders.index') }}">
                     <div class="row mt-4 mb-2">
                         <div class="col-md-4">
-                            <label for="warehouseFilter"><strong>Warehouse:</strong></label>
+                            <label for="warehouseFilter"><strong>Location:</strong></label>
                             <select name="warehouse" id="warehouseFilter" class="form-control" style="height: 60px;"
                                 onchange="this.form.submit()">
-                                <option value="">All Warehouses</option>
+                                <option value="">All Locations</option>
                                 @foreach ($warehouses as $warehouseOption)
                                     <option value="{{ $warehouseOption->name }}"
                                         {{ request('warehouse') === $warehouseOption->name ? 'selected' : '' }}>
