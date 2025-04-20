@@ -24,18 +24,20 @@ class OrdersController extends Controller
         // Extract numeric value from weight (if needed)
         $weight = preg_replace('/[^0-9.]/', '', $request->input('weight'));
 
-        $user = User::findOrFail($request->customer_id);
+        $user = Auth::user();
 
-        Order::create([
+        $order = Order::create([
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
             'customer_id' => $user->id,
             'cylinder_size' => $validated['cylinder_size'],
             'weight' => $weight,
             'order_type' => $validated['order_type'],
-            'retrieval'     => $validated['retrieval'],
+            'retrieval' => $validated['retrieval'],
         ]);
 
+        \Log::info('Order created successfully', ['order_id' => $order->id]);
+        
         return response()->json(['message' => 'Order placed successfully!'], 201);
     }
 

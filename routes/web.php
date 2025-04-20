@@ -117,9 +117,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard.ordercylinder');
 
     // Handle Order Placement
-    Route::post('/order/place', function () {
-        return redirect()->route('dashboard.ordercylinder')->with('success', 'Your order has been placed successfully.');
-    })->name('order.place');
+    Route::post('/order/place', [OrdersController::class, 'placeOrder'])->name('order.place');
 });
 
 // Employee-specific routes
