@@ -1,4 +1,4 @@
-@extends('layouts.user-dashboard')
+@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.user-dashboard')))
 
 @section('content')
     <div class="container" style="margin-top: -6rem;">
@@ -30,11 +30,20 @@
                                     <td class="text-center">{{ $cylinder->size }}</td>
                                     <td class="text-center">
                                         @switch($cylinder->size)
-                                            @case('Small') 3kg @break
-                                            @case('Medium') 5kg @break
-                                            @case('Large') 12kg @break
-                                            @case('Extra Large') 25kg @break
-                                            @default N/A
+                                            @case('Small')
+                                                3kg
+                                                @break
+                                            @case('Medium')
+                                                5kg
+                                                @break
+                                            @case('Large')
+                                                12kg
+                                                @break
+                                            @case('Extra Large')
+                                                25kg
+                                                @break
+                                            @default
+                                                N/A
                                         @endswitch
                                     </td>
                                     <td>{{ \Carbon\Carbon::parse($cylinder->allocated_date)->format('Y-m-d') }}</td>

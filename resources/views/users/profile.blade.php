@@ -65,8 +65,7 @@
         <div class="row tm-content-row tm-mt-big">
             @if ($user->position === 'Customer')
                 <!-- Check if the user has 'Customer' position -->
-                <a href="{{ route('dashboard.cylinder', ['userId' => auth()->id()]) }}"
-                    class="text-decoration-none text-dark">
+                <a href="{{ route('users.cylinders', ['id' => $user->id]) }}" class="text-decoration-none text-dark">
                     <div class="bg-white tm-block" style="cursor: pointer;">
                         <h3 class="tm-block-title">Cylinders Assigned:</h3>
                         <p>You have been assigned a total of {{ $totalCylinders }} cylinder(s).</p>

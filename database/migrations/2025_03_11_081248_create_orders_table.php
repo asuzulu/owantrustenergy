@@ -12,9 +12,10 @@ return new class extends Migration {
             $table->id();
             $table->string('first_name');
             $table->string('last_name');
+            $table->foreignId('customer_id')->constrained('users')->onDelete('cascade');
             $table->string('cylinder_size');
             $table->string('weight');
-            $table->string('retrieval'); // New field for retrieval option
+            $table->string('retrieval');
 
             // Use enum type on databases that support it; use a plain string for SQLite.
             if (DB::getDriverName() === 'sqlite') {

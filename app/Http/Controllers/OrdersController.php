@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class OrdersController extends Controller
@@ -23,11 +24,14 @@ class OrdersController extends Controller
         // Extract numeric value from weight (if needed)
         $weight = preg_replace('/[^0-9.]/', '', $request->input('weight'));
 
+        $user = User::findOrFail($request->customer_id);
+
         Order::create([
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
+            'customer_id' => $user->id,
             'cylinder_size' => $validated['cylinder_size'],
-            'weight' => $weight, // Now it contains only numbers
+            'weight' => $weight,
             'order_type' => $validated['order_type'],
             'retrieval'     => $validated['retrieval'],
         ]);

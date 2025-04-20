@@ -81,8 +81,8 @@
                             $("#uploadNinModal").modal("hide");
                         }
 
-                        // Redirect to dashboard.profile after successful upload
-                        window.location.href = "{{ route('dashboard.profile') }}";
+                        // Refreshes page after successful upload
+                        location.reload();
                     }
                 },
                 error: function(xhr) {
