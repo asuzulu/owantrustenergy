@@ -69,15 +69,22 @@
                                             </div>
                                         </label>
                                         <div class="mt-2">
-                                            <input type="radio" name="order_type[{{ $cylinder['size'] }}]" value="new" data-weight="{{ $cylinder['weight'] }}">
+                                            <input type="radio" class="order-radio"
+                                                name="order_type[{{ $cylinder['size'] }}]" value="new"
+                                                data-size="{{ $cylinder['size'] }}" data-weight="{{ $cylinder['weight'] }}">
                                             New
                                             &nbsp; &nbsp;
-                                            <input type="radio" name="order_type[{{ $cylinder['size'] }}]" value="refill" data-weight="{{ $cylinder['weight'] }}">
+                                            <input type="radio" class="order-radio"
+                                                name="order_type[{{ $cylinder['size'] }}]" value="refill"
+                                                data-size="{{ $cylinder['size'] }}"
+                                                data-weight="{{ $cylinder['weight'] }}">
                                             Refill
                                         </div>
                                         <!-- Retrieval Dropdown for this cylinder -->
                                         <div class="mt-2">
-                                            <select name="retrieval[{{ $cylinder['size'] }}]" class="retrieval-dropdown form-control" style="display: none; height: 4rem;">
+                                            <select name="retrieval[{{ $cylinder['size'] }}]"
+                                                class="retrieval-dropdown form-control" style="display: none; height: 4rem;"
+                                                disabled>
                                                 <option value="">Select Retrieval Option</option>
                                                 <option value="delivery">Delivery</option>
                                                 <option value="pick up">Pick up</option>
@@ -128,50 +135,62 @@
 
 @section('scripts')
     <script>
-        // When a radio button is selected within a cylinder option, show that option's retrieval dropdown.
         $(document).ready(function() {
-            $('input[name^="order_type"]').on('change', function() {
-                $(this).closest('.cylinder-option').find('.retrieval-dropdown')
-                    .show()
-                    .prop('required', true);
+            $('input.order-radio').on('change', function() {
+                // Uncheck all other radios
+                $('input.order-radio').not(this).prop('checked', false);
+
+                // Hide and reset all dropdowns
+                $('.retrieval-dropdown').hide().val('').prop('disabled', true);
+
+                // Show and enable the related dropdown
+                var size = $(this).data('size');
+                $('select[name="retrieval[' + size + ']"]').show().prop('disabled', false);
+            });
+
+            $('.close, .btn-secondary').on('click', function() {
+                $('#confirmOrderModal').modal('hide');
             });
         });
 
         function validateAndConfirm() {
-            // Find the first selected radio button (assuming one order is being placed)
-            let selected = document.querySelector('input[name^="order_type"]:checked');
+            let selected = document.querySelector('input.order-radio:checked');
             if (!selected) {
                 alert("Please select an order type (New or Refill) for a cylinder.");
                 return;
             }
-            // Extract the cylinder size from the radio's name attribute.
-            let cylinderSize = selected.name.match(/\[(.*?)\]/)[1];
-            let retrieval = $('select[name="retrieval[' + cylinderSize + ']"]').val();
+
+            let size = selected.getAttribute('data-size');
+            let retrieval = document.querySelector('select[name="retrieval[' + size + ']"]').value;
             if (!retrieval) {
                 alert("Please select a retrieval option (Delivery or Pick up) for the selected cylinder.");
                 return;
             }
+
             $('#confirmOrderModal').modal('show');
         }
 
         function submitOrder() {
             let firstName = "{{ Auth::user()->first_name }}";
             let lastName = "{{ Auth::user()->last_name }}";
-            let selected = document.querySelector('input[name^="order_type"]:checked');
-            let cylinderSize = selected.name.match(/\[(.*?)\]/)[1];
-            let weight = selected.dataset.weight;
+            let selected = document.querySelector('input.order-radio:checked');
+            let size = selected.getAttribute('data-size');
+            let weight = selected.getAttribute('data-weight');
             let orderType = selected.value;
-            let retrieval = $('select[name="retrieval[' + cylinderSize + ']"]').val();
+            let retrieval = document.querySelector('select[name="retrieval[' + size + ']"]').value;
+
             let postData = {
                 first_name: firstName,
                 last_name: lastName,
-                cylinder_size: cylinderSize,
+                cylinder_size: size,
                 weight: weight,
                 order_type: orderType,
                 retrieval: retrieval,
                 _token: $('input[name="_token"]').val()
             };
+
             console.log(postData);
+
             $.post("{{ route('order.place') }}", postData, function(response) {
                 console.log(response);
                 alert("Order placed successfully!");
@@ -181,11 +200,5 @@
                 alert("There was an error placing your order. Please try again.");
             });
         }
-
-        $(document).ready(function() {
-            $('.close, .btn-secondary').on('click', function() {
-                $('#confirmOrderModal').modal('hide');
-            });
-        });
     </script>
 @endsection
