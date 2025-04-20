@@ -37,11 +37,15 @@ Route::view('/contact', 'contact')->name('contact');
 Auth::routes(['register' => false]);
 Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+
+// Login routes (sign-in and login routes merged)
 Route::get('/sign-in', [SignInController::class, 'showSignInForm'])->name('signin.form');
+Route::get('/login', [SignInController::class, 'showSignInForm'])->name('login');  // Both '/sign-in' and '/login' point to the same form
 Route::post('/signin', [SignInController::class, 'store'])->name('signin.store');
+Route::post('/login', [SignInController::class, 'store'])->name('login.store');  // Both '/signin' and '/login' handle the same store logic
+
+// Logout route
 Route::post('/logout', [SignInController::class, 'customLogout'])->name('logout');
-Route::get('/login', [SignInController::class, 'showSignInForm'])->name('login');
-Route::post('/login', [SignInController::class, 'store'])->name('login.store');
 Route::get('/logout', function () {
     return redirect('/');
 });
@@ -70,14 +74,29 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Cylinder management routes
-Route::middleware(['auth'])->prefix('management/cylinders')->name('management.cylinders')->group(function () {
-    Route::get('/', [ManagementController::class, 'cylindersPage'])->name('index');
+Route::middleware(['auth'])->prefix('management/cylinders')->name('management.cylinders.')->group(function () {
+    // Main Cylinder Management page (add a name here)
+    Route::get('/', [ManagementController::class, 'index'])->name('index');
+
+    // Show a single cylinder
     Route::get('/{id}', [ManagementController::class, 'showCylinder'])->name('show');
-    Route::delete('cylinders/destroy/{id}', [CylinderController::class, 'destroyCustom'])->name('cylinders.destroy.custom');
-    Route::get('/cylinders/create', [CylinderController::class, 'create'])->name('cylinders.create');
-    Route::get('/cylinders', [CylinderController::class, 'index'])->name('cylinders.index');
-    Route::post('/management/assign-cylinder/{user}', [CylinderController::class, 'assignCylinder'])->name('management.assign-cylinder');
+
+    // Destroy a cylinder (custom destroy action)
+    Route::delete('/{id}', [CylinderController::class, 'destroyCustom'])->name('destroy');
+
+    // Create a new cylinder
+    Route::get('/create', [CylinderController::class, 'create'])->name('create');
+
+    // List all cylinders (another listing route)
+    Route::get('/', [CylinderController::class, 'index'])->name('list');  // <-- You might want to rename this to avoid conflicts.
+
+    // Assign a cylinder to a user
+    Route::post('/assign-cylinder/{user}', [CylinderController::class, 'assignCylinder'])->name('assign-cylinder');
 });
+
+// Cylinders list page
+Route::get('/management/cylinders', [ManagementController::class, 'cylindersPage'])->name('management.cylinders');
+
 Route::post('/register-modal', [RegisterController::class, 'registerModal'])->name('register.modal');
 
 // Cylinder detail routes
@@ -86,10 +105,6 @@ Route::prefix('cylinders')->name('cylinders.')->group(function () {
     Route::get('detail/{id}', [CylinderController::class, 'show'])->name('show.detail');
     Route::delete('destroy/{id}', [CylinderController::class, 'destroyCustom'])->name('destroy.custom');
 });
-
-// Unassigned cylinders list page
-Route::get('/cylinders/unassigned', [CylinderController::class, 'showUnassigned'])
-    ->name('cylinders.unassigned');
 
 // Customer-specific routes
 Route::middleware(['auth'])->group(function () {
@@ -112,7 +127,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/employee/dashboard', [ManagementController::class, 'index'])->name('dashboard.employee');
     Route::get('/employee/accounts', [ManagementController::class, 'accounts'])->name('employee.accounts');
     Route::get('/employee/agents', [ManagementController::class, 'agents'])->name('employee.agents');
-    Route::get('/employee/statistics', [EmployeeController::class, 'statistics'])->name('employee.statistics');
     Route::get('/employee/cylinders', [ManagementController::class, 'cylindersPage'])->name('employee.cylinders');
 });
 Route::get('/employee/profile', [EmployeeController::class, 'profile'])->name('employee.profile')->middleware('auth');
@@ -125,7 +139,6 @@ Route::get('/agent/profile', [AgentController::class, 'dashboard'])->name('agent
 
 //Driver-specific routes
 Route::get('/drivers/{id}/profile', [DriversController::class, 'driverProfile'])->name('drivers.profile');
-Route::get('/drivers/cylinders', [DriversController::class, 'dashboard'])->name('drivers.cylinders');
 
 // Driver cylinders show page route
 Route::middleware(['auth'])->prefix('drivers/cylinders')->name('drivers.cylinders.')->group(function () {
@@ -160,9 +173,6 @@ Route::get('/locations/getWarehouses', [LocationController::class, 'getWarehouse
 Route::get('/employee/statistics', [StatisticsController::class, 'index'])
     ->name('employee.statistics')
     ->middleware(['auth']);
-
-// Cylinders list page
-Route::get('/management/cylinders', [ManagementController::class, 'cylindersPage'])->name('management.cylinders');
 
 // Cylinders details page
 Route::get('/management/cylinders/{id}', [ManagementController::class, 'showCylinder'])
@@ -239,7 +249,6 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Customer Order Routes
-Route::post('/order/place', [OrdersController::class, 'placeOrder'])->name('order.place');
 Route::delete('/orders/delete', [OrdersController::class, 'destroy'])->name('orders.destroy');
 Route::delete('/orders', [OrdersController::class, 'destroy'])->name('orders.delete');
 Route::get('/orders/requests', [OrdersController::class, 'requests'])->name('orders.requests');
@@ -250,9 +259,15 @@ Route::middleware(['auth', 'role:Manager'])->group(function () {
     Route::post('/manager/global-settings/update', [GlobalSettingsController::class, 'update'])->name('manager.settings.update');
 });
 
-// Unassigned cylinders assignment form
-Route::get('/cylinders/unassigned', [CylinderController::class, 'showUnassigned'])->name('cylinders.unassigned');
-Route::post('/cylinders/assign', [CylinderController::class, 'assignWarehouses'])->name('cylinders.assign');
+// Show a specific user's cylinders (assigned + orders)
+Route::middleware(['auth'])
+     ->get('/users/{id}/cylinders', [UserController::class, 'cylinders'])
+     ->name('users.cylinders');
+
+// Unassigned cylinders list page
+Route::get('/cylinders/unassigned', [CylinderController::class, 'showUnassigned'])
+    ->name('cylinders.unassigned');
+Route::post('/cylinders/assign', [CylinderController::class, 'assignWarehouses'])->name('warehouses.assign');
 
 // Resource routes
 Route::resource('cylinders', CylinderController::class)->parameters(['cylinder' => 'id']);

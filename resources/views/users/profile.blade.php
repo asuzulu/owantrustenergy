@@ -56,8 +56,60 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        @include('partials.dashboard.nin-modal')
+    @include('partials.dashboard.nin-modal')
+
+    <!-- Show Cylinders Assigned and ordered only if user has 'Customer' position -->
+    <div class="container" style="margin-top: -6rem;">
+        <div class="row tm-content-row tm-mt-big">
+            @if ($user->position === 'Customer')
+                <!-- Check if the user has 'Customer' position -->
+                <a href="{{ route('dashboard.cylinder', ['userId' => auth()->id()]) }}"
+                    class="text-decoration-none text-dark">
+                    <div class="bg-white tm-block" style="cursor: pointer;">
+                        <h3 class="tm-block-title">Cylinders Assigned:</h3>
+                        <p>You have been assigned a total of {{ $totalCylinders }} cylinder(s).</p>
+                    </div>
+                </a>
+            @endsection
+            @section('content2')
+            <a href="{{ route('users.cylinders', ['id' => $user->id]) }}" class="text-decoration-none text-dark">
+                    <div class="row tm-content-row tm-mt-big">
+                        <div class="bg-white tm-block" style="margin-top: -7rem;">
+                            <h3 class="tm-block-title">Cylinder Ordered:</h3>
+                            @if ($orders->isEmpty())
+                                <p>No cylinders have been ordered yet.</p>
+                            @else
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Cylinder Size</th>
+                                            <th>Weight</th>
+                                            <th>Order Type</th>
+                                            <th>Ordered At</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($orders as $order)
+                                            <tr>
+                                                <td>{{ $order->id }}</td>
+                                                <td>{{ $order->cylinder_size }}</td>
+                                                <td>{{ $order->weight }}</td>
+                                                <td>{{ ucfirst($order->order_type) }}</td>
+                                                <td>{{ $order->created_at->format('Y-m-d H:i:s') }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            @endif
+                        </div>
+                    </div>
+                </a>
+            @endif
+            <!-- End the check for 'Customer' position -->
+        </div>
 
         {{-- Show Distribute Cylinders modal only if user is not Customer (for Employee and Manager) --}}
         @if (in_array(Auth::user()->position, ['Employee', 'Manager']))

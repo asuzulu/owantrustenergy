@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cylinder;
+use App\Models\Warehouse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Order;
@@ -16,12 +17,13 @@ class DashboardController extends Controller
         if ($user->position === 'Manager') {
             $cylinders = Cylinder::paginate(10);
             return view('management.home', [
-                'position' => $user->position,
-                'cylinders' => $cylinders,
+                'position'   => $user->position,
+                'cylinders'  => $cylinders,
+                'warehouses' => Warehouse::all(),
             ]);
         }
 
-        $cylinders = Cylinder::where('user_id', $user->id)->get();
+        $cylinders     = Cylinder::where('user_id', $user->id)->get();
         $totalCylinders = $cylinders->count();
 
         return view('dashboard.profile', compact('cylinders', 'totalCylinders'));
@@ -29,11 +31,14 @@ class DashboardController extends Controller
 
     public function managementHome()
     {
-        // Fetch cylinders from the database
-        $cylinders = Cylinder::orderBy('created_at')->paginate(10); // Ensure pagination is applied
+        // Fetch cylinders from the database, paginated
+        $cylinders  = Cylinder::orderBy('created_at')->paginate(10);
 
-        // Pass cylinders to the view
-        return view('management.home', compact('cylinders'));
+        // Fetch all warehouses for the location filter
+        $warehouses = Warehouse::all();
+
+        // Pass both to the view
+        return view('management.home', compact('cylinders', 'warehouses'));
     }
 
     public function customerDashboard()

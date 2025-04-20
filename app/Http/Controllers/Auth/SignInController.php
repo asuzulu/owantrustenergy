@@ -8,29 +8,30 @@ use Illuminate\Support\Facades\Auth;
 
 class SignInController extends Controller
 {
+    // Show the sign-in form
     public function showSignInForm()
     {
-        return view('sign-in');
+        return view('sign-in'); // This can be reused for both /login and /sign-in
     }
 
+    // Handle the login process
     public function store(Request $request)
     {
         $credentials = $request->only('email', 'password');
 
+        // Attempt login with provided credentials and remember option
         if (Auth::attempt($credentials, $request->has('remember'))) {
             $user = Auth::user();
 
-            if ($user->wasRecentlyCreated) {
-                return redirect()->route('dashboard.profile');
-            }
-
+            // Redirect the user based on role (position)
             return $this->redirectUserByPosition($user);
         }
 
+        // If login fails, return back with error
         return redirect()->back()->with('login_error', 'Invalid email or password.');
     }
 
-    // Redirect the user based on their position
+    // Redirect the user based on their role (position)
     private function redirectUserByPosition($user)
     {
         switch (strtolower($user->position)) {
@@ -41,15 +42,16 @@ class SignInController extends Controller
             case 'manager':
                 return redirect()->route('management.home');
             case 'agent':
-                return redirect()->route('dashboard.agent');
+                return redirect()->route('agent.dashboard');
             case 'driver':
                 return redirect()->route('drivers.cylinders');
             default:
                 Auth::logout();
-                return redirect('/sign-in')->route('signin.form')->withErrors(['Invalid role.']);
+                return redirect()->route('signin.form')->withErrors(['Invalid role.']);
         }
     }
 
+    // Custom logout logic
     public function customLogout(Request $request)
     {
         Auth::logout();

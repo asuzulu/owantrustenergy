@@ -157,22 +157,6 @@ class CylinderController extends Controller
         return response()->json(['success' => 'Cylinder assigned successfully.']);
     }
 
-    public function assign(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'cylinder_id' => 'required|exists:cylinders,id',
-        ]);
-
-        $cylinder = Cylinder::findOrFail($request->cylinder_id);
-        $user = User::findOrFail($request->user_id);
-
-        $cylinder->user_id = $user->id;
-        $cylinder->location = $user->first_name . ' ' . $user->last_name;
-        $cylinder->save();
-
-        return response()->json(['success' => true, 'message' => 'Cylinder assigned successfully']);
-    }
     private function generateUniqueCylinderId()
     {
         do {

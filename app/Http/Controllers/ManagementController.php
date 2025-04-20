@@ -54,33 +54,48 @@ class ManagementController extends Controller
         return view('management.agents', compact('agents', 'states'));
     }
 
-    /**
-     * Display a paginated list of cylinders, with optional warehouse & size filters.
-     */
     public function cylindersPage(Request $request)
     {
-        // Redirect customers back to home
         if (! Auth::check() || Auth::user()->position === 'Customer') {
             return redirect()->route('home');
         }
 
-        // All warehouses for the dropdown
+        // Fetch all warehouses for the filter dropdown
         $warehouses = Warehouse::all();
 
-        // Base query
+        // Base query for cylinders
         $query = Cylinder::orderBy('id', 'asc');
 
-        // Apply warehouse filter if provided
+        // Apply location filter
         if ($request->filled('warehouse')) {
-            $query->where('location', $request->input('warehouse'));
+            if ($request->warehouse === 'Customer') {
+                // Exclude any cylinder whose location matches a warehouse name
+                $warehouseNames = $warehouses->pluck('name')->toArray();
+
+                // Get all customer full names
+                $customerNames = User::where('position', 'Customer')
+                    ->get()
+                    ->map(function ($u) {
+                        return $u->first_name . ' ' . $u->last_name;
+                    })
+                    ->toArray();
+
+                // Only include cylinders whose location matches a customer full name,
+                // and ensure none of the locations are warehouses
+                $query->whereNotIn('location', $warehouseNames)
+                    ->whereIn('location', $customerNames);
+            } else {
+                // Only cylinders at the selected warehouse
+                $query->where('location', $request->input('warehouse'));
+            }
         }
 
-        // Apply size filter if provided
+        // Apply size filter
         if ($request->filled('size')) {
             $query->where('size', $request->input('size'));
         }
 
-        // Paginate 10 per page, append filters so links keep them
+        // Paginate and preserve query parameters
         $cylinders = $query
             ->paginate(10)
             ->appends($request->only(['warehouse', 'size']));
@@ -146,7 +161,7 @@ class ManagementController extends Controller
         $deliveries = Delivery::where('cylinder', $id)->get();
         $pickups = Pickup::where('cylinder', $id)->get();
 
-        return view('cylinders.show', compact('cylinder', 'deliveries', 'pickups', 'warehouses' ));
+        return view('cylinders.show', compact('cylinder', 'deliveries', 'pickups', 'warehouses'));
     }
 
     public function store(Request $request)

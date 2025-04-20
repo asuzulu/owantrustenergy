@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\State;
 use App\Models\User;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -51,7 +52,7 @@ class UserController extends Controller
             'Customer' => redirect()->route('dashboard.profile'),
             'Employee' => redirect()->route('dashboard.employee'),
             'Manager' => redirect()->route('management.home'),
-            'Agent' => redirect()->route('dashboard.agent'),
+            'Agent' => redirect()->route('agent.dashboard'),
             'Driver' => redirect()->route('dashboard.driver'),
             default => redirect('/'),
         };
@@ -64,6 +65,31 @@ class UserController extends Controller
         $totalCylinders = $cylinders->count();
 
         return view('dashboard.profile', compact('cylinders', 'totalCylinders'));
+    }
+
+    /**
+     * Display the list of cylinders assigned to the given user.
+     */
+    public function cylinders($id)
+    {
+        $user = User::findOrFail($id);
+        $cylinders = Cylinder::where('user_id', $user->id)->get();
+        $orders     = Order::where('customer_id', $user->id)->get();
+
+        // Only managers/employees/agents can view others; customers only their own
+        if (Auth::user()->position === 'Customer' && Auth::id() !== $user->id) {
+            return redirect()->route('dashboard.profile');
+        }
+
+        $cylinders = Cylinder::where('user_id', $user->id)
+            ->orderBy('allocated_date', 'desc')
+            ->get();
+
+        $orders = Order::where('customer_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('users.cylinders', compact('user', 'cylinders', 'orders'));
     }
 
     // Update the profile image
@@ -96,11 +122,15 @@ class UserController extends Controller
 
     public function profile($id)
     {
+        // Find the user by ID
         $user = User::findOrFail($id);
         $cylinders = Cylinder::where('user_id', $id)->get();
         $user->age = Carbon::parse($user->dob)->age;
         $warehouseCylinders = collect();
-
+        // Get total assigned cylinders for the user
+        $totalCylinders = Cylinder::where('user_id', $user->id)->count();
+        // Get the user's orders (assuming 'customer_id' is used for relation)
+        $orders = Order::where('customer_id', $user->id)->get();
         if (in_array(Auth::user()->position, ['Manager', 'Employee'])) {
             $warehouseCylinders = Cylinder::whereIn('location', Warehouse::pluck('name')->toArray())
                 ->orWhereNull('user_id')
@@ -110,7 +140,7 @@ class UserController extends Controller
 
         $users = Auth::user()->position === 'Manager' ? User::all() : null;
 
-        return view('users.profile', compact('user', 'users', 'cylinders', 'warehouseCylinders'));
+        return view('users.profile', compact('user', 'orders', 'cylinders', 'warehouseCylinders', 'totalCylinders'));
     }
 
     public function edit($id)

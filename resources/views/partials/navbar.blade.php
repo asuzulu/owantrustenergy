@@ -20,7 +20,7 @@
                 @elseif(Auth::user()->position === 'Employee')
                     <a class="nav-item nav-link {{ request()->routeIs('employee.home') ? 'active' : '' }}" href="{{ route('employee.home') }}">Dashboard</a>
                 @elseif(Auth::user()->position === 'Agent')
-                    <a class="nav-item nav-link {{ request()->routeIs('dashboard.agent') ? 'active' : '' }}" href="{{ route('dashboard.agent') }}">Dashboard</a>
+                    <a class="nav-item nav-link {{ request()->routeIs('agent.dashboard') ? 'active' : '' }}" href="{{ route('agent.dashboard') }}">Dashboard</a>
                 @elseif(Auth::user()->position === 'Driver')
                     <a class="nav-item nav-link {{ request()->routeIs('drivers.cylinders') ? 'active' : '' }}" href="{{ route('drivers.cylinders') }}">Dashboard</a>
                 @endif

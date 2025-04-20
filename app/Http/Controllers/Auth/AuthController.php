@@ -49,7 +49,7 @@ class AuthController extends Controller
             } elseif ($user->position === 'Manager') {
                 return redirect()->route('management.home');
             } elseif ($user->position === 'Agent') {
-                return redirect()->route('dashboard.agent');
+                return redirect()->route('agent.dashboard');
             } elseif ($user->position === 'Driver') {
                 return redirect()->route('dashboard.driver');
             }
@@ -68,7 +68,7 @@ class AuthController extends Controller
         } elseif ($user->position === 'Manager') {
             return redirect()->route('management.home');
         } elseif ($user->position === 'Agent') {
-            return redirect()->route('dashboard.agent');
+            return redirect()->route('agent.dashboard');
         } elseif ($user->position === 'Driver') {
             return redirect()->route('dashboard.driver');
         }
