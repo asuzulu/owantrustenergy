@@ -130,7 +130,7 @@ class UserController extends Controller
         // Get total assigned cylinders for the user
         $totalCylinders = Cylinder::where('user_id', $user->id)->count();
         // Get the user's orders (assuming 'customer_id' is used for relation)
-        $orders = Order::where('customer_id', $user->id)->get();
+        $orders = Order::where('customer', $user->first_name . ' ' . $user->last_name)->get();
         if (in_array(Auth::user()->position, ['Manager', 'Employee'])) {
             $warehouseCylinders = Cylinder::whereIn('location', Warehouse::pluck('name')->toArray())
                 ->orWhereNull('user_id')

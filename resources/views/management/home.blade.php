@@ -70,8 +70,10 @@
                                     Large</option>
                             </select>
                         </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            {{-- Keep any other controls here --}}
+                        <div class="col-md-4">
+                            <label for="cylinderSearch"><strong>Search:</strong></label>
+                            <input type="text" id="cylinderSearch" class="form-control" placeholder="Search cylinders..."
+                                style="height: 60px;">
                         </div>
                     </div>
                 </form>
@@ -89,8 +91,7 @@
                         </thead>
                         <tbody>
                             @foreach ($cylinders as $cylinder)
-                                <tr onclick="window.location='{{ route('management.cylinders.show', $cylinder->id) }}';"
-                                    style="cursor: pointer;">
+                                <tr onclick="window.location='{{ route('management.cylinders.show', $cylinder->id) }}';" style="cursor: pointer;">
                                     <td>{{ str_pad($cylinder->id, 9, '0', STR_PAD_LEFT) }}</td>
                                     <td>{{ $cylinder->size }}</td>
                                     <td>
@@ -98,19 +99,15 @@
                                             @case('Small')
                                                 3 kg
                                             @break
-
                                             @case('Medium')
                                                 5 kg
                                             @break
-
                                             @case('Large')
                                                 12 kg
                                             @break
-
                                             @case('Extra Large')
                                                 25 kg
                                             @break
-
                                             @default
                                                 N/A
                                         @endswitch
@@ -176,29 +173,83 @@
     </div>
 
     <script>
-        $(document).ready(function() {
-            // Fetch warehouse locations dynamically
-            $.get("{{ route('locations.getWarehouses') }}", function(data) {
-                $("#location").empty().append(data.map(wh =>
-                    `<option value="${wh.name}">${wh.name}</option>`
-                ));
+        let allCylinders = @json($cylinders->items());
+    </script>
+
+<script>
+    $(document).ready(function() {
+        // Handle filtering by size and warehouse location
+        let filteredCylinders = allCylinders;
+
+        function filterCylinders() {
+            let warehouseFilter = $('#warehouseFilter').val();
+            let sizeFilter = $('#sizeFilter').val();
+            let searchQuery = $('#cylinderSearch').val().toLowerCase();
+
+            filteredCylinders = allCylinders.filter(function(cylinder) {
+                let matchesWarehouse = warehouseFilter ? cylinder.location.includes(warehouseFilter) : true;
+                let matchesSize = sizeFilter ? cylinder.size === sizeFilter : true;
+                let matchesSearch = searchQuery ? (
+                    cylinder.id.toString().includes(searchQuery) ||
+                    cylinder.size.toLowerCase().includes(searchQuery) ||
+                    cylinder.location.toLowerCase().includes(searchQuery)
+                ) : true;
+
+                return matchesWarehouse && matchesSize && matchesSearch;
             });
 
-            $("#cylinderForm").submit(function(event) {
-                event.preventDefault();
-                $.ajax({
-                    url: "{{ route('cylinders.store') }}",
-                    type: "POST",
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        alert("Cylinder(s) added successfully!");
-                        location.reload();
-                    },
-                    error: function(xhr) {
-                        alert("Error adding cylinder(s).");
-                    }
-                });
+            renderTable(filteredCylinders);
+        }
+
+        // Render filtered cylinders in the table
+        function renderTable(cylinders) {
+            let tableBody = $('table tbody');
+            tableBody.empty();
+
+            let startIndex = 0;
+            let perPage = 10;
+            let paginated = cylinders.slice(startIndex, startIndex + perPage);
+
+            paginated.forEach(function(cylinder) {
+                tableBody.append(`
+                    <tr onclick="window.location='{{ route('management.cylinders.show', ['id' => $cylinder->id]) }}';" style="cursor: pointer;">
+                        <td>${String(cylinder.id).padStart(9, '0')}</td>
+                        <td>${cylinder.size}</td>
+                        <td>${getCylinderWeight(cylinder.size)}</td>
+                        <td>${cylinder.location}</td>
+                        <td>${new Date(cylinder.allocated_date).toLocaleDateString()}</td>
+                    </tr>
+                `);
             });
+
+            // Update pagination (simplified pagination for now)
+            updatePagination(cylinders);
+        }
+
+        function getCylinderWeight(size) {
+            switch (size) {
+                case 'Small': return '3 kg';
+                case 'Medium': return '5 kg';
+                case 'Large': return '12 kg';
+                case 'Extra Large': return '25 kg';
+                default: return 'N/A';
+            }
+        }
+
+        function updatePagination(cylinders) {
+            // Handle pagination logic here (just a basic example)
+            let totalPages = Math.ceil(cylinders.length / 10);
+            // Update your pagination UI accordingly
+            console.log(`Total Pages: ${totalPages}`);
+        }
+
+        // Event listeners for filters
+        $('#warehouseFilter, #sizeFilter, #cylinderSearch').on('change keyup', function() {
+            filterCylinders();
         });
-    </script>
+
+        // Initialize the table with the full list
+        filterCylinders();
+    });
+</script>
 @endsection
