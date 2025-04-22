@@ -1,28 +1,66 @@
-@if (Auth::user()->position === 'Customer')
-    <script>
-        window.location.href = "{{ route('dashboard') }}"; // Redirect to a safe page
-    </script>
-    @php exit; @endphp
-@endif
+@extends(
+    auth()->check() && auth()->user()->position === 'Manager'
+        ? 'layouts.management-dashboard'
+        : (auth()->check() && auth()->user()->position === 'Employee'
+            ? 'layouts.employee-dashboard'
+            : (auth()->check() && auth()->user()->position === 'Driver'
+                ? 'layouts.drivers-dashboard'
+                : 'layouts.default-dashboard'
+            )
+        )
+)
 
-@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : (Auth::user()->position === 'Driver' ? 'layouts.drivers-dashboard' : 'layouts.default-dashboard')))
+@php
+    if (!auth()->check()) {
+        header('Location: ' . url('/'));
+        exit();
+    }
+@endphp
 
 @section('content')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <div class="container" style="margin-top: -6rem;">
         <div class="row tm-content-row tm-mt-big">
             <div class="bg-white tm-block h-100">
-                <div class="row">
-                    <div class="col-md-8 col-sm-12">
-                        <h2 class="tm-block-title d-inline-block">Drivers</h2>
-                    </div>
-                    @if (Auth::user()->position !== 'Driver')
-                        <div class="col-md-4 col-sm-12 text-right">
-                            <button class="btn btn-small btn-primary" data-toggle="modal" data-target="#addDriverModal">Add
-                                New Driver</button>
+
+                {{-- HEADER ROW: title, search, add button all same height --}}
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-stretch mb-3" style="height: 50px;">
+                            <h2 class="tm-block-title align-self-center" style="margin:0;">Drivers</h2>
+
+                            <form method="GET"
+                                  action="{{ route('management.drivers') }}"
+                                  class="d-flex mx-2"
+                                  style="width: 400px; height: 100%;">
+                                <input type="text"
+                                       name="search"
+                                       class="form-control"
+                                       placeholder="Search drivers..."
+                                       value="{{ request('search') }}"
+                                       aria-label="Search Drivers"
+                                       style="height: 100%;">
+                                <button type="submit"
+                                        class="btn btn-primary ml-2"
+                                        style="height: 100%;">
+                                    Search
+                                </button>
+                            </form>
+
+                            @if (Auth::user()->position !== 'Driver')
+                                <button class="btn btn-small btn-primary"
+                                        data-toggle="modal"
+                                        data-target="#addDriverModal"
+                                        style="height: 100%;">
+                                    Add New Driver
+                                </button>
+                            @endif
                         </div>
-                    @endif
+                    </div>
                 </div>
+                {{-- END HEADER ROW --}}
+                
                 <div class="table-responsive">
                     <table class="table table-hover table-striped tm-table-striped-even mt-3">
                         <thead>

@@ -149,7 +149,7 @@ class DriversController extends Controller
 
         return redirect()->back()->with('success', 'Profile updated successfully!');
     }
-    
+
     public function dashboard()
     {
         $user = Auth::user();

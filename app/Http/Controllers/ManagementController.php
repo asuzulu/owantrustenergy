@@ -274,19 +274,38 @@ class ManagementController extends Controller
 
         return view('management.statistics', compact('cylindersAssignedChart', 'customerRegistrationsChart'));
     }
-    public function drivers()
+    public function drivers(Request $request)
     {
-        if (Auth::user()->position === 'Customer') {
-            abort(403, 'Unauthorized action.');
+        // Redirect Customers away
+        if (! Auth::check() || Auth::user()->position === 'Customer') {
+            return redirect()->route('dashboard');
         }
-        try {
-            // Use paginate(10) so that $drivers is a paginator, not a collection
-            $drivers = User::where('position', 'Driver')->paginate(10);
-            $states = State::all();
-        } catch (\Exception $e) {
-            Log::debug('Error retrieving Drivers: ', ['error' => $e->getMessage()]);
-            abort(500, 'Failed to retrieve drivers.');
+
+        // Base query for drivers
+        $query = User::where('position', 'Driver');
+
+        // Server‑side search across name, phone, email, city, state
+        if ($request->filled('search')) {
+            $term = $request->search;
+            $query->where(function ($q) use ($term) {
+                $q->where('first_name', 'like', "%{$term}%")
+                  ->orWhere('last_name', 'like', "%{$term}%")
+                  ->orWhere('phone_number', 'like', "%{$term}%")
+                  ->orWhere('email', 'like', "%{$term}%")
+                  ->orWhere('city', 'like', "%{$term}%")
+                  ->orWhere('state', 'like', "%{$term}%");
+            });
         }
+
+        // Paginate and preserve search query
+        $drivers = $query
+            ->orderBy('first_name')
+            ->paginate(10)
+            ->withQueryString();
+
+        // States for the Add Driver modal
+        $states = State::all();
+
         return view('management.drivers', compact('drivers', 'states'));
     }
 

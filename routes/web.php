@@ -238,7 +238,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/management/drivers', [DriversController::class, 'index'])->name('drivers.index');
+    Route::get('/drivers/index', [DriversController::class, 'index'])->name('drivers.index');
     Route::post('/management/drivers', [DriversController::class, 'store'])->name('drivers.store');
     Route::get('/management/drivers/profile/{id}', [DriversController::class, 'driverProfile'])->name('management.drivers.profile');
     Route::put('/management/drivers/profile/{id}', [DriversController::class, 'update'])->name('drivers.update');

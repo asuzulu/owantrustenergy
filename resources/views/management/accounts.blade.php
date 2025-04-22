@@ -1,14 +1,4 @@
-@extends(
-    auth()->check() && auth()->user()->position === 'Manager'
-        ? 'layouts.management-dashboard'
-        : (auth()->check() && auth()->user()->position === 'Employee'
-            ? 'layouts.employee-dashboard'
-            : (auth()->check() && auth()->user()->position === 'Agent'
-                ? 'layouts.agent-dashboard'
-                : 'layouts.app'
-            )
-        )
-)
+@extends(auth()->check() && auth()->user()->position === 'Manager' ? 'layouts.management-dashboard' : (auth()->check() && auth()->user()->position === 'Employee' ? 'layouts.employee-dashboard' : (auth()->check() && auth()->user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.app')))
 
 @php
     if (!auth()->check()) {
@@ -28,36 +18,27 @@
                                 <h2 class="tm-block-title">Customer Accounts</h2>
                                 <div class="d-flex justify-content-between align-items-center">
                                     {{-- HEADER: buttons + search, all same height --}}
-                                    <div class="d-flex justify-content-between align-items-stretch mb-3" style="height: 50px;">
-                                        <a href="{{ route('management.orders.requests') }}"
-                                           class="btn btn-primary"
-                                           style="height: 100%;">
-                                            Customer Requests
-                                        </a>
+                                    <div class="d-flex justify-content-between align-items-stretch mb-3"
+                                        style="height: 50px;">
 
-                                        <form method="GET"
-                                              action="{{ route('management.accounts') }}"
-                                              class="d-flex mx-2"
-                                              style="width: 400px; height: 100%;">
-                                            <input type="text"
-                                                   name="search"
-                                                   class="form-control"
-                                                   placeholder="Search customers..."
-                                                   value="{{ request('search') }}"
-                                                   aria-label="Search Customers"
-                                                   style="height: 100%;">
-                                            <button type="submit"
-                                                    class="btn btn-primary ml-2"
-                                                    aria-label="Submit Search"
-                                                    style="height: 100%;">
+                                        <form method="GET" action="{{ route('management.accounts') }}" class="d-flex mx-2"
+                                            style="width: 400px; height: 100%;">
+                                            <input type="text" name="search" class="form-control"
+                                                placeholder="Search customers..." value="{{ request('search') }}"
+                                                aria-label="Search Customers" style="height: 100%;">
+                                            <button type="submit" class="btn btn-primary ml-2 mr-3"
+                                                aria-label="Submit Search" style="height: 100%;">
                                                 Search
                                             </button>
                                         </form>
 
-                                        <button class="btn btn-primary"
-                                                data-toggle="modal"
-                                                data-target="#addCustomerModal"
-                                                style="height: 100%;">
+                                        <a href="{{ route('management.orders.requests') }}" class="btn btn-primary"
+                                            style="height: 100%;">
+                                            Customer Requests
+                                        </a>
+
+                                        <button class="btn btn-primary" data-toggle="modal" data-target="#addCustomerModal"
+                                            style="height: 100%;">
                                             Add Customer
                                         </button>
                                     </div>
