@@ -73,35 +73,57 @@
                 </a>
             @endsection
             @section('content2')
-            <a href="{{ route('users.cylinders', ['id' => $user->id]) }}" class="text-decoration-none text-dark">
+                <a href="{{ route('users.cylinders', ['id' => $user->id]) }}" class="text-decoration-none text-dark">
                     <div class="row tm-content-row tm-mt-big">
                         <div class="bg-white tm-block" style="margin-top: -7rem;">
-                            <h3 class="tm-block-title">Cylinder Ordered:</h3>
+                            <h3 class="tm-block-title">Cylinders Ordered:</h3>
+
+                            @php
+                                $sizeCounts = $orders->groupBy('cylinder_size')->map->count();
+                            @endphp
+
                             @if ($orders->isEmpty())
                                 <p>No cylinders have been ordered yet.</p>
                             @else
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Order ID</th>
-                                            <th>Cylinder Size</th>
-                                            <th>Weight</th>
-                                            <th>Order Type</th>
-                                            <th>Ordered At</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($orders as $order)
+                                <div style="display: none;">
+                                    <table class="table">
+                                        <thead>
                                             <tr>
-                                                <td>{{ $order->id }}</td>
-                                                <td>{{ $order->cylinder_size }}</td>
-                                                <td>{{ $order->weight }}</td>
-                                                <td>{{ ucfirst($order->order_type) }}</td>
-                                                <td>{{ $order->created_at->format('Y-m-d H:i:s') }}</td>
+                                                <th>Order ID</th>
+                                                <th>Cylinder Size</th>
+                                                <th>Weight</th>
+                                                <th>Order Type</th>
+                                                <th>Ordered At</th>
                                             </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($orders as $order)
+                                                <tr>
+                                                    <td>{{ $order->id }}</td>
+                                                    <td>{{ $order->cylinder_size }}</td>
+                                                    <td>{{ $order->weight }}</td>
+                                                    <td>{{ ucfirst($order->order_type) }}</td>
+                                                    <td>{{ $order->created_at->format('Y-m-d H:i:s') }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="row">
+                                    @foreach ($sizeCounts as $size => $count)
+                                        <div class="col-md-3">
+                                            <div class="card text-white bg-primary mb-3" style="max-width: 18rem;">
+                                                <div class="card-header">{{ $size }} Cylinders</div>
+                                                <div class="card-body">
+                                                    <h5 class="card-title">{{ $count }}</h5>
+                                                    <p class="card-text">Total {{ strtolower($size) }} cylinders ordered.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
                             @endif
                         </div>
                     </div>

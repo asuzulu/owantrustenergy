@@ -25,7 +25,8 @@
                 </div>
             </div>
             <div class="tm-col tm-col-small">
-                <div class="bg-white tm-block" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0 10px !important; padding-left: 5px !important; padding-right: 5px !important;">
+                <div class="bg-white tm-block"
+                    style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0 10px !important; padding-left: 5px !important; padding-right: 5px !important;">
                     <div style="flex-shrink: 1 !important; max-width: fit-content !important;">
                         @include('partials.dashboard.profile-image.display')
                     </div>
@@ -51,28 +52,27 @@
         <a href="{{ route('dashboard.cylinder', ['userId' => auth()->id()]) }}" class="text-decoration-none text-dark">
             <div class="row tm-content-row tm-mt-big">
                 <div class="bg-white tm-block" style="margin-top: -30px;">
-                    <h3 class="tm-block-title">Cylinder Ordered:</h3>
-                    @if ($orders->isEmpty())
+                    <h3 class="tm-block-title">Cylinders Ordered (Summary):</h3>
+
+                    @php
+                        $sizeTotals = $orders->groupBy('cylinder_size')->map->count();
+                    @endphp
+
+                    @if ($sizeTotals->isEmpty())
                         <p>No cylinders have been ordered yet.</p>
                     @else
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Order ID</th>
                                     <th>Cylinder Size</th>
-                                    <th>Weight</th>
-                                    <th>Order Type</th>
-                                    <th>Ordered At</th>
+                                    <th>Total Ordered</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($orders as $order)
+                                @foreach ($sizeTotals as $size => $count)
                                     <tr>
-                                        <td>{{ $order->id }}</td>
-                                        <td>{{ $order->cylinder_size }}</td>
-                                        <td>{{ $order->weight }}</td>
-                                        <td>{{ ucfirst($order->order_type) }}</td>
-                                        <td>{{ $order->created_at->format('Y-m-d H:i:s') }}</td>
+                                        <td>{{ $size }}</td>
+                                        <td>{{ $count }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

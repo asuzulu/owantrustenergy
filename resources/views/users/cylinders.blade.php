@@ -139,7 +139,7 @@
 
                 if (!ids.length) return alert("Please select at least one order.");
 
-                fetch('/orders', {
+                fetch('/orders/delete', {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

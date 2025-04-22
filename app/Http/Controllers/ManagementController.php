@@ -56,53 +56,57 @@ class ManagementController extends Controller
 
     public function cylindersPage(Request $request)
     {
+        // Redirect non‑logged‑in or Customer users
         if (! Auth::check() || Auth::user()->position === 'Customer') {
             return redirect()->route('home');
         }
 
-        // Fetch all warehouses for the filter dropdown
+        // Fetch all warehouses for the Location dropdown
         $warehouses = Warehouse::all();
 
         // Base query for cylinders
         $query = Cylinder::orderBy('id', 'asc');
 
-        // Apply location filter
+        // Apply Location (warehouse/customer) filter
         if ($request->filled('warehouse')) {
             if ($request->warehouse === 'Customer') {
-                // Exclude any cylinder whose location matches a warehouse name
                 $warehouseNames = $warehouses->pluck('name')->toArray();
 
-                // Get all customer full names
                 $customerNames = User::where('position', 'Customer')
                     ->get()
-                    ->map(function ($u) {
-                        return $u->first_name . ' ' . $u->last_name;
-                    })
+                    ->map(fn($u) => $u->first_name . ' ' . $u->last_name)
                     ->toArray();
 
-                // Only include cylinders whose location matches a customer full name,
-                // and ensure none of the locations are warehouses
                 $query->whereNotIn('location', $warehouseNames)
-                    ->whereIn('location', $customerNames);
+                      ->whereIn('location', $customerNames);
             } else {
-                // Only cylinders at the selected warehouse
                 $query->where('location', $request->input('warehouse'));
             }
         }
 
-        // Apply size filter
+        // Apply Size filter
         if ($request->filled('size')) {
             $query->where('size', $request->input('size'));
         }
 
-        // Paginate and preserve query parameters
+        // Apply Search filter (server‑side)
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhere('size', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
+
+        // Paginate and preserve all three query params
         $cylinders = $query
             ->paginate(10)
-            ->appends($request->only(['warehouse', 'size']));
+            ->appends($request->only(['warehouse', 'size', 'search']));
 
         return view('management.home', compact('cylinders', 'warehouses'));
     }
-
+    
     public function assignCylinder(Request $request, User $user)
     {
         $request->validate([
