@@ -17,10 +17,57 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ManagementController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $cylinders = Cylinder::orderBy('id')->paginate(10);
-        return view('management.home', compact('cylinders'));
+        // Redirect non‑logged‑in or Customer users
+        if (! Auth::check() || Auth::user()->position === 'Customer') {
+            return redirect()->route('home');
+        }
+
+        // Fetch all warehouses for the Location dropdown
+        $warehouses = Warehouse::all();
+
+        // Base query for cylinders
+        $query = Cylinder::orderBy('id', 'asc');
+
+        // Apply Location (warehouse/customer) filter
+        if ($request->filled('warehouse')) {
+            if ($request->warehouse === 'Customer') {
+                $warehouseNames = $warehouses->pluck('name')->toArray();
+
+                $customerNames = User::where('position', 'Customer')
+                    ->get()
+                    ->map(fn($u) => $u->first_name . ' ' . $u->last_name)
+                    ->toArray();
+
+                $query->whereNotIn('location', $warehouseNames)
+                    ->whereIn('location', $customerNames);
+            } else {
+                $query->where('location', $request->input('warehouse'));
+            }
+        }
+
+        // Apply Size filter
+        if ($request->filled('size')) {
+            $query->where('size', $request->input('size'));
+        }
+
+        // Apply Search filter (server‑side)
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhere('size', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
+
+        // Paginate and preserve all three query params
+        $cylinders = $query
+            ->paginate(10)
+            ->appends($request->only(['warehouse', 'size', 'search']));
+
+        return view('management.home', compact('cylinders', 'warehouses'));
     }
 
     public function accounts(Request $request)
@@ -79,11 +126,34 @@ class ManagementController extends Controller
         return view('management.accounts', compact('users', 'states'));
     }
 
-    public function employees()
+    public function employees(Request $request)
     {
-        // Fetch all users with the role 'employee'
-        $employees = User::where('position', 'Employee')->get();
-        return view('management.employees', compact('employees'));
+        // Redirect Customers away
+        if (! Auth::check() || Auth::user()->position === 'Customer') {
+            return redirect()->route('home');
+        }
+
+        $query = User::where('position', 'Employee');
+
+        // Server‑side search (name / phone / email)
+        if ($request->filled('search')) {
+            $term = $request->search;
+            $query->where(function($q) use ($term) {
+                $q->where('first_name','like',"%{$term}%")
+                  ->orWhere('last_name','like',"%{$term}%")
+                  ->orWhere('phone_number','like',"%{$term}%")
+                  ->orWhere('email','like',"%{$term}%");
+            });
+        }
+
+        $states = State::all();
+
+        $employees = $query
+            ->orderBy('first_name')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('management.employees', compact('employees', 'states'));
     }
 
     public function agents()

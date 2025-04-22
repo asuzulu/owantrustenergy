@@ -88,7 +88,7 @@ Route::middleware(['auth'])->prefix('management/cylinders')->name('management.cy
     Route::get('/create', [CylinderController::class, 'create'])->name('create');
 
     // List all cylinders (another listing route)
-    Route::get('/', [CylinderController::class, 'index'])->name('list'); 
+    Route::get('/', [CylinderController::class, 'index'])->name('list');
 
     // Assign a cylinder to a user
     Route::post('/assign-cylinder/{user}', [CylinderController::class, 'assignCylinder'])->name('assign-cylinder');
