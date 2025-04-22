@@ -23,12 +23,57 @@ class ManagementController extends Controller
         return view('management.home', compact('cylinders'));
     }
 
-    public function accounts()
+    public function accounts(Request $request)
     {
-        // Fetch all users with the role 'customer'
-        $users = User::where('position', 'Customer')->paginate(10);
+        // Redirect non‑logged‑in users or Customers
+        if (! Auth::check() || Auth::user()->position === 'Customer') {
+            return redirect()->route('home');
+        }
 
-        // Fetch states for the Add Customer form
+        $query = User::where('position', 'Customer');
+
+        $search = trim($request->input('search', ''));
+        if ($search !== '') {
+            // split on whitespace
+            $terms = preg_split('/\s+/', mb_strtolower($search, 'UTF-8'));
+
+            // columns to include in matching
+            $columns = ['first_name', 'last_name', 'email', 'phone_number', 'street', 'city', 'state'];
+
+            // build relevance parts
+            $bindings = [];
+            $relevanceParts = [];
+            foreach ($terms as $term) {
+                $wild = "%{$term}%";
+                foreach ($columns as $col) {
+                    $relevanceParts[] = "CASE WHEN LOWER($col) LIKE ? THEN 1 ELSE 0 END";
+                    $bindings[] = $wild;
+                }
+            }
+            $relevanceSql = implode(' + ', $relevanceParts) . ' as relevance';
+
+            // apply search + ranking
+            $query = $query
+                ->select('*')
+                ->selectRaw($relevanceSql, $bindings)
+                ->where(function($q) use ($terms, $columns) {
+                    foreach ($terms as $term) {
+                        $q->where(function($q2) use ($term, $columns) {
+                            foreach ($columns as $col) {
+                                $q2->orWhere($col, 'like', "%{$term}%");
+                            }
+                        });
+                    }
+                })
+                ->orderByDesc('relevance');
+        }
+
+        // final ordering & pagination (with search still in the query string)
+        $users = $query
+            ->orderBy('first_name')
+            ->paginate(10)
+            ->withQueryString();
+
         $states = State::all();
 
         return view('management.accounts', compact('users', 'states'));
@@ -78,7 +123,7 @@ class ManagementController extends Controller
                     ->toArray();
 
                 $query->whereNotIn('location', $warehouseNames)
-                      ->whereIn('location', $customerNames);
+                    ->whereIn('location', $customerNames);
             } else {
                 $query->where('location', $request->input('warehouse'));
             }
@@ -92,10 +137,10 @@ class ManagementController extends Controller
         // Apply Search filter (server‑side)
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('id', 'like', "%{$search}%")
-                  ->orWhere('size', 'like', "%{$search}%")
-                  ->orWhere('location', 'like', "%{$search}%");
+                    ->orWhere('size', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%");
             });
         }
 
@@ -106,7 +151,7 @@ class ManagementController extends Controller
 
         return view('management.home', compact('cylinders', 'warehouses'));
     }
-    
+
     public function assignCylinder(Request $request, User $user)
     {
         $request->validate([
