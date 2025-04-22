@@ -24,7 +24,7 @@
                 <div class="bg-white tm-block" style="width: 100% !important; font-size: 13px !important;">
 
                     {{-- HEADER: buttons + search, all same height --}}
-                    <div class="d-flex justify-content-between align-items-stretch mb-3" style="height: 40px;">
+                    <div class="d-flex justify-content-between align-items-stretch mb-3" style="height: 50px;">
                         <a href="{{ route('management.orders.requests') }}"
                            class="btn btn-primary"
                            style="height: 100%;">
@@ -34,7 +34,7 @@
                         <form method="GET"
                               action="{{ route('management.accounts') }}"
                               class="d-flex mx-2"
-                              style="width: 300px; height: 100%;">
+                              style="width: 400px; height: 100%;">
                             <input type="text"
                                    name="search"
                                    class="form-control"
