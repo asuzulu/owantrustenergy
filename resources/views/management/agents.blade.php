@@ -1,9 +1,4 @@
-@if (Auth::user()->position === 'Customer')
-    <script>
-        window.location.href = "{{ route('dashboard') }}"; // Redirect to a safe page
-    </script>
-    @php exit; @endphp
-@endif
+@extends(auth()->check() && auth()->user()->position === 'Manager' ? 'layouts.management-dashboard' : (auth()->check() && auth()->user()->position === 'Employee' ? 'layouts.employee-dashboard' : (auth()->check() && auth()->user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.app')))
 
 @php
     if (!auth()->check()) {
@@ -12,23 +7,37 @@
     }
 @endphp
 
-@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : 'layouts.app'))
-
 @section('content')
     <div class="container" style="margin-top: -6rem;">
         <div class="row tm-content-row tm-mt-big">
             <div class="bg-white tm-block h-100">
-                <div class="row">
-                    <div class="col-md-8 col-sm-12">
-                        <h2 class="tm-block-title d-inline-block">Agents</h2>
-                    </div>
-                    @if (Auth::user()->position !== 'Agent')
-                        <div class="col-md-4 col-sm-12 text-right">
-                            <button class="btn btn-small btn-primary" data-toggle="modal" data-target="#addAgentModal"
-                                aria-label="Add New Agent">Add New Agent</button>
+
+                {{-- HEADER ROW: title, search, add button all same height --}}
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-stretch mb-3" style="height: 50px;">
+                            <h2 class="tm-block-title align-self-center" style="margin:0;">Agents</h2>
+
+                            <form method="GET" action="{{ route('management.agents') }}" class="d-flex mx-2"
+                                style="width: 400px; height: 100%;">
+                                <input type="text" name="search" class="form-control" placeholder="Search agents..."
+                                    value="{{ request('search') }}" aria-label="Search Agents" style="height: 100%;">
+                                <button type="submit" class="btn btn-primary ml-2" style="height: 100%;">
+                                    Search
+                                </button>
+                            </form>
+
+                            @if (Auth::user()->position !== 'Agent')
+                                <button class="btn btn-small btn-primary" data-toggle="modal" data-target="#addAgentModal"
+                                    style="height: 100%;" aria-label="Add New Agent">
+                                    Add New Agent
+                                </button>
+                            @endif
                         </div>
-                    @endif
+                    </div>
                 </div>
+                {{-- END HEADER ROW --}}
+
                 <div class="table-responsive">
                     <table class="table table-hover table-striped tm-table-striped-even mt-3">
                         <thead>
@@ -53,21 +62,23 @@
                                     <td>{{ $agent->dob ? \Carbon\Carbon::parse($agent->dob)->age : 'N/A' }}</td>
                                 </tr>
                             @endforeach
+
                             @if ($agents->isEmpty())
                                 <tr>
-                                    <td colspan="7" class="text-center">No agents found.</td>
+                                    <td colspan="6" class="text-center">No agents found.</td>
                                 </tr>
                             @endif
                         </tbody>
                     </table>
                 </div>
+
+                @if ($agents->hasPages())
+                    <div class="d-flex justify-content-center mt-3">
+                        {{ $agents->links('pagination::bootstrap-4') }}
+                    </div>
+                @endif
+
             </div>
-            {{-- Pagination Links --}}
-            @if ($agents->hasPages())
-                <div style="text-align: center; margin-top: 20px;">
-                    {{ $agents->links('pagination::bootstrap-4') }}
-                </div>
-            @endif
         </div>
     </div>
 

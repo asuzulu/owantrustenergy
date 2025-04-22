@@ -156,17 +156,34 @@ class ManagementController extends Controller
         return view('management.employees', compact('employees', 'states'));
     }
 
-    public function agents()
+    public function agents(Request $request)
     {
-        try {
-            $agents = User::where('position', 'Agent')->paginate(10);
-            $states = State::all();  // Retrieve all states
-        } catch (\Exception $e) {
-            Log::error('Error retrieving agents: ' . $e->getMessage());
-            abort(500, 'Error retrieving agents.');
+        // Redirect non‑logged‑in or Customers away
+        if (! Auth::check() || Auth::user()->position === 'Customer') {
+            return redirect()->route('home');
         }
 
-        return view('management.agents', compact('agents', 'states'));
+        $query = User::where('position', 'Agent');
+
+        // Server‑side search across first_name, last_name, phone_number, email
+        if ($request->filled('search')) {
+            $term = $request->search;
+            $query->where(function($q) use ($term) {
+                $q->where('first_name', 'like', "%{$term}%")
+                  ->orWhere('last_name',  'like', "%{$term}%")
+                  ->orWhere('phone_number','like', "%{$term}%")
+                  ->orWhere('email',       'like', "%{$term}%");
+            });
+        }
+
+        $agents = $query
+            ->orderBy('first_name')
+            ->paginate(10)
+            ->withQueryString();
+
+        $states = State::all();
+
+        return view('management.agents', compact('agents','states'));
     }
 
     public function cylindersPage(Request $request)
