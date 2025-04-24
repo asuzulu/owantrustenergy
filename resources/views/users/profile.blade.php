@@ -141,13 +141,15 @@
         @if ($user->position === 'Agent' && in_array(Auth::user()->position, ['Employee', 'Manager', 'Agent']))
             <div class="row tm-content-row tm-mt-big">
                 <div class="bg-white tm-block">
-                    <h3 class="tm-block-title" style="text-align: center">Cylinders Distributed to Agent</h3>
+                    <h3 class="tm-block-title text-center">Cylinders Distributed to Agent</h3>
+
                     @php
                         $distributed = \Illuminate\Support\Facades\DB::table('agent_cylinders_distribution')
                             ->where('agent_id', $user->id)
                             ->orderBy('created_at', 'desc')
                             ->get();
                     @endphp
+
                     @if ($distributed->isNotEmpty())
                         <table class="table table-hover">
                             <thead>
@@ -164,12 +166,14 @@
                             </thead>
                             <tbody>
                                 @foreach ($distributed as $item)
-                                    <tr style="cursor: pointer;">
+                                    <tr style="cursor: pointer;"
+                                        onclick="window.location='{{ route('management.cylinders.show', $item->cylinder_id) }}'">
                                         <td>{{ str_pad($item->cylinder_id, 9, '0', STR_PAD_LEFT) }}</td>
                                         <td>{{ $item->cylinder_size }}</td>
                                         <td>{{ $item->cylinder_weight }}</td>
                                         <td>{{ $item->warehouse }}</td>
-                                        <td>{{ $item->pick_up_date ? \Carbon\Carbon::parse($item->pick_up_date)->format('d-m-Y') : 'N/A' }}
+                                        <td>
+                                            {{ $item->pick_up_date ? \Carbon\Carbon::parse($item->pick_up_date)->format('d-m-Y') : 'N/A' }}
                                         </td>
                                         @if (Auth::user()->position === 'Agent')
                                             <td>{{ $item->passcode }}</td>
@@ -179,7 +183,7 @@
                             </tbody>
                         </table>
                     @else
-                        <p style="text-align: center">No cylinders distributed to this agent.</p>
+                        <p class="text-center">No cylinders distributed to this agent.</p>
                     @endif
                 </div>
             </div>
