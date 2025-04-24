@@ -304,8 +304,8 @@
                 }
             });
             $('#assignCylinderBtn').on('click', function() {
-                let userId = $('#selectedUserId').val().trim();
-                let cylinderId = {{ $cylinder->id }};
+                let userId         = $('#selectedUserId').val().trim();
+                let cylinderId     = "{{ str_pad($cylinder->id, 9, '0', STR_PAD_LEFT) }}";
                 let assignmentType = $('input[name="assignmentType"]:checked').val();
                 let driverId = $('#selectedDriverId').val() || null;
                 let deliveryDate = $('#deliveryDate').val();

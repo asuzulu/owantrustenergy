@@ -54,7 +54,7 @@
         <!-- Display the cylinders assigned to the driver -->
         <div class="row tm-content-row tm-mt-big">
             <div class="bg-white tm-block">
-                <h3 class="tm-block-title" style="text-align: center">Cylinders Assigned</h3>
+                <h3 class="tm-block-title" style="text-align: center">Deliveries</h3>
                 @if ($deliveries->isNotEmpty())
                     <table class="table table-hover">
                         <thead>
@@ -67,9 +67,12 @@
                         </thead>
                         <tbody>
                             @foreach ($deliveries as $delivery)
-                                <tr onclick="window.location='{{ route('cylinders.show', ['cylinder' => $delivery->cylinder]) }}';"
-                                    style="cursor: pointer;">
-                                    <td>{{ str_pad($delivery->cylinder, 9, '0', STR_PAD_LEFT) }}</td>
+                                @php
+                                    $paddedId = str_pad($delivery->cylinder, 9, '0', STR_PAD_LEFT);
+                                @endphp
+                                <tr style="cursor: pointer;"
+                                    onclick="window.location='{{ route('cylinders.show', ['cylinder' => $paddedId]) }}';">
+                                    <td>{{ $paddedId }}</td>
                                     <td>{{ $delivery->size }}</td>
                                     <td>{{ $delivery->customer }}</td>
                                     <td>{{ \Carbon\Carbon::parse($delivery->delivery_date)->format('d-m-Y') ?? 'N/A' }}
@@ -92,35 +95,35 @@
     @endsection
 
     @section('scripts')
-    <script>
-        $(document).ready(function() {
-            $("#editDriverForm").on("submit", function(e) {
-                e.preventDefault(); // Prevent normal form submission
+        <script>
+            $(document).ready(function() {
+                $("#editDriverForm").on("submit", function(e) {
+                    e.preventDefault(); // Prevent normal form submission
 
-                let formData = $(this).serialize(); // Serialize form data
-                let actionUrl = $(this).attr("action");
+                    let formData = $(this).serialize(); // Serialize form data
+                    let actionUrl = $(this).attr("action");
 
-                $.ajax({
-                    url: actionUrl,
-                    type: "POST",
-                    data: formData,
-                    success: function(response) {
-                        if (response.success) {
-                            // Close the modal
-                            $("#editDriverModal").modal("hide");
+                    $.ajax({
+                        url: actionUrl,
+                        type: "POST",
+                        data: formData,
+                        success: function(response) {
+                            if (response.success) {
+                                // Close the modal
+                                $("#editDriverModal").modal("hide");
 
-                            // Update user details on the page dynamically
-                            $("#editFirstName").val(response.user.first_name);
-                            $("#editLastName").val(response.user.last_name);
-                            $("#editPhoneNumber").val(response.user.phone_number);
-                            $("#editStreet").val(response.user.street);
-                            $("#editCity").val(response.user.city);
-                            $("#editState").val(response.user.state);
-                            $("#editEmail").val(response.user.email);
-                            $("#editDob").val(response.user.dob);
+                                // Update user details on the page dynamically
+                                $("#editFirstName").val(response.user.first_name);
+                                $("#editLastName").val(response.user.last_name);
+                                $("#editPhoneNumber").val(response.user.phone_number);
+                                $("#editStreet").val(response.user.street);
+                                $("#editCity").val(response.user.city);
+                                $("#editState").val(response.user.state);
+                                $("#editEmail").val(response.user.email);
+                                $("#editDob").val(response.user.dob);
 
-                            // Update displayed profile details
-                            $(".tm-block").html(`\
+                                // Update displayed profile details
+                                $(".tm-block").html(`\
                                 Name: ${response.user.first_name} ${response.user.last_name}<br>\
                                 Email: ${response.user.email}<br>\
                                 Gender: ${response.user.gender}<br>\
@@ -131,16 +134,16 @@
                                 Age: ${response.user.age}<br>\
                             `);
 
-                            alert("Profile updated successfully!");
-                        } else {
-                            alert("Something went wrong. Please try again.");
+                                alert("Profile updated successfully!");
+                            } else {
+                                alert("Something went wrong. Please try again.");
+                            }
+                        },
+                        error: function(xhr) {
+                            alert("Error updating profile: " + xhr.responseJSON.message);
                         }
-                    },
-                    error: function(xhr) {
-                        alert("Error updating profile: " + xhr.responseJSON.message);
-                    }
+                    });
                 });
             });
-        });
-    </script>
-@endsection
+        </script>
+    @endsection
