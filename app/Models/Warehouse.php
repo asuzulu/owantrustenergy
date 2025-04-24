@@ -9,7 +9,7 @@ class Warehouse extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'address', 'phone_number'];
+    protected $fillable = ['name', 'street', 'city', 'state', 'phone_number'];
 
     // If you want to log timestamps (usually enabled by default)
     public $timestamps = true;

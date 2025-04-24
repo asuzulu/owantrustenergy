@@ -196,4 +196,43 @@ class DriversController extends Controller
         $warehouses = DB::table('warehouses')->get();
         return view('cylinders.show', compact('cylinder', 'warehouses'));
     }
+
+    // show the upload form
+    public function delivering($cylinderId)
+    {
+        $paddedId = str_pad($cylinderId, 9, '0', STR_PAD_LEFT);
+        return view('drivers.delivering', compact('paddedId'));
+    }
+
+    // process the upload
+    public function storeDeliveryImage(Request $request, $cylinderId)
+    {
+        $request->validate([
+            'delivery_image' => 'required|image|max:5120', // max 5MB
+        ]);
+
+        $driver = Auth::user();
+        $paddedId = str_pad($cylinderId, 9, '0', STR_PAD_LEFT);
+        $date     = now()->format('Y-m-d');
+        $ext      = $request->file('delivery_image')->extension();
+        $filename = "{$driver->first_name} {$driver->last_name}_{$paddedId}-{$date}.{$ext}";
+
+        // store under storage/app/public/deliveries/
+        $path = $request->file('delivery_image')
+            ->storeAs('public/deliveries', $filename);
+
+        // update deliveries record
+        DB::table('deliveries')
+            ->where('cylinder', (int)$cylinderId)
+            ->update([
+                'date_delivered' => now()->toDateString(),
+                'time_delivered' => now()->format('H:i:s'),
+                // optionally save path if you have an 'image_path' column
+                'image_path'     => $path,
+            ]);
+
+        return redirect()
+            ->route('drivers.delivering', $paddedId)
+            ->with('success', 'Delivery recorded successfully.');
+    }
 }

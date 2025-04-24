@@ -1,10 +1,4 @@
-@extends(auth()->check() && auth()->user()->position === 'Manager'
-    ? 'layouts.management-dashboard'
-    : (auth()->check() && auth()->user()->position === 'Employee'
-        ? 'layouts.employee-dashboard'
-        : (auth()->check() && auth()->user()->position === 'Agent'
-            ? 'layouts.agent-dashboard'
-            : 'layouts.app')))
+@extends(auth()->check() && auth()->user()->position === 'Manager' ? 'layouts.management-dashboard' : (auth()->check() && auth()->user()->position === 'Employee' ? 'layouts.employee-dashboard' : (auth()->check() && auth()->user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.app')))
 
 @php
     if (!auth()->check()) {
@@ -66,8 +60,16 @@
                                 <td class="col-md-8">{{ $warehouse->name }}</td>
                             </tr>
                             <tr>
-                                <th scope="row" class="col-md-4">Address</th>
-                                <td class="col-md-8">{{ $warehouse->address }}</td>
+                                <th scope="row" class="col-md-4">Street</th>
+                                <td class="col-md-8">{{ $warehouse->street }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="col-md-4">City</th>
+                                <td class="col-md-8">{{ $warehouse->city }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="col-md-4">State</th>
+                                <td class="col-md-8">{{ $warehouse->state }}</td>
                             </tr>
                             <tr>
                                 <th scope="row" class="col-md-4">Phone Number</th>
@@ -97,19 +99,32 @@
                         <div class="form-group">
                             <label for="name">Name</label>
                             <input type="text" class="form-control" id="name" name="name"
-                                   value="{{ old('name', $warehouse->name) }}" required>
+                                value="{{ old('name', $warehouse->name) }}" required>
                             <div class="invalid-feedback">Please enter a warehouse name.</div>
                         </div>
                         <div class="form-group">
-                            <label for="address">Address</label>
-                            <input type="text" class="form-control" id="address" name="address"
-                                   value="{{ old('address', $warehouse->address) }}" required>
-                            <div class="invalid-feedback">Please enter an address.</div>
+                            <label for="street">Street</label>
+                            <input type="text" class="form-control" id="street" name="street"
+                                value="{{ old('street', $warehouse->street) }}" required>
+                            <div class="invalid-feedback">Please enter the street address.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" class="form-control" id="city" name="city"
+                                value="{{ old('city', $warehouse->city) }}" required>
+                            <div class="invalid-feedback">Please enter the city.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <input type="text" class="form-control" id="state" name="state"
+                                value="{{ old('state', $warehouse->state) }}" required>
+                            <div class="invalid-feedback">Please enter the state.</div>
                         </div>
                         <div class="form-group">
                             <label for="phone_number">Phone Number</label>
-                            <input type="text" class="form-control" id="phone_number" name="phone_number" maxlength="10"
-                                   value="{{ old('phone_number', $warehouse->phone_number) }}" required pattern="\d{10}">
+                            <input type="text" class="form-control" id="phone_number" name="phone_number"
+                                maxlength="10" value="{{ old('phone_number', $warehouse->phone_number) }}" required
+                                pattern="\d{10}">
                             <div class="invalid-feedback">Please enter a valid 10‑digit phone number.</div>
                         </div>
                     </div>
@@ -157,8 +172,9 @@
             @include('partials.dashboard.agent-distribution')
         </div>
     </div>
-    @endsection
-    @section('content2')
+@endsection
+
+@section('content2')
     <!-- Cylinders Stored at this Warehouse (by size filter) -->
     <div class="row tm-content-row tm-mt-big">
         <div class="col-12">
@@ -212,13 +228,16 @@
 
                 $.ajax({
                     url: url,
-                    data: { table: tableType },
+                    data: {
+                        table: tableType
+                    },
                     success: function(response) {
                         if (tableType === 'agent') {
                             $('#agent-distribution-table-body').parent().html(response);
                         } else {
                             $('#warehouse-cylinders-table-body').parent().html(response.html);
-                            $('#warehouse-cylinders-pagination').html($(response.html).find('#warehouse-cylinders-pagination').html());
+                            $('#warehouse-cylinders-pagination').html($(response.html).find(
+                                '#warehouse-cylinders-pagination').html());
                         }
                     },
                     error: function() {

@@ -23,5 +23,6 @@ class Delivery extends Model
         'delivery_time',
         'date_delivered',
         'time_delivered',
+        'image_path',
     ];
 }

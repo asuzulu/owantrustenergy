@@ -137,6 +137,15 @@ Route::get('/agent/profile', [AgentController::class, 'dashboard'])->name('agent
 
 //Driver-specific routes
 Route::get('/drivers/{id}/profile', [DriversController::class, 'driverProfile'])->name('drivers.profile');
+Route::middleware(['auth'])->group(function() {
+    // show the delivering upload form
+    Route::get('/drivers/delivering/{cylinder}', [DriversController::class, 'delivering'])
+         ->name('drivers.delivering');
+
+    // handle the image upload & mark delivered
+    Route::post('/drivers/delivering/{cylinder}', [DriversController::class, 'storeDeliveryImage'])
+         ->name('drivers.delivering.store');
+});
 
 // Driver cylinders show page route
 Route::middleware(['auth'])->prefix('drivers/cylinders')->name('drivers.cylinders.')->group(function () {

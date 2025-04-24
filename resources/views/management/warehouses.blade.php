@@ -27,7 +27,7 @@
                                     <tr onclick="window.location='{{ route('warehouses.show', $warehouse->id) }}';"
                                         style="cursor: pointer;">
                                         <td>{{ $warehouse->name }}</td>
-                                        <td>{{ $warehouse->address }}</td>
+                                        <td>{{ $warehouse->street }}, {{ $warehouse->city }}, {{ $warehouse->state }}</td>
                                         <td>{{ $warehouse->phone_number }}</td>
                                     </tr>
                                 @endif
@@ -57,19 +57,44 @@
                             <label for="name">Name</label>
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
+
                         <div class="form-group">
-                            <label for="address">Address</label>
-                            <!-- Using common address rules: required text with a maximum length -->
-                            <input type="text" class="form-control" id="address" name="address" required
+                            <label for="street">Street Address</label>
+                            <input type="text" class="form-control" id="street" name="street" required
                                 maxlength="255">
                         </div>
+
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" class="form-control" id="city" name="city" required
+                                placeholder="Enter City" value="{{ old('city') }}" />
+                            @error('city')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <select class="form-control" id="state" name="state" required>
+                                <option value="" disabled selected>Select State</option>
+                                @foreach ($states as $state)
+                                    <option value="{{ $state->id }}" {{ old('state') == $state->id ? 'selected' : '' }}>
+                                        {{ $state->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('state')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <div class="form-group">
                             <label for="phone_number">Phone Number</label>
-                            <!-- Phone number must be 10 digits long and numeric -->
                             <input type="text" class="form-control" id="phone_number" name="phone_number" required
                                 pattern="\d{10}" title="Phone number must be exactly 10 digits" maxlength="10"
                                 minlength="10">
                         </div>
+
                         <button type="submit" class="btn btn-primary">Submit</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     </form>
@@ -77,6 +102,7 @@
             </div>
         </div>
     </div>
+
     <!-- Success Modal -->
     @if (session('success'))
         <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel"

@@ -15,7 +15,9 @@ class WarehouseSeeder extends Seeder
         DB::table('warehouses')->insert([
             'id' => 1,
             'name' => 'Unassigned',
-            'address' => 'Unassigned',
+            'street' => 'Unassigned',
+            'city' => 'Unassigned',
+            'state' => 'Unassigned',
             'phone_number' => 'Unassigned',
             'created_at' => now(),
             'updated_at' => now(),

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->time('delivery_time');
             $table->date('date_delivered')->nullable();
             $table->time('time_delivered')->nullable();
+            $table->string('image_path')->nullable();
             $table->timestamps();
         });
     }

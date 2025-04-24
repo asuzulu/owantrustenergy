@@ -20,7 +20,7 @@
 
             <!-- Cylinders Link -->
             <li class="nav-item {{ request()->routeIs('drivers.cylinders') ? 'active' : '' }}">
-                <a href="{{ route('drivers.cylinders') }}" class="nav-link">Cylinders</a>
+                <a href="{{ route('drivers.cylinders') }}" class="nav-link">Deliveries</a>
             </li>
 
             <!-- Settings Dropdown -->

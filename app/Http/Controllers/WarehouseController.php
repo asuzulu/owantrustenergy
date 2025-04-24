@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Warehouse;
+use App\Models\State;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -13,8 +14,10 @@ class WarehouseController extends Controller
     // Show all warehouses
     public function index()
     {
+        $states = State::all(); // Assuming your model is State
+
         $warehouses = Warehouse::all();
-        return view('management.warehouses', compact('warehouses'));
+        return view('management.warehouses', compact('warehouses', 'states'));
     }
 
     // Store a new warehouse
@@ -22,21 +25,36 @@ class WarehouseController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            // Common address rules: required string with maximum length
-            'address' => 'required|string|max:255',
-            // Phone number must be numeric and exactly 10 digits long
+            'street' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'state' => 'required|string|max:255',
             'phone_number' => 'required|numeric|digits:10',
         ]);
 
+        // Convert state ID to state name
+        $stateName = State::find($request->input('state'))?->name;
+
+        if (!$stateName) {
+            return redirect()->back()->withErrors(['state' => 'Invalid state selected.'])->withInput();
+        }
+
         // Create the new warehouse
-        $warehouse = Warehouse::create($request->all());
+        $warehouse = Warehouse::create([
+            'name' => $request->input('name'),
+            'street' => $request->input('street'),
+            'city' => $request->input('city'),
+            'state' => $stateName, // Store the name instead of ID
+            'phone_number' => $request->input('phone_number'),
+        ]);
 
         // Log the warehouse creation with user details
         $user = Auth::user(); // Get the currently authenticated user
         Log::channel('warehouse_creation')->info('Warehouse Added', [
             'user' => $user->first_name . ' ' . $user->last_name,
             'warehouse_name' => $warehouse->name,
-            'address' => $warehouse->address,
+            'street' => $warehouse->street,
+            'city' => $warehouse->city,
+            'state' => $warehouse->state,
             'phone_number' => $warehouse->phone_number,
         ]);
 
@@ -92,7 +110,6 @@ class WarehouseController extends Controller
             }
 
             if ($table === 'warehouse') {
-                // Handle filtered size (if any) and return HTML snippet
                 return response()->json([
                     'html' => view('partials.dashboard.warehouse-cylinders-size-table', compact('warehouseCylinders'))->render()
                 ]);
@@ -103,35 +120,47 @@ class WarehouseController extends Controller
         return view('warehouses.show', compact('warehouse', 'agentCylinders', 'warehouseCylinders'));
     }
 
+    // Update a warehouse
     public function update(Request $request, $id)
     {
         $warehouse = Warehouse::findOrFail($id);
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'address' => 'required|string|max:255',
+            'street' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'state' => 'required|string|max:255',
             'phone_number' => 'required|digits:10',
         ]);
 
-        $warehouse->update($request->only(['name', 'address', 'phone_number']));
+        $stateName = State::find($request->input('state'))?->name ?? $request->input('state');
+
+        $warehouse->update([
+            'name' => $request->input('name'),
+            'street' => $request->input('street'),
+            'city' => $request->input('city'),
+            'state' => $stateName,
+            'phone_number' => $request->input('phone_number'),
+        ]);
 
         Log::channel('warehouse_update')->info('Warehouse Updated', [
             'user' => Auth::user()->first_name . ' ' . Auth::user()->last_name,
             'warehouse_id' => $warehouse->id,
-            'new_data' => $request->only(['name', 'address', 'phone_number']),
+            'new_data' => $request->only(['name', 'street', 'city', 'state', 'phone_number']),
         ]);
 
         $message = 'Warehouse updated successfully.';
 
         if ($request->ajax()) {
             return response()->json(
-                array_merge((array) $warehouse->only(['name', 'address', 'phone_number']), ['message' => $message])
+                array_merge((array) $warehouse->only(['name', 'street', 'city', 'state', 'phone_number']), ['message' => $message])
             );
         }
 
         return redirect()->route('warehouses.show', $warehouse->id)->with('success', $message);
     }
 
+    // Delete a warehouse
     public function destroy(Request $request, $id)
     {
         $warehouse = Warehouse::findOrFail($id);
@@ -154,6 +183,7 @@ class WarehouseController extends Controller
         return redirect()->route('warehouses.index')->with('success', $message);
     }
 
+    // Confirm agent pickup
     public function confirmAgentPickup(Request $request, $warehouseId)
     {
         $request->validate([
@@ -161,7 +191,6 @@ class WarehouseController extends Controller
             'cylinders.*' => 'exists:agent_cylinders_distribution,id',
         ]);
 
-        // Mark selected cylinders as picked up (you can also move them to another table if needed)
         DB::table('agent_cylinders_distribution')
             ->whereIn('id', $request->cylinders)
             ->delete(); // Or update status instead of deleting

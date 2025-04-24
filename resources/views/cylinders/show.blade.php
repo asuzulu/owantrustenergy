@@ -1,3 +1,4 @@
+```blade
 @extends(
     match (Auth::user()->position) {
         'Manager' => 'layouts.management-dashboard',
@@ -8,6 +9,10 @@
 )
 
 @section('content')
+    @php
+        $paddedId = str_pad($cylinder->id, 9, '0', STR_PAD_LEFT);
+    @endphp
+
     <div class="container" style="margin-top: -6rem;">
         <div class="row tm-content-row tm-mt-big">
             <div class="bg-white tm-block h-100">
@@ -27,7 +32,7 @@
                         <tbody>
                             <tr>
                                 <td><strong>Cylinder #</strong></td>
-                                <td>{{ str_pad($cylinder->id, 9, '0', STR_PAD_LEFT) }}</td>
+                                <td>{{ $paddedId }}</td>
                             </tr>
                             <tr>
                                 <td><strong>Size</strong></td>
@@ -100,8 +105,29 @@
                     </table>
                 </div>
                 <div class="d-flex justify-content-start mt-3">
-                    <a href="{{ Auth::user()->position === 'Driver' ? route('drivers.cylinders') : route('management.cylinders') }}"
-                        class="btn btn-secondary mr-2">Back to Cylinders List</a>
+                    <div class="d-flex justify-content-start mt-3">
+                        <a href="{{ Auth::user()->position === 'Driver' ? route('drivers.cylinders') : route('management.cylinders') }}"
+                            class="btn btn-secondary mr-2">Back to Cylinders List</a>
+
+                        @if (in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
+                            <button type="button" class="btn btn-primary mr-2" data-toggle="modal"
+                                data-target="#assignCylinderModal">Assign to User</button>
+                        @endif
+
+                        @if (Auth::user()->position === 'Manager')
+                            <button type="button" class="btn btn-danger" data-toggle="modal"
+                                data-target="#deleteCylinderModal">Delete
+                                Cylinder</button>
+                        @endif
+
+                        {{-- NEW: only for Drivers --}}
+                        @if (Auth::user()->position === 'Driver' && isset($delivery) && !$delivery->date_delivered)
+                            <button type="button" class="btn btn-success mr-2"
+                                onclick="window.location='{{ route('drivers.delivering', $paddedId) }}'">
+                                Deliver
+                            </button>
+                        @endif
+                    </div>
                     @if (in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
                         <button type="button" class="btn btn-primary mr-2" data-toggle="modal"
                             data-target="#assignCylinderModal">Assign to User</button>
@@ -116,69 +142,93 @@
     </div>
 
     <!-- Assign Cylinder Modal -->
-    <div class="modal fade" id="assignCylinderModal" tabindex="-1" role="dialog"aria-labelledby="assignCylinderModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="assignCylinderModal" tabindex="-1" role="dialog"
+        aria-labelledby="assignCylinderModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="assignCylinderModalLabel">Assign Cylinder to Customer</h5> <button
-                        type="button" class="close" data-dismiss="modal" aria-label="Close"> <span
-                            aria-hidden="true">&times;</span> </button>
+                    <h5 class="modal-title" id="assignCylinderModalLabel">Assign Cylinder to Customer</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group search-container"> <label for="customerSearch">Search Customer:</label> <input
-                            type="text" id="customerSearch" class="form-control" placeholder="Type customer name...">
+                    <div class="form-group search-container">
+                        <label for="customerSearch">Search Customer:</label>
+                        <input type="text" id="customerSearch" class="form-control" placeholder="Type customer name...">
                         <div id="customerDropdown" class="dropdown-menu w-100"></div>
-                    </div> <input type="hidden" id="selectedUserId">
-                    <div class="form-group"> <label>Assignment Type:</label>
-                        <div> <input type="radio" id="deliveryOption" name="assignmentType" value="delivery"> <label
-                                for="deliveryOption">Delivery</label> <input type="radio" id="pickupOption"
-                                name="assignmentType" value="pickup"> <label for="pickupOption">Pick-Up</label> </div>
+                    </div>
+                    <input type="hidden" id="selectedUserId">
+                    <div class="form-group">
+                        <label>Assignment Type:</label>
+                        <div>
+                            <input type="radio" id="deliveryOption" name="assignmentType" value="delivery">
+                            <label for="deliveryOption">Delivery</label>
+                            <input type="radio" id="pickupOption" name="assignmentType" value="pickup">
+                            <label for="pickupOption">Pick-Up</label>
+                        </div>
                     </div>
                     <div id="deliveryFields" style="display: none;">
-                        <div class="form-group search-container"> <label for="driverSearch">Assign Driver:</label> <input
-                                type="text" id="driverSearch" class="form-control" placeholder="Type driver name...">
+                        <div class="form-group search-container">
+                            <label for="driverSearch">Assign Driver:</label>
+                            <input type="text" id="driverSearch" class="form-control" placeholder="Type driver name...">
                             <div id="driverDropdown" class="dropdown-menu w-100"></div>
-                        </div> <input type="hidden" id="selectedDriverId">
-                        <div class="form-group"> <label for="deliveryDate">Delivery Date:</label> <input type="date"
-                                id="deliveryDate" class="form-control"> </div>
-                        <div class="form-group"> <label for="deliveryTime">Delivery Time:</label> <input type="time"
-                                id="deliveryTime" class="form-control"> </div>
+                        </div>
+                        <input type="hidden" id="selectedDriverId">
+                        <div class="form-group">
+                            <label for="deliveryDate">Delivery Date:</label>
+                            <input type="date" id="deliveryDate" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="deliveryTime">Delivery Time:</label>
+                            <input type="time" id="deliveryTime" class="form-control">
+                        </div>
                     </div>
                     <div id="pickupFields" style="display: none;">
-                        <div class="form-group"> <label for="pickupLocation">Pick Up Location:</label>
+                        <div class="form-group">
+                            <label for="pickupLocation">Pick Up Location:</label>
                             <select id="pickupLocation" class="form-control" style="height: 4rem;">
                                 @foreach ($warehouses as $warehouse)
-                                    <option value="{{ $warehouse->name }}" {{ $cylinder->location === $warehouse->name ? 'selected' : '' }}>
+                                    <option value="{{ $warehouse->name }}"
+                                        {{ $cylinder->location === $warehouse->name ? 'selected' : '' }}>
                                         {{ $warehouse->name }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="form-group"> <label for="pickupDate">Pick-Up Date:</label> <input type="date"
-                                id="pickupDate" class="form-control"> </div>
+                        <div class="form-group">
+                            <label for="pickupDate">Pick-Up Date:</label>
+                            <input type="date" id="pickupDate" class="form-control">
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer"> <button type="button" class="btn btn-secondary"
-                        data-dismiss="modal">Close</button> <button type="button" id="assignCylinderBtn"
-                        class="btn btn-primary" disabled>Assign Cylinder</button> </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" id="assignCylinderBtn" class="btn btn-primary" disabled>Assign
+                        Cylinder</button>
+                </div>
             </div>
         </div>
-    </div> <!-- Delete Cylinder Modal -->
-    <div class="modal fade" id="deleteCylinderModal" tabindex="-1"
-        role="dialog"aria-labelledby="deleteCylinderModalLabel" aria-hidden="true">
+    </div>
+
+    <!-- Delete Cylinder Modal -->
+    <div class="modal fade" id="deleteCylinderModal" tabindex="-1" role="dialog"
+        aria-labelledby="deleteCylinderModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteCylinderModalLabel">Confirm Delete</h5> <button type="button"
-                        class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">&times;</span>
+                    <h5 class="modal-title" id="deleteCylinderModalLabel">Confirm Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body"> Are you sure you want to delete this cylinder? </div>
-                <div class="modal-footer"> <button type="button" class="btn btn-secondary"
-                        data-dismiss="modal">Cancel</button>
-                    <form action="{{ route('cylinders.destroy', $cylinder->id) }}" method="POST"> @csrf
-                        @method('DELETE') <div class="tm-table-actions-col-right">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <form action="{{ route('cylinders.destroy', $cylinder->id) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <div class="tm-table-actions-col-right">
                             @if (Auth::user()->position === 'Manager')
                                 <button type="button" class="btn btn-danger" data-toggle="modal"
                                     data-target="#deleteCylinderModal">Delete Cylinder</button>
@@ -189,6 +239,7 @@
             </div>
         </div>
     </div>
+
     <!-- Success Modal -->
     <div class="modal fade" id="assignSuccessModal" tabindex="-1" role="dialog"
         aria-labelledby="assignSuccessModalLabel" aria-hidden="true">
@@ -209,6 +260,7 @@
             </div>
         </div>
     </div>
+
     <style>
         .search-container {
             position: relative;
@@ -229,6 +281,7 @@
             width: 50%;
         }
     </style>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
@@ -304,8 +357,8 @@
                 }
             });
             $('#assignCylinderBtn').on('click', function() {
-                let userId         = $('#selectedUserId').val().trim();
-                let cylinderId     = "{{ str_pad($cylinder->id, 9, '0', STR_PAD_LEFT) }}";
+                let userId = $('#selectedUserId').val().trim();
+                let cylinderId = "{{ $paddedId }}";
                 let assignmentType = $('input[name="assignmentType"]:checked').val();
                 let driverId = $('#selectedDriverId').val() || null;
                 let deliveryDate = $('#deliveryDate').val();

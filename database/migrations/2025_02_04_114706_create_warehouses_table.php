@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('warehouses', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('address');
+            $table->string('street');
+            $table->string('city');
+            $table->string('state');
             $table->string('phone_number');
             $table->timestamps();
         });
@@ -23,7 +25,7 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('warehouses');
     }

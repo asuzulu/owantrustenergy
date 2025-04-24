@@ -13,7 +13,7 @@
             <div class="bg-white tm-block h-100">
                 <div class="row">
                     <div class="col-md-8 col-sm-12">
-                        <h2 class="tm-block-title d-inline-block">Cylinders for Delivery</h2>
+                        <h2 class="tm-block-title d-inline-block">Cylinders to Be Delivered</h2>
                     </div>
                 </div>
                 <div class="table-responsive">
