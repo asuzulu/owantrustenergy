@@ -21,14 +21,12 @@ class DriversController extends Controller
             abort(403, 'Unauthorized action.');
         }
         try {
-            // Ensure $drivers is paginated so the view can call ->hasPages()
             $drivers = User::where('position', 'Driver')->paginate(10);
             $states = State::all();
         } catch (\Exception $e) {
             Log::debug('Error retrieving Drivers: ', ['error' => $e->getMessage()]);
             abort(500, 'Failed to retrieve drivers.');
         }
-        // Note: returning the view from management folder
         return view('management.drivers', compact('drivers', 'states'));
     }
 
@@ -159,8 +157,9 @@ class DriversController extends Controller
             return redirect()->route('dashboard')->withErrors(['Unauthorized access.']);
         }
 
-        // Fetch deliveries assigned to the logged-in driver
+        // Fetch deliveries assigned to the logged-in driver excluding those that are already delivered
         $deliveries = Delivery::where('driver', $user->first_name . ' ' . $user->last_name)
+            ->whereNull('date_delivered') // Exclude cylinders that have been delivered
             ->orderBy('delivery_date', 'desc')
             ->paginate(10);
 
@@ -217,22 +216,42 @@ class DriversController extends Controller
         $ext      = $request->file('delivery_image')->extension();
         $filename = "{$driver->first_name} {$driver->last_name}_{$paddedId}-{$date}.{$ext}";
 
-        // store under storage/app/public/deliveries/
+        // Store the image under storage/app/public/deliveries/
         $path = $request->file('delivery_image')
             ->storeAs('public/deliveries', $filename);
 
-        // update deliveries record
+        // Update the deliveries table with the image path
         DB::table('deliveries')
             ->where('cylinder', (int)$cylinderId)
             ->update([
                 'date_delivered' => now()->toDateString(),
                 'time_delivered' => now()->format('H:i:s'),
-                // optionally save path if you have an 'image_path' column
                 'image_path'     => $path,
             ]);
 
+        // Log the delivery entry into the log file with all the details
+        $delivery = DB::table('deliveries')->where('cylinder', (int)$cylinderId)->first();
+
+        $logMessage = sprintf(
+            "[%s] Delivery for Cylinder #%s assigned to %s %s.\nDelivery Date: %s\nDelivery Time: %s\nCustomer: %s\nSize: %s\nImage Path: %s\n",
+            now()->toDateTimeString(),
+            $paddedId,
+            $driver->first_name,
+            $driver->last_name,
+            $delivery->delivery_date,
+            $delivery->delivery_time,
+            $delivery->customer,
+            $delivery->size,
+            $path
+        );
+
+        // Write the log message to the deliveries.log file
+        Log::channel('single')->info($logMessage);
+
+        // Return back to the delivering page with the image path
         return redirect()
             ->route('drivers.delivering', $paddedId)
-            ->with('success', 'Delivery recorded successfully.');
+            ->with('success', 'Delivery recorded successfully.')
+            ->with('imagePath', $path);  // Pass the image path to the view
     }
 }

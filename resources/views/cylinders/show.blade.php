@@ -128,14 +128,6 @@
                             </button>
                         @endif
                     </div>
-                    @if (in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
-                        <button type="button" class="btn btn-primary mr-2" data-toggle="modal"
-                            data-target="#assignCylinderModal">Assign to User</button>
-                    @endif
-                    @if (Auth::user()->position === 'Manager')
-                        <button type="button" class="btn btn-danger" data-toggle="modal"
-                            data-target="#deleteCylinderModal">Delete Cylinder</button>
-                    @endif
                 </div>
             </div>
         </div>

@@ -96,7 +96,7 @@ Route::middleware(['auth'])->prefix('management/cylinders')->name('management.cy
 
 // Cylinders list page
 Route::get('/management/cylinders', [ManagementController::class, 'cylindersPage'])->name('management.cylinders');
-
+Route::post('/cylinders', [CylinderController::class, 'store'])->name('cylinders.store');
 Route::post('/register-modal', [RegisterController::class, 'registerModal'])->name('register.modal');
 
 // Cylinder detail routes
@@ -135,7 +135,7 @@ Route::get('/agent/cylinders', [AgentController::class, 'cylindersPage'])->name(
 Route::get('/agent/customers', [AgentController::class, 'customers'])->name('agent.customers');
 Route::get('/agent/profile', [AgentController::class, 'dashboard'])->name('agent.profile');
 
-//Driver-specific routes
+// Driver-specific routes
 Route::get('/drivers/{id}/profile', [DriversController::class, 'driverProfile'])->name('drivers.profile');
 Route::middleware(['auth'])->group(function() {
     // show the delivering upload form

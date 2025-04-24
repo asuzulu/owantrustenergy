@@ -67,6 +67,15 @@
                 </div>
                 <!-- End Upload Modal -->
 
+                {{-- Display the uploaded image after success --}}
+                @if (session('success') && isset($imagePath))
+                    <div class="row mt-4">
+                        <div class="col text-center">
+                            <h4>Delivery Image:</h4>
+                            <img src="{{ asset('storage/' . $imagePath) }}" alt="Delivery Image" class="img-fluid">
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

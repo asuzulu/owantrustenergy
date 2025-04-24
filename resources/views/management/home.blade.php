@@ -1,5 +1,3 @@
-{{-- resources/views/management/home.blade.php --}}
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
@@ -168,7 +166,7 @@
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <form id="cylinderForm">
+                    <form id="cylinderForm" method="POST" action="{{ route('cylinders.store') }}">
                         @csrf
                         <div class="form-group">
                             <label for="size">Cylinder Size</label>
@@ -182,8 +180,13 @@
 
                         <div class="form-group">
                             <label for="location">Warehouse Location</label>
-                            <select class="form-control" id="location" name="location" required
-                                    style="height: 60px;"></select>
+                            <select class="form-control" id="location" name="location" required style="height: 60px;">
+                                @foreach ($warehouses as $warehouse)
+                                    @if ($warehouse->name !== 'Unassigned')
+                                        <option value="{{ $warehouse->name }}">{{ $warehouse->name }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
                         </div>
 
                         <div class="form-group">
