@@ -8,17 +8,7 @@
     @php exit; @endphp
 @endif
 
-@extends(
-    Auth::user()->position === 'Manager'
-        ? 'layouts.management-dashboard'
-        : (Auth::user()->position === 'Employee'
-            ? 'layouts.employee-dashboard'
-            : (Auth::user()->position === 'Agent'
-                ? 'layouts.agent-dashboard'
-                : 'layouts.default-dashboard'
-            )
-        )
-)
+@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.default-dashboard')))
 
 @section('content')
     <div class="container" style="margin-top: -6rem;">
@@ -35,17 +25,10 @@
                                     <a href="{{ route('management.orders.requests') }}" class="btn btn-primary">
                                         Customers' Requests
                                     </a>
-                                    <a href="{{ route('orders.pickup') }}" class="btn btn-primary ms-3">
-                                        Pick Ups
-                                    </a>
-                                    <a href="{{ route('management.deliveries') }}" class="btn btn-primary ms-3">
-                                        Deliveries
-                                    </a>
                                     <a href="{{ route('cylinders.unassigned') }}" class="btn btn-primary ms-3">
                                         Unassigned
                                     </a>
-                                    <button class="btn btn-small btn-primary ms-3" data-toggle="modal"
-                                            data-target="#addCylinderModal">
+                                    <button class="btn btn-primary ms-3" data-toggle="modal" data-target="#addCylinderModal" style="position: absolute; right: 20px;">
                                         Add Cylinder
                                     </button>
                                 </div>
@@ -59,8 +42,8 @@
                     <div class="row mt-4 mb-2">
                         <div class="col-md-4">
                             <label for="warehouseFilter"><strong>Location:</strong></label>
-                            <select name="warehouse" id="warehouseFilter" class="form-control"
-                                    style="height: 60px;" onchange="this.form.submit()">
+                            <select name="warehouse" id="warehouseFilter" class="form-control" style="height: 60px;"
+                                onchange="this.form.submit()">
                                 <option value="">All Cylinders</option>
                                 @foreach ($warehouses as $warehouseOption)
                                     <option value="{{ $warehouseOption->name }}"
@@ -76,8 +59,8 @@
 
                         <div class="col-md-4">
                             <label for="sizeFilter"><strong>Size:</strong></label>
-                            <select name="size" id="sizeFilter" class="form-control"
-                                    style="height: 60px;" onchange="this.form.submit()">
+                            <select name="size" id="sizeFilter" class="form-control" style="height: 60px;"
+                                onchange="this.form.submit()">
                                 <option value="">All Sizes</option>
                                 <option value="Small" {{ request('size') === 'Small' ? 'selected' : '' }}>
                                     Small
@@ -96,14 +79,9 @@
 
                         <div class="col-md-4">
                             <label for="cylinderSearch"><strong>Search:</strong></label>
-                            <input type="text"
-                                   name="search"
-                                   id="cylinderSearch"
-                                   class="form-control"
-                                   value="{{ request('search') }}"
-                                   placeholder="Search cylinders..."
-                                   style="height: 60px;"
-                                   onkeydown="if(event.key === 'Enter'){ this.form.submit(); }">
+                            <input type="text" name="search" id="cylinderSearch" class="form-control"
+                                value="{{ request('search') }}" placeholder="Search cylinders..." style="height: 60px;"
+                                onkeydown="if(event.key === 'Enter'){ this.form.submit(); }">
                         </div>
                     </div>
                 </form>
@@ -125,19 +103,30 @@
                                     // pad the numeric ID to 9 digits with leading zeroes
                                     $paddedId = str_pad($cylinder->id, 9, '0', STR_PAD_LEFT);
                                 @endphp
-                                <tr
-                                    onclick="window.location='{{ route('management.cylinders.show', $paddedId) }}';"
-                                    style="cursor: pointer;"
-                                >
+                                <tr onclick="window.location='{{ route('management.cylinders.show', $paddedId) }}';"
+                                    style="cursor: pointer;">
                                     <td>{{ $paddedId }}</td>
                                     <td>{{ $cylinder->size }}</td>
                                     <td>
                                         @switch($cylinder->size)
-                                            @case('Small') 3 kg @break
-                                            @case('Medium') 5 kg @break
-                                            @case('Large') 12 kg @break
-                                            @case('Extra Large') 25 kg @break
-                                            @default N/A
+                                            @case('Small')
+                                                3 kg
+                                            @break
+
+                                            @case('Medium')
+                                                5 kg
+                                            @break
+
+                                            @case('Large')
+                                                12 kg
+                                            @break
+
+                                            @case('Extra Large')
+                                                25 kg
+                                            @break
+
+                                            @default
+                                                N/A
                                         @endswitch
                                     </td>
                                     <td>{{ $cylinder->location }}</td>
@@ -153,6 +142,16 @@
                         </div>
                     @endif
                 </div>
+                @if (Auth::user()->position !== 'Agent')
+                    <div class="d-flex justify-content-center mt-3">
+                        <a href="{{ route('orders.pickup') }}" class="btn btn-primary ms-3">
+                            Pick Ups
+                        </a>
+                        <a href="{{ route('management.deliveries') }}" class="btn btn-primary ms-3">
+                            Deliveries
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -192,7 +191,7 @@
                         <div class="form-group">
                             <label for="amount">How many?</label>
                             <input type="number" min="1" step="1" id="amount" name="amount"
-                                   class="form-control" required placeholder="Enter quantity">
+                                class="form-control" required placeholder="Enter quantity">
                         </div>
 
                         <div class="modal-footer">

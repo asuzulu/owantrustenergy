@@ -1,4 +1,3 @@
-```blade
 @extends(
     match (Auth::user()->position) {
         'Manager' => 'layouts.management-dashboard',
@@ -10,23 +9,28 @@
 
 @section('content')
     @php
+        // Always pad to 9 digits for display & links
         $paddedId = str_pad($cylinder->id, 9, '0', STR_PAD_LEFT);
     @endphp
 
     <div class="container" style="margin-top: -6rem;">
         <div class="row tm-content-row tm-mt-big">
             <div class="bg-white tm-block h-100">
+
+                {{-- Header --}}
                 <div class="row">
                     <div class="col-md-8 col-sm-12">
                         <h2 class="tm-block-title d-inline-block">Cylinder Details</h2>
                     </div>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped tm-table-striped-even mt-3">
+
+                {{-- Details Table --}}
+                <div class="table-responsive mt-3">
+                    <table class="table table-hover table-striped tm-table-striped-even">
                         <thead>
                             <tr class="tm-bg-gray">
-                                <th scope="col">Field</th>
-                                <th scope="col">Details</th>
+                                <th>Field</th>
+                                <th>Details</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -41,17 +45,26 @@
                             <tr>
                                 <td><strong>Weight</strong></td>
                                 <td>
-                                    @if ($cylinder->size == 'Small')
-                                        3 kg
-                                    @elseif($cylinder->size == 'Medium')
-                                        5 kg
-                                    @elseif($cylinder->size == 'Large')
-                                        12 kg
-                                    @elseif($cylinder->size == 'Extra Large')
-                                        25 kg
-                                    @else
-                                        N/A
-                                    @endif
+                                    @switch($cylinder->size)
+                                        @case('Small')
+                                            3 kg
+                                        @break
+
+                                        @case('Medium')
+                                            5 kg
+                                        @break
+
+                                        @case('Large')
+                                            12 kg
+                                        @break
+
+                                        @case('Extra Large')
+                                            25 kg
+                                        @break
+
+                                        @default
+                                            N/A
+                                    @endswitch
                                 </td>
                             </tr>
                             <tr>
@@ -61,7 +74,8 @@
                                         @if (in_array($cylinder->user->position, ['Manager', 'Employee', 'Agent']))
                                             {{ $cylinder->location }}
                                         @else
-                                            {{ $cylinder->user->street }}, {{ $cylinder->user->city }},
+                                            {{ $cylinder->user->street }},
+                                            {{ $cylinder->user->city }},
                                             {{ $cylinder->user->state }}
                                         @endif
                                     @else
@@ -71,23 +85,18 @@
                             </tr>
                             <tr>
                                 <td><strong>Date Allocated</strong></td>
-                                <td>{{ $cylinder->allocated_date ? $cylinder->allocated_date->format('d-m-Y') : 'N/A' }}
+                                <td>
+                                    {{ $cylinder->allocated_date ? $cylinder->allocated_date->format('d-m-Y') : 'N/A' }}
                                 </td>
                             </tr>
                             <tr>
                                 <td><strong>Assigned User</strong></td>
-                                <td>{{ $cylinder->user ? $cylinder->user->first_name . ' ' . $cylinder->user->last_name : 'Not Assigned' }}
+                                <td>
+                                    {{ $cylinder->user ? $cylinder->user->first_name . ' ' . $cylinder->user->last_name : 'Not Assigned' }}
                                 </td>
                             </tr>
-                            @php
-                                $delivery = isset($deliveries)
-                                    ? $deliveries->firstWhere('cylinder', (int) $cylinder->id)
-                                    : null;
-                                $pickup = isset($pickups)
-                                    ? $pickups->firstWhere('cylinder', (int) $cylinder->id)
-                                    : null;
-                            @endphp
 
+                            {{-- Driver row, if there is a delivery record at all --}}
                             @if ($delivery)
                                 <tr>
                                     <td><strong>Driver</strong></td>
@@ -95,6 +104,7 @@
                                 </tr>
                             @endif
 
+                            {{-- Pickup row, if there is a pickup record --}}
                             @if ($pickup)
                                 <tr>
                                     <td><strong>Pick Up Location</strong></td>
@@ -104,30 +114,35 @@
                         </tbody>
                     </table>
                 </div>
+
+                {{-- Action Buttons --}}
                 <div class="d-flex justify-content-start mt-3">
-                    <div class="d-flex justify-content-start mt-3">
-                        <a href="{{ Auth::user()->position === 'Driver' ? route('drivers.cylinders') : route('management.cylinders') }}"
-                            class="btn btn-secondary mr-2">Back to Cylinders List</a>
+                    <a href="{{ Auth::user()->position === 'Driver' ? route('drivers.cylinders') : route('management.cylinders') }}"
+                        class="btn btn-secondary mr-2">
+                        Back to Cylinders List
+                    </a>
 
-                        @if (in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
-                            <button type="button" class="btn btn-primary mr-2" data-toggle="modal"
-                                data-target="#assignCylinderModal">Assign to User</button>
-                        @endif
+                    @if (in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
+                        <button type="button" class="btn btn-primary mr-2" data-toggle="modal"
+                            data-target="#assignCylinderModal">
+                            Assign to User
+                        </button>
+                    @endif
 
-                        @if (Auth::user()->position === 'Manager')
-                            <button type="button" class="btn btn-danger" data-toggle="modal"
-                                data-target="#deleteCylinderModal">Delete
-                                Cylinder</button>
-                        @endif
+                    @if (Auth::user()->position === 'Manager')
+                        <button type="button" class="btn btn-danger mr-2" data-toggle="modal"
+                            data-target="#deleteCylinderModal">
+                            Delete Cylinder
+                        </button>
+                    @endif
 
-                        {{-- NEW: only for Drivers --}}
-                        @if (Auth::user()->position === 'Driver' && isset($delivery) && !$delivery->date_delivered)
-                            <button type="button" class="btn btn-success mr-2"
-                                onclick="window.location='{{ route('drivers.delivering', $paddedId) }}'">
-                                Deliver
-                            </button>
-                        @endif
-                    </div>
+                    {{-- Deliver button only for drivers on undelivered cylinders --}}
+                    @if (Auth::user()->position === 'Driver' && $delivery && is_null($delivery->date_delivered))
+                        <button type="button" class="btn btn-success"
+                            onclick="window.location='{{ route('drivers.delivering', $paddedId) }}'">
+                            Deliver
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>

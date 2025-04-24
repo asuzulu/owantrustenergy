@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Cylinder;
 use App\Models\User;
+use App\Models\Pickup;
 use App\Models\Delivery;
 use App\Models\Warehouse;
 use Illuminate\Support\Facades\Auth;
@@ -55,11 +56,25 @@ class CylinderController extends Controller
 
     public function show($id)
     {
-        $cylinder = Cylinder::findOrFail($id);
-        $deliveries = Delivery::where('cylinder', $cylinder->id)->get();
+        // Find the cylinder by its (possibly zero-padded) string ID
+        $cylinder   = Cylinder::findOrFail($id);
+
+        // All warehouses (for your assign modal, etc.)
         $warehouses = DB::table('warehouses')->get();
 
-        return view('cylinders.show', compact('cylinder', 'warehouses', 'deliveries'));
+        // Fetch at most one matching delivery record
+        $delivery = Delivery::where('cylinder', $id)->first();
+
+        // Fetch at most one matching pickup record
+        $pickup   = Pickup::where('cylinder', $id)->first();
+
+        // Pass exactly these four variables into the view:
+        return view('cylinders.show', compact(
+            'cylinder',
+            'warehouses',
+            'delivery',
+            'pickup'
+        ));
     }
 
     public function store(Request $request)

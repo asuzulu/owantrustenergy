@@ -306,7 +306,7 @@
                 submitButton.prop('disabled', true).contents().last()[0].textContent = ' Registering...';
 
                 $('#okButton').on('click', function() {
-                    location.href = 'management.accounts';
+                    location.href = 'accounts';
                 });
 
                 const formData = new FormData(this);

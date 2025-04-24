@@ -145,6 +145,11 @@ return [
             'level' => 'info',
         ],
 
+        'deliveries' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/deliveries.log'),
+            'level' => 'info',
+        ],
     ],
 
 ];

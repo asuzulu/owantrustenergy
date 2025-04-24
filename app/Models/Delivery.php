@@ -25,4 +25,17 @@ class Delivery extends Model
         'time_delivered',
         'image_path',
     ];
+
+    protected $casts = [
+        'date_assigned'  => 'date',
+        'delivery_date'  => 'date',
+        'date_delivered' => 'date',
+        'delivery_time'  => 'datetime:H:i:s',
+        'time_delivered' => 'datetime:H:i:s',
+    ];
+
+    public function driverUser()
+    {
+        return $this->belongsTo(User::class, 'driver_id');
+    }
 }

@@ -311,15 +311,20 @@ class ManagementController extends Controller
 
     public function showCylinder($id)
     {
-        // strip leading zeroes, cast to int
-        $intId = (int) ltrim($id, '0');
-
-        $cylinder = Cylinder::findOrFail($id);
+        // $id is the padded 9-digit string, e.g. "000123456"
+        $cylinder   = Cylinder::findOrFail($id);
         $warehouses = DB::table('warehouses')->get();
-        $deliveries = Delivery::where('cylinder', $id)->get();
-        $pickups = Pickup::where('cylinder', $id)->get();
 
-        return view('cylinders.show', compact('cylinder', 'deliveries', 'pickups', 'warehouses'));
+        // Grab at most one matching delivery or pickup
+        $delivery = Delivery::where('cylinder', $id)->first();
+        $pickup   = Pickup::where('cylinder', $id)->first();
+
+        return view('cylinders.show', compact(
+            'cylinder',
+            'warehouses',
+            'delivery',
+            'pickup'
+        ));
     }
 
     public function store(Request $request)
