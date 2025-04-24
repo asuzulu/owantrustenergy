@@ -119,52 +119,54 @@
             </div>
         </div>
     </div>
+@endsection
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let checkboxes = document.querySelectorAll(".order-checkbox");
-            let deleteBtn = document.getElementById("delete-order-btn");
-            let confirmDeleteBtn = document.getElementById("confirm-delete");
+@push
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let checkboxes = document.querySelectorAll(".order-checkbox");
+        let deleteBtn = document.getElementById("delete-order-btn");
+        let confirmDeleteBtn = document.getElementById("confirm-delete");
 
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener("change", function() {
-                    deleteBtn.disabled = !document.querySelector(".order-checkbox:checked");
-                });
-            });
-
-            confirmDeleteBtn.addEventListener("click", function() {
-                let selectedOrders = Array.from(document.querySelectorAll(".order-checkbox:checked"))
-                    .map(cb => cb.value);
-
-                if (selectedOrders.length === 0) {
-                    alert("Please select at least one order to delete.");
-                    return;
-                }
-
-                fetch('/orders', {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                        },
-                        body: JSON.stringify({
-                            order_ids: selectedOrders
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            location.reload();
-                        } else {
-                            alert("Some orders may already be assigned and cannot be deleted.");
-                            location.reload();
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                        alert("An error occurred while deleting the orders.");
-                    });
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener("change", function() {
+                deleteBtn.disabled = !document.querySelector(".order-checkbox:checked");
             });
         });
-    </script>
-@endsection
+
+        confirmDeleteBtn.addEventListener("click", function() {
+            let selectedOrders = Array.from(document.querySelectorAll(".order-checkbox:checked"))
+                .map(cb => cb.value);
+
+            if (selectedOrders.length === 0) {
+                alert("Please select at least one order to delete.");
+                return;
+            }
+
+            fetch('/orders', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        order_ids: selectedOrders
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert("Some orders may already be assigned and cannot be deleted.");
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("An error occurred while deleting the orders.");
+                });
+        });
+    });
+</script>
+@endpush

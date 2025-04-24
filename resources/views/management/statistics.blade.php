@@ -1,3 +1,4 @@
+// resources/views/management/statistics.blade.php
 @extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : 'layouts.employee-dashboard')
 
 @section('content')
@@ -6,20 +7,79 @@
             @php
                 $stats = [
                     ['id' => 'cylinders-assigned', 'title' => 'Cylinders Assigned', 'value' => $cylinders_assigned],
-                    ['id' => 'cylinders-warehouses', 'title' => 'Cylinders in Warehouses', 'value' => $cylinders_in_warehouses],
+                    [
+                        'id' => 'cylinders-warehouses',
+                        'title' => 'Cylinders in Warehouses',
+                        'value' => $cylinders_in_warehouses,
+                    ],
                     ['id' => 'total-cylinders', 'title' => 'Total Cylinders', 'value' => $total_cylinders],
-                    ['id' => 'new-customers-week', 'title' => 'New Customers Last Week', 'value' => $customers_last_week],
-                    ['id' => 'new-customers-month', 'title' => 'New Customers Last Month', 'value' => $customers_last_month],
-                    ['id' => 'new-customers-year', 'title' => 'New Customers Last Year', 'value' => $customers_last_year],
                     ['id' => 'total-customers', 'title' => 'Total Customers', 'value' => $total_customers],
+                    [
+                        'id' => 'new-customers-this-week',
+                        'title' => 'New Customers This Week',
+                        'value' => $new_customers_this_week,
+                    ],
+                    [
+                        'id' => 'new-customers-week',
+                        'title' => 'New Customers Last Week',
+                        'value' => $customers_last_week,
+                    ],
+                    [
+                        'id' => 'new-customers-month',
+                        'title' => 'New Customers Last Month',
+                        'value' => $customers_last_month,
+                    ],
+                    [
+                        'id' => 'new-customers-year',
+                        'title' => 'New Customers Last Year',
+                        'value' => $customers_last_year,
+                    ],
+                    [
+                        'id' => 'customers-assigned',
+                        'title' => 'Customers Assigned Cylinders',
+                        'value' => $customers_assigned,
+                    ],
+                    [
+                        'id' => 'customers-unassigned',
+                        'title' => 'Customers Without Cylinders',
+                        'value' => $customers_unassigned,
+                    ],
+                    [
+                        'id' => 'order-requests-pending',
+                        'title' => 'Customer Order Requests Pending',
+                        'value' => $customer_orders_pending,
+                    ],
+                    [
+                        'id' => 'cylinders-distributed-agents',
+                        'title' => 'Cylinders Distributed to Agents',
+                        'value' => $cylinders_distributed_agents,
+                    ],
+                    [
+                        'id' => 'agents-with-distribution',
+                        'title' => 'Agents with Distributed Cylinders',
+                        'value' => $agents_with_distribution,
+                    ],
+                    ['id' => 'deliveries-pending', 'title' => 'Deliveries Pending', 'value' => $deliveries_pending],
+                    [
+                        'id' => 'pickup-orders-pending',
+                        'title' => 'Pickup Orders Pending',
+                        'value' => $pickup_orders_pending,
+                    ],
+                    ['id' => 'total-drivers', 'title' => 'Total Drivers', 'value' => $total_drivers],
+                    [
+                        'id' => 'drivers-with-deliveries',
+                        'title' => 'Drivers with Deliveries',
+                        'value' => $drivers_with_deliveries,
+                    ],
                     ['id' => 'total-employees', 'title' => 'Total Employees', 'value' => $total_employees],
-                    ['id' => 'total-warehouses', 'title' => 'Total Warehouses', 'value' => $total_warehouses]
+                    ['id' => 'total-warehouses', 'title' => 'Total Warehouses', 'value' => $total_warehouses],
                 ];
             @endphp
 
             @foreach ($stats as $stat)
                 <div class="col-lg-4 col-md-6">
-                    <div class="bg-white tm-block text-center p-4 d-flex flex-column justify-content-between shadow-sm rounded">
+                    <div
+                        class="bg-white tm-block text-center p-4 d-flex flex-column justify-content-between shadow-sm rounded">
                         <h4 class="tm-block-title">{{ $stat['title'] }}</h4>
                         <p id="{{ $stat['id'] }}" class="tm-value display-5 text-primary fw-bold">{{ $stat['value'] }}</p>
                     </div>
@@ -66,7 +126,28 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
+        function drawBarChart(chartId, data, labels, label) {
+            var ctx = document.getElementById(chartId).getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        borderColor: 'blue',
+                        backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
             let cylinderData = {!! json_encode($cylindersAssignedChart) !!};
             let customerData = {!! json_encode($customerRegistrationsChart) !!};
 
@@ -76,8 +157,8 @@
             let customerLabels = customerData.map(item => item.month || "Unknown");
             let customerCounts = customerData.map(item => item.count || 0);
 
-            drawLineChart("cylinders-chart", cylinderCounts, cylinderLabels);
-            drawBarChart("customers-chart", customerCounts, customerLabels);
+            drawLineChart("cylinders-chart", cylinderCounts, cylinderLabels, "Cylinders Assigned");
+            drawBarChart("customers-chart", customerCounts, customerLabels, "Customer Registrations");
         });
     </script>
 

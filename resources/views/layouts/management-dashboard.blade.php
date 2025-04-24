@@ -39,6 +39,12 @@
 
     @stack('scripts')
     @include('partials.dashboard.scripts')
+    @if (Auth::guest())
+        <script>
+            window.location = "{{ url('/') }}";
+        </script>
+    @endif
+
 </body>
 
 </html>
