@@ -1,4 +1,3 @@
-// resources/views/management/statistics.blade.php
 @extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : 'layouts.employee-dashboard')
 
 @section('content')
@@ -6,14 +5,46 @@
         <div class="row g-4">
             @php
                 $stats = [
+                    // Cylinder Stats
+                    ['id' => 'total-cylinders', 'title' => 'Total Cylinders', 'value' => $total_cylinders],
                     ['id' => 'cylinders-assigned', 'title' => 'Cylinders Assigned', 'value' => $cylinders_assigned],
                     [
                         'id' => 'cylinders-warehouses',
                         'title' => 'Cylinders in Warehouses',
                         'value' => $cylinders_in_warehouses,
                     ],
-                    ['id' => 'total-cylinders', 'title' => 'Total Cylinders', 'value' => $total_cylinders],
+
+                    // Unassigned and Distribution
+                    [
+                        'id' => 'unassigned-cylinders',
+                        'title' => 'Unassigned Cylinders',
+                        'value' => $unassigned_cylinders,
+                    ],
+                    [
+                        'id' => 'cylinders-distributed-agents',
+                        'title' => 'Cylinders Distributed to Agents',
+                        'value' => $cylinders_distributed_agents,
+                    ],
+                    [
+                        'id' => 'agents-with-distribution',
+                        'title' => 'Agents with Distributed Cylinders',
+                        'value' => $agents_with_distribution,
+                    ],
+
+                    // Customer Overview
                     ['id' => 'total-customers', 'title' => 'Total Customers', 'value' => $total_customers],
+                    [
+                        'id' => 'customers-assigned',
+                        'title' => 'Customers Assigned Cylinders',
+                        'value' => $customers_assigned,
+                    ],
+                    [
+                        'id' => 'customers-unassigned',
+                        'title' => 'Customers Without Cylinders',
+                        'value' => $customers_unassigned,
+                    ],
+
+                    // Customer Growth
                     [
                         'id' => 'new-customers-this-week',
                         'title' => 'New Customers This Week',
@@ -29,20 +60,11 @@
                         'title' => 'New Customers Last Month',
                         'value' => $customers_last_month,
                     ],
+
                     [
                         'id' => 'new-customers-year',
                         'title' => 'New Customers Last Year',
                         'value' => $customers_last_year,
-                    ],
-                    [
-                        'id' => 'customers-assigned',
-                        'title' => 'Customers Assigned Cylinders',
-                        'value' => $customers_assigned,
-                    ],
-                    [
-                        'id' => 'customers-unassigned',
-                        'title' => 'Customers Without Cylinders',
-                        'value' => $customers_unassigned,
                     ],
                     [
                         'id' => 'order-requests-pending',
@@ -50,28 +72,27 @@
                         'value' => $customer_orders_pending,
                     ],
                     [
-                        'id' => 'cylinders-distributed-agents',
-                        'title' => 'Cylinders Distributed to Agents',
-                        'value' => $cylinders_distributed_agents,
-                    ],
-                    [
-                        'id' => 'agents-with-distribution',
-                        'title' => 'Agents with Distributed Cylinders',
-                        'value' => $agents_with_distribution,
-                    ],
-                    ['id' => 'deliveries-pending', 'title' => 'Deliveries Pending', 'value' => $deliveries_pending],
-                    [
                         'id' => 'pickup-orders-pending',
                         'title' => 'Pickup Orders Pending',
                         'value' => $pickup_orders_pending,
                     ],
+
+                    // Delivery and Drivers
+                    ['id' => 'deliveries-pending', 'title' => 'Deliveries Pending', 'value' => $deliveries_pending],
                     ['id' => 'total-drivers', 'title' => 'Total Drivers', 'value' => $total_drivers],
                     [
                         'id' => 'drivers-with-deliveries',
                         'title' => 'Drivers with Deliveries',
                         'value' => $drivers_with_deliveries,
                     ],
+
+                    // Employees and Warehouses
                     ['id' => 'total-employees', 'title' => 'Total Employees', 'value' => $total_employees],
+                    [
+                        'id' => 'new-employees-month',
+                        'title' => 'New Employees This Month',
+                        'value' => $new_employees_this_month,
+                    ],
                     ['id' => 'total-warehouses', 'title' => 'Total Warehouses', 'value' => $total_warehouses],
                 ];
             @endphp

@@ -57,10 +57,19 @@ class StatisticsController extends Controller
 
         // 9. Total warehouses
         $total_warehouses = Warehouse::count();
+        // New Customers This Week
+        $new_customers_this_week = User::where('position', 'Customer')
+            ->whereDate('created_at', '>=', now()->subDays(7)->toDateString())
+            ->count();
 
-        //
-        // ─── OTHER NEW STATISTICS ────────────────────────────────────────────────────
-        //
+        // Unassigned Cylinders
+        $unassigned_cylinders = Cylinder::where('location', 'Unassigned')->count();
+
+        // New Employees This Month
+        $new_employees_this_month = User::where('position', 'Employee')
+            ->whereDate('created_at', '>=', now()->startOfMonth()->toDateString())
+            ->count();
+
 
         // Prepare full‐name expression for matching
         $fullNameExpr = $databaseConnection === 'sqlite'
@@ -131,7 +140,6 @@ class StatisticsController extends Controller
             'customers_last_month',
             'customers_last_week',
             'customers_last_year',
-            'new_customers_this_week',
             'total_employees',
             'total_warehouses',
             'customers_assigned',
@@ -144,7 +152,10 @@ class StatisticsController extends Controller
             'total_drivers',
             'drivers_with_deliveries',
             'cylindersAssignedChart',
-            'customerRegistrationsChart'
+            'customerRegistrationsChart',
+            'new_customers_this_week',
+            'unassigned_cylinders',
+            'new_employees_this_month'
         ));
     }
 
