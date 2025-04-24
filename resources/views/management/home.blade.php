@@ -123,9 +123,15 @@
                         </thead>
                         <tbody>
                             @foreach ($cylinders as $cylinder)
-                                <tr onclick="window.location='{{ route('management.cylinders.show', $cylinder->id) }}';"
-                                    style="cursor: pointer;">
-                                    <td>{{ str_pad($cylinder->id, 9, '0', STR_PAD_LEFT) }}</td>
+                                @php
+                                    // pad the numeric ID to 9 digits with leading zeroes
+                                    $paddedId = str_pad($cylinder->id, 9, '0', STR_PAD_LEFT);
+                                @endphp
+                                <tr
+                                    onclick="window.location='{{ route('management.cylinders.show', $paddedId) }}';"
+                                    style="cursor: pointer;"
+                                >
+                                    <td>{{ $paddedId }}</td>
                                     <td>{{ $cylinder->size }}</td>
                                     <td>
                                         @switch($cylinder->size)

@@ -103,9 +103,9 @@ class ManagementController extends Controller
             $query = $query
                 ->select('*')
                 ->selectRaw($relevanceSql, $bindings)
-                ->where(function($q) use ($terms, $columns) {
+                ->where(function ($q) use ($terms, $columns) {
                     foreach ($terms as $term) {
-                        $q->where(function($q2) use ($term, $columns) {
+                        $q->where(function ($q2) use ($term, $columns) {
                             foreach ($columns as $col) {
                                 $q2->orWhere($col, 'like', "%{$term}%");
                             }
@@ -138,11 +138,11 @@ class ManagementController extends Controller
         // Server‑side search (name / phone / email)
         if ($request->filled('search')) {
             $term = $request->search;
-            $query->where(function($q) use ($term) {
-                $q->where('first_name','like',"%{$term}%")
-                  ->orWhere('last_name','like',"%{$term}%")
-                  ->orWhere('phone_number','like',"%{$term}%")
-                  ->orWhere('email','like',"%{$term}%");
+            $query->where(function ($q) use ($term) {
+                $q->where('first_name', 'like', "%{$term}%")
+                    ->orWhere('last_name', 'like', "%{$term}%")
+                    ->orWhere('phone_number', 'like', "%{$term}%")
+                    ->orWhere('email', 'like', "%{$term}%");
             });
         }
 
@@ -168,11 +168,11 @@ class ManagementController extends Controller
         // Server‑side search across first_name, last_name, phone_number, email
         if ($request->filled('search')) {
             $term = $request->search;
-            $query->where(function($q) use ($term) {
+            $query->where(function ($q) use ($term) {
                 $q->where('first_name', 'like', "%{$term}%")
-                  ->orWhere('last_name',  'like', "%{$term}%")
-                  ->orWhere('phone_number','like', "%{$term}%")
-                  ->orWhere('email',       'like', "%{$term}%");
+                    ->orWhere('last_name',  'like', "%{$term}%")
+                    ->orWhere('phone_number', 'like', "%{$term}%")
+                    ->orWhere('email',       'like', "%{$term}%");
             });
         }
 
@@ -183,7 +183,7 @@ class ManagementController extends Controller
 
         $states = State::all();
 
-        return view('management.agents', compact('agents','states'));
+        return view('management.agents', compact('agents', 'states'));
     }
 
     public function cylindersPage(Request $request)
@@ -289,11 +289,11 @@ class ManagementController extends Controller
             $term = $request->search;
             $query->where(function ($q) use ($term) {
                 $q->where('first_name', 'like', "%{$term}%")
-                  ->orWhere('last_name', 'like', "%{$term}%")
-                  ->orWhere('phone_number', 'like', "%{$term}%")
-                  ->orWhere('email', 'like', "%{$term}%")
-                  ->orWhere('city', 'like', "%{$term}%")
-                  ->orWhere('state', 'like', "%{$term}%");
+                    ->orWhere('last_name', 'like', "%{$term}%")
+                    ->orWhere('phone_number', 'like', "%{$term}%")
+                    ->orWhere('email', 'like', "%{$term}%")
+                    ->orWhere('city', 'like', "%{$term}%")
+                    ->orWhere('state', 'like', "%{$term}%");
             });
         }
 
@@ -311,6 +311,9 @@ class ManagementController extends Controller
 
     public function showCylinder($id)
     {
+        // strip leading zeroes, cast to int
+        $intId = (int) ltrim($id, '0');
+
         $cylinder = Cylinder::findOrFail($id);
         $warehouses = DB::table('warehouses')->get();
         $deliveries = Delivery::where('cylinder', $id)->get();

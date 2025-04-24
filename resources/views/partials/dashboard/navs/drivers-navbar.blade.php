@@ -11,16 +11,16 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mx-auto">
-            <!-- Cylinders Link -->
-            <li class="nav-item {{ request()->routeIs('drivers.cylinders') ? 'active' : '' }}">
-                <a href="{{ route('drivers.cylinders') }}" class="nav-link">Cylinders</a>
-            </li>
-
             <!-- Profile Link -->
             <li class="nav-item {{ request()->routeIs('drivers.profile') ? 'active' : '' }}">
                 <a href="{{ route('drivers.profile', ['id' => $user->id]) }}" class="nav-link">
                     <i class="fas fa-user-circle mr-2"></i>Profile
                 </a>
+            </li>
+
+            <!-- Cylinders Link -->
+            <li class="nav-item {{ request()->routeIs('drivers.cylinders') ? 'active' : '' }}">
+                <a href="{{ route('drivers.cylinders') }}" class="nav-link">Cylinders</a>
             </li>
 
             <!-- Settings Dropdown -->
