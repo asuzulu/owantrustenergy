@@ -81,12 +81,6 @@ Route::middleware(['auth'])->prefix('management/cylinders')->name('management.cy
     // Show a single cylinder
     Route::get('/{id}', [ManagementController::class, 'showCylinder'])->name('show');
 
-    // Destroy a cylinder (custom destroy action)
-    Route::delete('/{id}', [CylinderController::class, 'destroyCustom'])->name('destroy');
-
-    // Create a new cylinder
-    Route::get('/create', [CylinderController::class, 'create'])->name('create');
-
     // List all cylinders (another listing route)
     Route::get('/', [CylinderController::class, 'index'])->name('list');
 
@@ -103,7 +97,7 @@ Route::post('/register-modal', [RegisterController::class, 'registerModal'])->na
 Route::prefix('cylinders')->name('cylinders.')->group(function () {
     Route::get('/', [CylinderController::class, 'index'])->name('index');
     Route::get('detail/{id}', [CylinderController::class, 'show'])->name('show.detail');
-    Route::delete('destroy/{id}', [CylinderController::class, 'destroyCustom'])->name('destroy.custom');
+    Route::delete('destroy/{id}', [CylinderController::class, 'destroy'])->name('destroy');
 });
 
 // Customer-specific routes

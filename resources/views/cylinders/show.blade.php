@@ -220,27 +220,27 @@
 
     <!-- Delete Cylinder Modal -->
     <div class="modal fade" id="deleteCylinderModal" tabindex="-1" role="dialog"
-        aria-labelledby="deleteCylinderModalLabel" aria-hidden="true">
+         aria-labelledby="deleteCylinderModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteCylinderModalLabel">Confirm Delete</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
-                <div class="modal-body"> Are you sure you want to delete this cylinder? </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this cylinder?
+                </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <form action="{{ route('cylinders.destroy', $cylinder->id) }}" method="POST">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <form action="{{ route('cylinders.destroy', $paddedId) }}"
+                          method="POST" class="d-inline">
                         @csrf
                         @method('DELETE')
-                        <div class="tm-table-actions-col-right">
-                            @if (Auth::user()->position === 'Manager')
-                                <button type="button" class="btn btn-danger" data-toggle="modal"
-                                    data-target="#deleteCylinderModal">Delete Cylinder</button>
-                            @endif
-                        </div>
+                        <button type="submit" class="btn btn-danger">
+                            Yes, Delete
+                        </button>
                     </form>
                 </div>
             </div>

@@ -150,6 +150,12 @@ return [
             'path' => storage_path('logs/deliveries.log'),
             'level' => 'info',
         ],
+
+        'cylinder_deletion' => [
+            'driver' => 'single',
+            'path'   => storage_path('logs/cylinder_deletion.log'),
+            'level'  => env('LOG_LEVEL', 'info'),
+        ],
     ],
 
 ];

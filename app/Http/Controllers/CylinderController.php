@@ -203,22 +203,63 @@ class CylinderController extends Controller
         return $id;
     }
 
+    /**
+     * Remove the specified cylinder from storage.
+     *
+     * Logs its details, then deletes it.
+     */
     public function destroy($id)
     {
         $cylinder = Cylinder::findOrFail($id);
 
         if (Auth::user()->position !== 'Manager') {
-            return redirect()->route('cylinders.index')->with('error', 'Unauthorized action.');
+            return redirect()
+                ->route('cylinders.index')
+                ->with('error', 'Unauthorized action.');
         }
+
+        // Capture all of its details before deletion
+        $details = $cylinder->toArray();
 
         DB::beginTransaction();
         try {
             $cylinder->delete();
+
+            // Build a human-friendly log entry
+            $message = sprintf(
+                "Cylinder Deleted: #%s\n" .
+                    "Size: %s\n" .
+                    "Location: %s\n" .
+                    "Allocated Date: %s\n" .
+                    "User ID: %s\n" .
+                    "QR Code Path: %s\n" .
+                    "Deleted By: %s %s (User ID %d)\n" .
+                    "At: %s\n",
+                $details['id'],
+                $details['size'],
+                $details['location'],
+                $details['allocated_date'] ?? 'N/A',
+                $details['user_id'] ?? 'N/A',
+                $details['qr_code_path'] ?? 'N/A',
+                Auth::user()->first_name,
+                Auth::user()->last_name,
+                Auth::id(),
+                now()->toDateTimeString()
+            );
+
+            // Write it to cylinder_deletion.log with a blank line afterward
+            Log::channel('cylinder_deletion')->info($message . "\n");
+
             DB::commit();
-            return redirect()->route('cylinders.index')->with('success', 'Cylinder deleted successfully.');
+
+            return redirect()
+                ->route('cylinders.index')
+                ->with('success', 'Cylinder deleted successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Failed to delete cylinder.');
+            return redirect()
+                ->back()
+                ->with('error', 'Failed to delete cylinder.');
         }
     }
 }
