@@ -40,9 +40,9 @@ Route::post('/register', [RegisterController::class, 'store'])->name('register.s
 
 // Login routes (sign-in and login routes merged)
 Route::get('/sign-in', [SignInController::class, 'showSignInForm'])->name('signin.form');
-Route::get('/login', [SignInController::class, 'showSignInForm'])->name('login');  // Both '/sign-in' and '/login' point to the same form
+Route::get('/login', [SignInController::class, 'showSignInForm'])->name('login');
 Route::post('/signin', [SignInController::class, 'store'])->name('signin.store');
-Route::post('/login', [SignInController::class, 'store'])->name('login.store');  // Both '/signin' and '/login' handle the same store logic
+Route::post('/login', [SignInController::class, 'store'])->name('login.store');
 
 // Logout route
 Route::post('/logout', [SignInController::class, 'customLogout'])->name('logout');

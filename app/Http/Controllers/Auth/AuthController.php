@@ -8,11 +8,12 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    // Show the login form
-    public function showLoginForm()
-    {
-        return view('management-portal'); // This should match your login page view
-    }
+    /** Show the login form
+    *public function showLoginForm()
+    *{
+    *    return view('management-portal');
+    *}
+    **/
 
     // Handle user authentication
     public function authenticate(Request $request)

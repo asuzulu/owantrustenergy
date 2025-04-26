@@ -32,7 +32,7 @@
                 </form>
             @else
                 <a class="nav-item nav-link {{ request()->routeIs('register') ? 'active' : '' }}" href="{{ route('register') }}">Sign Up</a>
-                <a class="nav-item nav-link {{ request()->routeIs('signin.form') ? 'active' : '' }}" href="{{ route('signin.form', ['portal' => 'customer']) }}">Sign In</a>
+                <a class="nav-item nav-link {{ request()->routeIs('signin.form') ? 'active' : '' }}" href="{{ route('signin.form',) }}">Sign In</a>
             @endif
         </div>
     </div>

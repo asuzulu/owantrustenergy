@@ -11,7 +11,7 @@ class SignInController extends Controller
     // Show the sign-in form
     public function showSignInForm()
     {
-        return view('sign-in'); // This can be reused for both /login and /sign-in
+        return view('sign-in');
     }
 
     // Handle the login process
@@ -49,12 +49,5 @@ class SignInController extends Controller
                 Auth::logout();
                 return redirect()->route('signin.form')->withErrors(['Invalid role.']);
         }
-    }
-
-    // Custom logout logic
-    public function customLogout(Request $request)
-    {
-        Auth::logout();
-        return redirect()->route('home');
     }
 }
