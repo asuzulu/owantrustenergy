@@ -50,4 +50,11 @@ class SignInController extends Controller
                 return redirect()->route('signin.form')->withErrors(['Invalid role.']);
         }
     }
+
+    // Custom logout logic
+    public function customLogout(Request $request)
+    {
+        Auth::logout();
+        return redirect()->route('home');
+    }
 }
