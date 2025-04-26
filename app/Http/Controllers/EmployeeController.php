@@ -50,7 +50,7 @@ class EmployeeController extends Controller
             'state' => 'required|exists:states,id',
             'bvn' => 'required|digits:11',
             'nin' => 'required|digits:11',
-            'email' => ['required', 'email', 'max:255', 'email:rfc,dns', 'unique:users,email'],
+            'email' => ['required', 'email', 'max:255', 'email' /*:rfc,dns'*/, 'unique:users,email'],
             'dob' => ['required', 'date', 'before:' . now()->subYears(18)->toDateString()],
             'password' => [
                 'required',

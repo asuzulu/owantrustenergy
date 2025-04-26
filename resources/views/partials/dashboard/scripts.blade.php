@@ -85,7 +85,7 @@
             });
         }
     </script>
-
+    
     <script>
         $(document).ready(function() {
             let croppieInstance;

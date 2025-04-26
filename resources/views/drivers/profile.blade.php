@@ -95,6 +95,11 @@
     @endsection
 
     @section('scripts')
+        @if (Auth::guest())
+            <script>
+                window.location = "{{ url('/') }}";
+            </script>
+        @endif
         <script>
             $(document).ready(function() {
                 $("#editDriverForm").on("submit", function(e) {
