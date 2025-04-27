@@ -46,7 +46,9 @@
                         <div class="form-group">
                             <label for="street">Street</label>
                             <input type="text" class="form-control" id="street" name="street"
-                                value="{{ $user->street }}">
+                                value="{{ old('street', $user->street) }}" required
+                                pattern=".*[a-zA-Z]+.*" title="Street address must contain at least one letter.">
+                            <div class="invalid-feedback">Please enter a valid street address.</div>
                         </div>
 
                         <div class="form-group">

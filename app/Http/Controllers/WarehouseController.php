@@ -25,7 +25,7 @@ class WarehouseController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'street' => 'required|string|max:255',
+            'street' => ['required', 'string', 'max:255', 'regex:/[a-zA-Z]+/'],
             'city' => 'required|string|max:255',
             'state' => 'required|string|max:255',
             'phone_number' => 'required|numeric|digits:10',
@@ -127,7 +127,7 @@ class WarehouseController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'street' => 'required|string|max:255',
+            'street' => ['required', 'string', 'max:255', 'regex:/[a-zA-Z]+/'],
             'city' => 'required|string|max:255',
             'state' => 'required|string|max:255',
             'phone_number' => 'required|digits:10',

@@ -61,7 +61,11 @@
                         <div class="form-group">
                             <label for="street">Street Address</label>
                             <input type="text" class="form-control" id="street" name="street" required
-                                maxlength="255">
+                                placeholder="Enter Street Address" value="{{ old('street') }}"
+                                aria-label="Street Address" title="Must be a valid stree address"/>
+                            @error('street')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="form-group">

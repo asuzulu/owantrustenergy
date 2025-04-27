@@ -78,17 +78,18 @@
                     </div>
                 </div>
 
-                <!-- Nigerian Address Section -->
                 <div class="form-row justify-content-center">
                     <div class="form-group col-md-6">
                         <label for="street">Street Address</label>
                         <input type="text" class="form-control" id="street" name="street" required
-                            placeholder="Enter Street Address" value="{{ old('street') }}" />
+                               placeholder="Enter Street Address" value="{{ old('street') }}"
+                               aria-label="Street Address" pattern=".*[a-zA-Z]+.*" title="Must be a valid stree address" />
                         @error('street')
                             <div class="text-danger">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
+
                 <div class="form-row justify-content-center">
                     <div class="form-group col-md-3">
                         <label for="city">City</label>

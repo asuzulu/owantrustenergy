@@ -194,8 +194,8 @@
                             <label for="street">Street Address</label>
                             <input type="text" class="form-control" id="street" name="street" required
                                 placeholder="Enter Street Address" value="{{ old('street') }}"
-                                aria-label="Street Address" />
-                            @error('street')
+                                aria-label="Street Address" pattern=".*[a-zA-Z]+.*" title="Must be a valid stree address" />
+                                @error('street')
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
                         </div>

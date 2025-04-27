@@ -96,7 +96,7 @@ class AgentController extends Controller
             'lastName'    => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'phoneNumber' => 'required|digits:10',
             'gender'      => 'required|string|in:male,female',
-            'street'      => 'required|string|max:255',
+            'street'      => ['required', 'string', 'max:255', 'regex:/[a-zA-Z]+/'],
             'city'        => 'required|string|max:255',
             'state'       => 'required|exists:states,id',
             'bvn'         => 'required|digits:11',
