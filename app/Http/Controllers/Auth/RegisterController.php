@@ -98,8 +98,13 @@ class RegisterController extends Controller
             'state' => 'required|exists:states,id',
             'bvn' => 'required|digits:11',
             'nin' => 'required|digits:11',
-            'email' => ['required', 'email', 'max:255', 'email' /*:rfc,dns'*/, 'unique:users,email'],
-            'dob' => ['required', 'date', 'before:' . now()->subYears(18)->toDateString()],
+            'email' => ['required', 'email', 'max:255', 'email', 'unique:users,email'],
+            'dob' => [
+                'required',
+                'date',
+                'before:' . now()->subYears(18)->toDateString(), // Ensuring the user is at least 16 years old
+                'after:' . now()->subYears(130)->toDateString(), // Ensuring the user is not older than 130 years
+            ],
             'password' => [
                 'required',
                 'string',
@@ -113,7 +118,8 @@ class RegisterController extends Controller
             'position' => 'nullable|string|max:255',
             'photo_id' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
-            'dob.before' => 'You must be at least 18 years old to register.',
+            'dob.before' => 'You must be at least 16 years old to register.',
+            'dob.after' => 'The date of birth must not be older than 130 years.',
             'password.regex' => 'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
             'phoneNumber.regex' => 'Phone number must be a valid number (e.g., 08012345678).',
             'firstName.regex' => 'First name can only contain letters and spaces.',

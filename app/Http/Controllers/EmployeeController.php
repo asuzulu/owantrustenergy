@@ -37,10 +37,9 @@ class EmployeeController extends Controller
         return view('users.profile', compact('user', 'warehouseCylinders'));
     }
 
-
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validatedData = $request->validate([
             'firstName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'lastName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'phoneNumber' => 'required|digits:10',
@@ -50,8 +49,13 @@ class EmployeeController extends Controller
             'state' => 'required|exists:states,id',
             'bvn' => 'required|digits:11',
             'nin' => 'required|digits:11',
-            'email' => ['required', 'email', 'max:255', 'email' /*:rfc,dns'*/, 'unique:users,email'],
-            'dob' => ['required', 'date', 'before:' . now()->subYears(18)->toDateString()],
+            'email' => ['required', 'email', 'max:255', 'email', 'unique:users,email'],
+            'dob' => [
+                'required',
+                'date',
+                'before:' . now()->subYears(18)->toDateString(), // Ensuring the user is at least 16 years old
+                'after:' . now()->subYears(130)->toDateString(), // Ensuring the user is not older than 130 years
+            ],
             'password' => [
                 'required',
                 'string',
@@ -60,24 +64,20 @@ class EmployeeController extends Controller
                 'regex:/[A-Z]/',       // At least one uppercase
                 'regex:/[a-z]/',       // At least one lowercase
                 'regex:/[0-9]/',       // At least one number
-                'regex:/[@$!%*?&]/'     // At least one special character
+                'regex:/[@$!%*?&]/'    // At least one special character
             ],
             'position' => 'nullable|string|max:255',
             'photo_id' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
-            'dob.before' => 'You must be at least 18 years old to register.',
+            'dob.before' => 'You must be at least 16 years old to register.',
+            'dob.after' => 'The date of birth must not be older than 130 years.',
             'password.regex' => 'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
             'phoneNumber.regex' => 'Phone number must be a valid number (e.g., 08012345678).',
             'firstName.regex' => 'First name can only contain letters and spaces.',
             'lastName.regex' => 'Last name can only contain letters and spaces.',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $validatedData = $validator->validated();
-        $position = $validatedData['position'] ?? 'Employee';
+        $position = $validatedData['position'] ?? 'Customer';
 
         try {
             $user = User::create([

@@ -39,55 +39,61 @@ class DriversController extends Controller
 
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'firstName'   => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-            'lastName'    => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
+        $validatedData = $request->validate([
+            'firstName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'lastName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'phoneNumber' => 'required|digits:10',
-            'gender'      => 'required|string|in:male,female',
-            'street'      => ['required', 'string', 'max:255', 'regex:/[a-zA-Z]+/'],            'city'        => 'required|string|max:255',
-            'state'       => 'required|exists:states,id',
-            'bvn'         => 'required|digits:11',
-            'nin'         => 'required|digits:11',
-            'email'       => ['required', 'email', 'max:255', 'email' /*:rfc,dns'*/, 'unique:users,email'],
-            'dob'         => ['required', 'date', 'before:' . now()->subYears(18)->toDateString()],
-            'password'    => [
+            'gender' => 'required|string|in:male,female',
+            'street' => ['required', 'string', 'max:255', 'regex:/[a-zA-Z]+/'],
+            'city' => 'required|string|max:255',
+            'state' => 'required|exists:states,id',
+            'bvn' => 'required|digits:11',
+            'nin' => 'required|digits:11',
+            'email' => ['required', 'email', 'max:255', 'email', 'unique:users,email'],
+            'dob' => [
+                'required',
+                'date',
+                'before:' . now()->subYears(18)->toDateString(), // Ensuring the user is at least 16 years old
+                'after:' . now()->subYears(130)->toDateString(), // Ensuring the user is not older than 130 years
+            ],
+            'password' => [
                 'required',
                 'string',
                 'min:8',
                 'confirmed',
-                'regex:/[A-Z]/',
-                'regex:/[a-z]/',
-                'regex:/[0-9]/',
-                'regex:/[@$!%*?&]/'
+                'regex:/[A-Z]/',       // At least one uppercase
+                'regex:/[a-z]/',       // At least one lowercase
+                'regex:/[0-9]/',       // At least one number
+                'regex:/[@$!%*?&]/'    // At least one special character
             ],
+            'position' => 'nullable|string|max:255',
+            'photo_id' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
-            'dob.before'       => 'You must be at least 18 years old to register.',
-            'password.regex'   => 'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
-            'firstName.regex'  => 'First name can only contain letters and spaces.',
-            'lastName.regex'   => 'Last name can only contain letters and spaces.',
+            'dob.before' => 'You must be at least 16 years old to register.',
+            'dob.after' => 'The date of birth must not be older than 130 years.',
+            'password.regex' => 'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
+            'phoneNumber.regex' => 'Phone number must be a valid number (e.g., 08012345678).',
+            'firstName.regex' => 'First name can only contain letters and spaces.',
+            'lastName.regex' => 'Last name can only contain letters and spaces.',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $v = $validator->validated();
+        $position = $validatedData['position'] ?? 'Customer';
 
         try {
-            $driver = User::create([
-                'first_name'   => $v['firstName'],
-                'last_name'    => $v['lastName'],
-                'phone_number' => $v['phoneNumber'],
-                'gender'       => $v['gender'],
-                'street'       => $v['street'],
-                'city'         => $v['city'],
-                'state'        => State::where('id', $v['state'])->value('name'),
-                'bvn'          => $v['bvn'],
-                'nin'          => $v['nin'],
-                'email'        => $v['email'],
-                'dob'          => $v['dob'],
-                'password'     => Hash::make($v['password']),
-                'position'     => 'Driver',
+            $user = User::create([
+                'first_name'   => $validatedData['firstName'],
+                'last_name'    => $validatedData['lastName'],
+                'phone_number' => $validatedData['phoneNumber'],
+                'gender'       => $validatedData['gender'],
+                'street'       => $validatedData['street'],
+                'city'         => $validatedData['city'],
+                'state'        => State::where('id', $validatedData['state'])->value('name'),
+                'bvn'          => $validatedData['bvn'],
+                'nin'          => $validatedData['nin'],
+                'email'        => $validatedData['email'],
+                'dob'          => $validatedData['dob'],
+                'password'     => Hash::make($validatedData['password']),
+                'position'     => $position,
             ]);
 
             return response()->json(['success' => true, 'message' => 'Driver registered successfully!']);
