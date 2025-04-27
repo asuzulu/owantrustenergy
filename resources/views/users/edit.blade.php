@@ -91,23 +91,25 @@
                         </div>
                     </form> <!-- CLOSE editUserForm HERE -->
 
-                    @if (Auth::user()->position === 'Manager')
-                        <div class="d-flex justify-content-center align-items-center gap-2 mt-3 flex-wrap">
-                            {{-- Save Changes Button (outside the form) --}}
+                    <div class="d-flex justify-content-center align-items-center gap-2 mt-3 flex-wrap">
+                        {{-- Save Changes Button for Manager, Employee, Agent --}}
+                        @if (in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
                             <button type="button" id="saveChangesBtn" class="btn btn-primary">Save Changes</button>
+                        @endif
 
-                            {{-- Delete button form (separate) --}}
+                        {{-- Delete button (Manager only) --}}
+                        @if (Auth::user()->position === 'Manager')
                             <form id="deleteUserForm" action="{{ route('users.destroy', $user->id) }}" method="POST"
                                 class="d-inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger">Delete</button>
                             </form>
+                        @endif
 
-                            {{-- Cancel button --}}
-                            <a href="{{ route('users.profile', $user->id) }}" class="btn btn-secondary">Cancel</a>
-                        </div>
-                    @endif
+                        {{-- Cancel (all roles) --}}
+                        <a href="{{ route('users.profile', $user->id) }}" class="btn btn-secondary">Cancel</a>
+                    </div>
                 </div>
             </div>
         </div>

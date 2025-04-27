@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class SignInController extends Controller
 {
@@ -17,17 +19,26 @@ class SignInController extends Controller
     // Handle the login process
     public function store(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        // Validate inputs
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required',
+        ]);
 
-        // Attempt login with provided credentials and remember option
-        if (Auth::attempt($credentials, $request->has('remember'))) {
-            $user = Auth::user();
+        // Normalize and extract credentials
+        $email    = strtolower($request->input('email'));
+        $password = $request->input('password');
 
-            // Redirect the user based on role (position)
+        // Find user by case‐insensitive email
+        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+
+        // Check password and log in
+        if ($user && Hash::check($password, $user->password)) {
+            Auth::login($user, $request->has('remember'));
             return $this->redirectUserByPosition($user);
         }
 
-        // If login fails, return back with error
+        // On failure, show error modal
         return redirect()->back()->with('login_error', 'Invalid email or password.');
     }
 

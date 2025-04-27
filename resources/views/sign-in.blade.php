@@ -53,7 +53,8 @@
     <div id="customErrorModal" class="modal" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <div class="modal-header bg-success text-white">                    <h5 class="modal-title" id="errorModalLabel">Sign In Error</h5>
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="errorModalLabel">Sign In Error</h5>
                     <button type="button" class="btn-close close-custom" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
