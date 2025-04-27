@@ -44,6 +44,7 @@
 
     {{-- Page-Specific Scripts --}}
     @yield('scripts')
+    @stack('scripts')
     @if (Auth::guest())
         <script>
             window.location = "{{ url('/') }}";

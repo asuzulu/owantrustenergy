@@ -1,11 +1,3 @@
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-@if (Auth::user()->position === 'Customer')
-    <script>
-        window.location.href = "{{ route('dashboard') }}"; // Redirect to a safe page
-    </script>
-    @php exit; @endphp
-@endif
-
 @extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : 'layouts.drivers-dashboard')
 
 @section('content')
@@ -34,8 +26,10 @@
                                 Age: {{ $user->dob ? \Carbon\Carbon::parse($user->dob)->age : 'N/A' }}<br>
                                 <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary mt-3">Edit Profile</a>
                                 @if (Auth::user()->position === 'Manager' || !$user->photo_id)
-                                    <button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal"
-                                        data-bs-target="#uploadNinModal">Upload NIN</button>
+                                    <button class="btn btn-secondary mt-3" data-bs-toggle="modal"
+                                        data-bs-target="#uploadNinModal">
+                                        Upload NIN
+                                    </button>
                                 @endif
                             </div>
                         </div>
@@ -95,6 +89,9 @@
     @endsection
 
     @section('scripts')
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
         @if (Auth::guest())
             <script>
                 window.location = "{{ url('/') }}";

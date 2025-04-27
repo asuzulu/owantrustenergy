@@ -34,6 +34,7 @@
         </div>
     </div>
 
+    @yield('scripts')
     @stack('scripts')
     @include('partials.dashboard.scripts')
     @if (Auth::guest())
