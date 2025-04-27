@@ -142,4 +142,37 @@ class CylinderDistributionController extends Controller
 
         return response()->json($cylinderData);
     }
+
+    public function updatePickUpDate(Request $request)
+    {
+        $cylinderIds = $request->input('selected_cylinders', []);
+        $enteredPasscode = $request->input('passcode');
+
+        // Get cylinders that are selected and not yet picked up
+        $cylinders = DB::table('agent_cylinders_distribution')
+            ->whereIn('cylinder_id', $cylinderIds)
+            ->whereNull('pick_up_date') // Only process cylinders that don't have a pick-up date
+            ->get();
+
+        $updatedCount = 0;
+
+        foreach ($cylinders as $cylinder) {
+            // Check if the entered passcode matches
+            if ($cylinder->passcode === $enteredPasscode) {
+                DB::table('agent_cylinders_distribution')
+                    ->where('cylinder_id', $cylinder->cylinder_id)
+                    ->update(['pick_up_date' => now()]);
+
+                Log::info("Pick up date updated for cylinder ID {$cylinder->cylinder_id}");
+
+                $updatedCount++;
+            }
+        }
+
+        if ($updatedCount > 0) {
+            return redirect()->back()->with('success', 'Pick-up date updated successfully.');
+        } else {
+            return redirect()->back()->with('error', 'Invalid passcode or no cylinders selected.');
+        }
+    }
 }

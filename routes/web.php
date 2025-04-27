@@ -185,6 +185,8 @@ Route::get('/cylinders/warehouse/data', [CylinderDistributionController::class, 
     ->name('cylinders.warehouse.data');
 Route::post('/cylinders/distribute/{id}', [CylinderDistributionController::class, 'distribute'])
     ->name('cylinders.distribute');
+Route::post('/agents/{id}/update-pickup-date', [AgentController::class, 'updatePickUpDate'])->name('agent.updatePickUpDate');
+
 
 // Pick up distributed cylinder from warehouse by agent
 Route::post('/warehouses/{warehouse}/confirm-agent-pickup', [WarehouseController::class, 'confirmAgentPickup'])

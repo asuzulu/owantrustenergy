@@ -29,7 +29,7 @@
             {{-- FILTER + SEARCH FORM --}}
             <form id="filterForm"
                   method="GET"
-                  action="{{ route('agent.cylinders') }}">
+                  action="{{ route('agent.cylinders',['id' => $agent->id]) }}">
                 <div class="row mt-4 mb-2">
                     <div class="col-md-6">
                         <label for="sizeFilter"><strong>Size:</strong></label>

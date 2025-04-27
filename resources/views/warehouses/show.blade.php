@@ -36,15 +36,18 @@
                         <h2 class="tm-block-title d-inline-block">Warehouse Details</h2>
                     </div>
                     <div class="col-md-4 col-sm-12 text-right">
-                        <div class="d-flex flex-nowrap justify-content-end align-items-center" style="white-space: nowrap;">
-                            <a href="{{ route('warehouses.index') }}" class="btn btn-small btn-secondary mr-2">
-                                Back to WarehouseList
+                        <div class="d-flex justify-content-end align-items-center flex-wrap"
+                            style="white-space: nowrap;">
+                            <a href="{{ route('warehouses.index') }}" class="btn btn-small btn-secondary mb-2 mb-sm-0 mr-2">
+                                Back to Warehouse List
                             </a>
                             @if (Auth::check() && Auth::user()->position === 'Manager')
-                                <button class="btn btn-small btn-primary mr-2" data-toggle="modal" data-target="#editModal">
+                                <button class="btn btn-small btn-primary mb-2 mb-sm-0 mr-2" data-toggle="modal"
+                                    data-target="#editModal">
                                     Edit
                                 </button>
-                                <button class="btn btn-small btn-danger" data-toggle="modal" data-target="#deleteModal">
+                                <button class="btn btn-small btn-danger mb-2 mb-sm-0" data-toggle="modal"
+                                    data-target="#deleteModal">
                                     Delete
                                 </button>
                             @endif
@@ -105,8 +108,8 @@
                         <div class="form-group">
                             <label for="street">Street</label>
                             <input type="text" class="form-control" id="street" name="street"
-                                value="{{ old('street', $warehouse->street) }}" required
-                                pattern=".*[a-zA-Z]+.*" title="Street address must contain at least one letter.">
+                                value="{{ old('street', $warehouse->street) }}" required pattern=".*[a-zA-Z]+.*"
+                                title="Street address must contain at least one letter.">
                             <div class="invalid-feedback">Please enter the street address.</div>
                         </div>
                         <div class="form-group">

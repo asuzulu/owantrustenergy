@@ -83,9 +83,10 @@ class AgentController extends Controller
 
     public function show($id)
     {
+        $agent = User::findOrFail($id);
         $user = User::findOrFail($id);
         $warehouseCylinders = collect();
-        return view('users.profile', compact('user', 'warehouseCylinders'));
+        return view('users.profile', compact('user', 'warehouseCylinders', 'agent'));
     }
 
     // Register Agent Modal

@@ -138,7 +138,7 @@
         @endif
 
         {{-- Cylinders Distributed section shows for Employee, Manager, and Agent (not Customer) --}}
-        @if ($user->position === 'Agent' && in_array(Auth::user()->position, ['Employee', 'Manager', 'Agent']))
+        @if (in_array(Auth::user()->position, ['Employee', 'Manager', 'Agent']))
             <div class="row tm-content-row tm-mt-big">
                 <div class="bg-white tm-block">
                     <h3 class="tm-block-title text-center">Cylinders Distributed to Agent</h3>
@@ -151,37 +151,109 @@
                     @endphp
 
                     @if ($distributed->isNotEmpty())
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Cylinder #</th>
-                                    <th>Size</th>
-                                    <th>Weight</th>
-                                    <th>Warehouse</th>
-                                    <th>Date Picked Up</th>
-                                    @if (Auth::user()->position === 'Agent')
-                                        <th>Passcode</th>
-                                    @endif
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($distributed as $item)
-                                    <tr style="cursor: pointer;"
-                                        onclick="window.location='{{ route('management.cylinders.show', $item->cylinder_id) }}'">
-                                        <td>{{ str_pad($item->cylinder_id, 9, '0', STR_PAD_LEFT) }}</td>
-                                        <td>{{ $item->cylinder_size }}</td>
-                                        <td>{{ $item->cylinder_weight }}</td>
-                                        <td>{{ $item->warehouse }}</td>
-                                        <td>
-                                            {{ $item->pick_up_date ? \Carbon\Carbon::parse($item->pick_up_date)->format('d-m-Y') : 'N/A' }}
-                                        </td>
+                        <form action="{{ route('agent.updatePickUpDate', $agent->id) }}" method="POST">
+                            @csrf
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox" id="select_all"> Select All</th>
+                                        <th>Cylinder #</th>
+                                        <th>Size</th>
+                                        <th>Weight</th>
+                                        <th>Warehouse</th>
+                                        <th>Date Picked Up</th>
                                         @if (Auth::user()->position === 'Agent')
-                                            <td>{{ $item->passcode }}</td>
+                                            <th>Passcode</th>
                                         @endif
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach ($distributed as $item)
+                                        @if ($item->pick_up_date === null)
+                                            <tr style="cursor: pointer;"
+                                                onclick="window.location='{{ route('management.cylinders.show', str_pad($item->cylinder_id, 9, '0', STR_PAD_LEFT)) }}'">
+                                                <td>
+                                                    <input type="checkbox" name="selected_cylinders[]"
+                                                        value="{{ $item->cylinder_id }}">
+                                                </td>
+                                                <td>{{ str_pad($item->cylinder_id, 9, '0', STR_PAD_LEFT) }}</td>
+                                                <td>{{ $item->cylinder_size }}</td>
+                                                <td>{{ $item->cylinder_weight }}</td>
+                                                <td>{{ $item->warehouse }}</td>
+                                                <td>
+                                                    {{ $item->pick_up_date ? \Carbon\Carbon::parse($item->pick_up_date)->format('d-m-Y') : 'N/A' }}
+                                                </td>
+                                                @if (Auth::user()->position === 'Agent')
+                                                    <td>{{ $item->passcode }}</td>
+                                                @endif
+                                            </tr>
+                                        @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
+
+                            @if (!in_array(Auth::user()->position, ['Agent', 'Customer']))
+                                <div class="form-group row passcode-form">
+                                    <label for="passcode" class="col-sm-3 col-form-label text-sm-right text-center">Enter
+                                        Passcode:</label>
+                                    <div class="col-sm-6 col-md-4 d-flex passcode-controls">
+                                        <input type="text" name="passcode" id="passcode"
+                                            class="form-control mr-2 passcode-input" required>
+                                        <button type="submit" class="btn btn-primary">
+                                            Update Pick-Up Date
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <style>
+                                    /* default (>1080px): left-align & baseline-align items */
+                                    .passcode-form {
+                                        justify-content: flex-start !important;
+                                    }
+
+                                    .passcode-form .passcode-controls {
+                                        display: flex;
+                                        flex-direction: row;
+                                        align-items: baseline;
+                                        /* align button to input’s text baseline */
+                                        justify-content: flex-start;
+                                    }
+
+                                    .passcode-form .passcode-controls button {
+                                        margin-top: 2px;
+                                        /* nudge it up slightly */
+                                    }
+
+                                    .passcode-input {
+                                        width: 250px;
+                                    }
+
+                                    /* ≤1080px: stack & center */
+                                    @media (max-width: 1080px) {
+                                        .passcode-form {
+                                            justify-content: center !important;
+                                        }
+
+                                        .passcode-form .passcode-controls {
+                                            flex-direction: column !important;
+                                            align-items: center !important;
+                                            justify-content: center !important;
+                                        }
+
+                                        .passcode-input {
+                                            width: 100% !important;
+                                            margin-bottom: 0.5rem;
+                                            margin-right: 0 !important;
+                                        }
+
+                                        .passcode-form .passcode-controls button {
+                                            margin-top: 0;
+                                            /* reset for stacked view */
+                                        }
+                                    }
+                                </style>
+                            @endif
+                        </form>
                     @else
                         <p class="text-center">No cylinders distributed to this agent.</p>
                     @endif
