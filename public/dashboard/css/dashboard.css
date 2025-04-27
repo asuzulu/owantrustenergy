@@ -428,6 +428,45 @@ footer {
     position: relative;
 }
 
+/* ───────────────────────────────────────────────
+   Tablet & below (≤992px): show only Prev + 1,2,3 + Next
+─────────────────────────────────────────────── */
+@media (max-width: 992px) {
+    .pagination li.page-item:nth-child(n+6):not(:last-child) {
+      display: none;
+    }
+  }
+
+  /* ───────────────────────────────────────────────
+     Mobile (≤576px): show only Prev, Current, Next
+     & make the wrapper fixed at bottom-center
+  ─────────────────────────────────────────────── */
+  @media (max-width: 576px) {
+    /* Hide all page‐items… */
+    .pagination li.page-item {
+      display: none;
+    }
+    /* …then re‐show Prev, the active page, and Next */
+    .pagination li.page-item:first-child,
+    .pagination li.page-item.active,
+    .pagination li.page-item:last-child {
+      display: inline-block;
+    }
+
+    /* Fix the pagination container to bottom-center */
+    .d-flex.justify-content-center.mt-3 {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.95);
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+  }
+
 
 @media (min-width: 992px) {
     .navbar-expand-lg .navbar-nav .nav-link {
