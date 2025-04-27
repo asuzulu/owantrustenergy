@@ -61,7 +61,7 @@
     @include('partials.dashboard.nin-modal')
 
     <!-- Show Cylinders Assigned and ordered only if user has 'Customer' position -->
-    <div class="container" style="margin-top: -6rem;">
+    <div class="container" style="margin-top: -4rem;">
         <div class="row tm-content-row tm-mt-big">
             @if ($user->position === 'Customer')
                 <!-- Check if the user has 'Customer' position -->
@@ -75,7 +75,7 @@
             @section('content2')
                 <a href="{{ route('users.cylinders', ['id' => $user->id]) }}" class="text-decoration-none text-dark">
                     <div class="row tm-content-row tm-mt-big">
-                        <div class="bg-white tm-block" style="margin-top: -7rem;">
+                        <div class="bg-white tm-block" style="margin-top: -3rem;">
                             <h3 class="tm-block-title">Cylinders Ordered:</h3>
 
                             @php

@@ -92,7 +92,7 @@
                     </form> <!-- CLOSE editUserForm HERE -->
 
                     @if (Auth::user()->position === 'Manager')
-                        <div class="d-flex justify-content-start align-items-center gap-2 mt-3">
+                        <div class="d-flex justify-content-center align-items-center gap-2 mt-3 flex-wrap">
                             {{-- Save Changes Button (outside the form) --}}
                             <button type="button" id="saveChangesBtn" class="btn btn-primary">Save Changes</button>
 
@@ -212,7 +212,7 @@
                         } else {
                             $('#errorList').append(
                                 '<li>An error occurred while updating the user profile.</li>'
-                                );
+                            );
                         }
                         $('#errorModal').modal('show');
                     }
