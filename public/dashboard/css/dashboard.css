@@ -617,3 +617,27 @@ footer {
         top: 107px;
     }
 }
+
+/* ──────────────────────────────────────────────────────────
+   Mobile & down (≤576px): stack adjacent .btn’s full-width
+─────────────────────────────────────────────────────────── */
+@media (max-width: 576px) {
+    /* ANY .btn immediately after another .btn will stack */
+    .btn + .btn {
+      display: block !important;
+      width: 100% !important;
+      margin: .5rem 0 0 0 !important;
+    }
+
+    /* If you use btn-group or btn-toolbar anywhere, stack those too */
+    .btn-group,
+    .btn-toolbar {
+      flex-direction: column !important;
+      width: 100%;
+    }
+    .btn-group .btn,
+    .btn-toolbar .btn {
+      width: 100%;
+      margin-bottom: .5rem;
+    }
+  }
