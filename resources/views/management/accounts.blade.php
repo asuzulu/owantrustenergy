@@ -1,57 +1,52 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+@if (!auth()->check() || auth()->user()->position === 'Customer')
+    <script>
+        window.location.href = "{{ route('home') }}";
+    </script>
+    @php exit(); @endphp
+@endif
+
 @extends(auth()->check() && auth()->user()->position === 'Manager' ? 'layouts.management-dashboard' : (auth()->check() && auth()->user()->position === 'Employee' ? 'layouts.employee-dashboard' : (auth()->check() && auth()->user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.app')))
 
-@php
-    if (!auth()->check()) {
-        header('Location: ' . url('/'));
-        exit();
-    }
-@endphp
-
 @section('content')
-    <div class="container">
-        <div class="row tm-content-row tm-mt-big justify-content-center" style="margin-top: -50px !important;">
-            <div class="col-12 col-lg-10">
-                <div class="bg-white tm-block" style="width: 100% !important; font-size: 13px !important;">
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <div class="d-flex justify-content-between">
-                                <h2 class="tm-block-title">Customer Accounts</h2>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    {{-- HEADER: buttons + search, all same height --}}
-                                    <div class="d-flex justify-content-between align-items-stretch mb-3"
-                                        style="height: 50px;">
+    <div class="container" style="margin-top: -6rem;">
+        <div class="row tm-content-row tm-mt-big">
+            <div class="bg-white tm-block h-100">
+                <div class="row">
+                    <div class="col-md-2 col-sm-12">
+                        <h2 class="tm-block-title">Customer Accounts</h2>
+                    </div>
+                    @if (auth()->user()->position !== 'Agent')
+                        <div class="col-md-10 col-sm-12">
+                            <div class="d-flex flex-wrap justify-content-center align-items-start position-relative button-container mb-4"
+                                style="min-height: 55px;">
+                                <form method="GET" action="{{ route('management.accounts') }}" class="d-flex mb-2 mx-2">
+                                    <input type="text" name="search" class="form-control"
+                                        placeholder="Search customers..." value="{{ request('search') }}"
+                                        style="height: 55px;">
+                                </form>
 
-                                        <form method="GET" action="{{ route('management.accounts') }}" class="d-flex mx-2"
-                                            style="width: 400px; height: 100%;">
-                                            <input type="text" name="search" class="form-control"
-                                                placeholder="Search customers..." value="{{ request('search') }}"
-                                                aria-label="Search Customers" style="height: 100%;">
-                                            <button type="submit" class="btn btn-primary ml-2 mr-3"
-                                                aria-label="Submit Search" style="height: 100%;">
-                                                Search
-                                            </button>
-                                        </form>
+                                <!-- Customer Requests button: use mr-2 mb-2 always, but only get margin-left on large screens -->
+                                <a href="{{ route('management.orders.requests') }}"
+                                    class="btn btn-primary mr-2 mb-2 customer-requests-btn" style="height: 100%;">
+                                    Customer Requests
+                                </a>
 
-                                        <a href="{{ route('management.orders.requests') }}" class="btn btn-primary"
-                                            style="height: 100%;">
-                                            Customer Requests
-                                        </a>
-
-                                        <button class="btn btn-primary" data-toggle="modal" data-target="#addCustomerModal"
-                                            style="height: 100%;">
-                                            Add Customer
-                                        </button>
-                                    </div>
-                                    {{-- END HEADER --}}
-                                </div>
+                                <button class="btn btn-primary mx-2 mb-2 text-right ml-auto" data-toggle="modal"
+                                    data-target="#addCustomerModal" style="height: 100%;">
+                                    Add Customer
+                                </button>
                             </div>
                         </div>
-                    </div>
+                    @endif
+                </div>
 
-                    {{-- TABLE --}}
-                    <table class="table table-striped" style="margin: 0 auto !important; width: 100% !important;">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped tm-table-striped-even mt-3">
                         <thead>
-                            <tr style="font-size: 17px !important; font-weight: 1000 !important;">
+                            <tr class="tm-bg-gray">
                                 <th>Name</th>
                                 <th>Phone</th>
                                 <th>Email</th>
@@ -62,7 +57,7 @@
                         </thead>
                         <tbody>
                             @forelse ($users as $user)
-                                <tr onclick="window.location.href='{{ route('users.profile', $user->id) }}'"
+                                <tr onclick="window.location.href='{{ route('users.profile', $user->id) }}';"
                                     style="cursor: pointer;">
                                     <td>{{ $user->first_name }} {{ $user->last_name }}</td>
                                     <td>{{ $user->phone_number }}</td>
@@ -73,11 +68,12 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">No users found.</td>
+                                    <td colspan="6" class="text-center">No users found.</td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
+
                     @if ($users->hasPages())
                         <div class="d-flex justify-content-center mt-3">
                             {{ $users->links('pagination::bootstrap-4') }}
@@ -87,6 +83,30 @@
             </div>
         </div>
     </div>
+
+    <style>
+        @media (max-width: 1400px) {
+            /* center the whole button‐container row */
+            .button-container {
+                justify-content: center !important;
+            }
+            /* remove auto margins on each item */
+            .button-container form,
+            .button-container a,
+            .button-container button {
+                flex: 0 0 auto;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
+        }
+
+        @media (min-width: 1421px) {
+            .customer-requests-btn {
+                /* override only on wide screens */
+                margin-left: 7rem !important;
+            }
+        }
+    </style>
 
     <!-- Add Customer Registration Modal -->
     <div class="modal fade" id="addCustomerModal" tabindex="-1" role="dialog" aria-labelledby="addCustomerModalLabel"
@@ -196,7 +216,8 @@
                                     <option value="" disabled selected>Select State</option>
                                     @foreach ($states as $state)
                                         <option value="{{ $state->id }}"
-                                            {{ old('state') == $state->id ? 'selected' : '' }}>{{ $state->name }}
+                                            {{ old('state') == $state->id ? 'selected' : '' }}>
+                                            {{ $state->name }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -292,7 +313,7 @@
     <script>
         $(document).ready(function() {
             const form = $('#registerForm');
-            form.attr('action', '{{ route('register.modal') }}'); // set action via JS after DOM is ready
+            form.attr('action', '{{ route('register.modal') }}');
 
             form.on('submit', function(e) {
                 e.preventDefault();
@@ -331,7 +352,6 @@
                                 let input = form.find(`[name="${key}"]`);
                                 input.addClass('is-invalid');
 
-                                // Avoid duplicates
                                 if (input.next('.text-danger').length === 0) {
                                     input.after(
                                         `<span class="text-danger">${messages[0]}</span>`
@@ -350,17 +370,6 @@
                         }
                     }
                 });
-                $.each(errors, function(key, messages) {
-                    let input = form.find(`[name="${key}"]`);
-                    input.addClass('is-invalid');
-
-                    if (input.next('.text-danger').length === 0) {
-                        messages.forEach(msg => {
-                            input.after(`<span class="text-danger">${msg}</span>`);
-                        });
-                    }
-                });
-
             });
         });
     </script>

@@ -1,42 +1,42 @@
-@extends(auth()->check() && auth()->user()->position === 'Manager' ? 'layouts.management-dashboard' : (auth()->check() && auth()->user()->position === 'Employee' ? 'layouts.employee-dashboard' : (auth()->check() && auth()->user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.app')))
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-@php
-    if (!auth()->check()) {
-        header('Location: ' . url('/'));
-        exit();
-    }
-@endphp
+@if (!auth()->check() || auth()->user()->position === 'Customer')
+    <script>
+        window.location.href = "{{ route('home') }}";
+    </script>
+    @php exit(); @endphp
+@endif
+
+@extends(auth()->check() && auth()->user()->position === 'Manager' ? 'layouts.management-dashboard' : (auth()->check() && auth()->user()->position === 'Employee' ? 'layouts.employee-dashboard' : (auth()->check() && auth()->user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.app')))
 
 @section('content')
     <div class="container" style="margin-top: -6rem;">
         <div class="row tm-content-row tm-mt-big">
             <div class="bg-white tm-block h-100">
+                <div class="row">
+                    <div class="col-md-2 col-sm-12">
+                        <h2 class="tm-block-title">Agents</h2>
+                    </div>
+                    @if (auth()->user()->position !== 'Agent')
+                        <div class="col-md-10 col-sm-12">
+                            {{-- auto-height flex container, wraps children, pushes table down --}}
+                            <div class="d-flex flex-wrap justify-content-center align-items-start position-relative button-container mb-4"
+                                style="min-height: 55px;">
+                                <form method="GET" action="{{ route('management.agents') }}" class="d-flex mb-2 mx-2">
+                                    <input type="text" name="search" class="form-control"
+                                        placeholder="Search agents..." value="{{ request('search') }}"
+                                        style="height: 55px;">
+                                </form>
 
-                {{-- HEADER ROW: title, search, add button all same height --}}
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <div class="d-flex justify-content-between align-items-stretch mb-3" style="height: 50px;">
-                            <h2 class="tm-block-title align-self-center" style="margin:0;">Agents</h2>
-
-                            <form method="GET" action="{{ route('management.agents') }}" class="d-flex mx-2"
-                                style="width: 400px; height: 100%;">
-                                <input type="text" name="search" class="form-control" placeholder="Search agents..."
-                                    value="{{ request('search') }}" aria-label="Search Agents" style="height: 100%;">
-                                <button type="submit" class="btn btn-primary ml-2" style="height: 100%;">
-                                    Search
-                                </button>
-                            </form>
-
-                            @if (Auth::user()->position !== 'Agent')
-                                <button class="btn btn-small btn-primary" data-toggle="modal" data-target="#addAgentModal"
-                                    style="height: 100%;" aria-label="Add New Agent">
+                                <button class="btn btn-primary mx-2 mb-2 ml-auto" data-toggle="modal"
+                                    data-target="#addAgentModal" style="height: 100%;">
                                     Add New Agent
                                 </button>
-                            @endif
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
-                {{-- END HEADER ROW --}}
 
                 <div class="table-responsive">
                     <table class="table table-hover table-striped tm-table-striped-even mt-3">
@@ -81,6 +81,31 @@
             </div>
         </div>
     </div>
+
+    <style>
+        @media (max-width: 1400px) {
+            /* center the whole button‐container row */
+            .button-container {
+                justify-content: center !important;
+            }
+            /* remove auto margins on each item */
+            .button-container form,
+            .button-container a,
+            .button-container button {
+                flex: 0 0 auto;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
+        }
+
+        @media (min-width: 1421px) {
+            .customer-requests-btn {
+                /* override only on wide screens */
+                margin-left: 7rem !important;
+            }
+        }
+    </style>
+
 
     <!-- Add Agent Modal -->
     <div class="modal fade" id="addAgentModal" tabindex="-1" role="dialog" aria-labelledby="addAgentModalLabel"
@@ -275,6 +300,7 @@
         </div>
     </div>
 @endsection
+
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="{{ asset('dashboard/js/moment.min.js') }}"></script>
