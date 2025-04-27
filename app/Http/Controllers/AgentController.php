@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Models\Cylinder;
 use App\Models\State;
 
@@ -29,27 +30,55 @@ class AgentController extends Controller
         return view('management.agents', compact('agents', 'states'));
     }
 
-    public function cylindersPage()
+    public function cylindersPage(Request $request)
     {
-        $cylinders = Cylinder::orderBy('id')->paginate(10);
-        return view('management.home', compact('cylinders'));
+        // Only Employees, Managers and Agents may view
+        if (! in_array(Auth::user()->position, ['Employee', 'Manager', 'Agent'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $agent = Auth::user();
+
+        $query = DB::table('agent_cylinders_distribution')
+            ->where('agent_id', $agent->id)
+            ->orderBy('created_at', 'desc');
+
+        if ($request->filled('size')) {
+            $query->where('cylinder_size', $request->size);
+        }
+
+        if ($request->filled('search')) {
+            // strip leading zeros for search
+            $query->where('cylinder_id', 'like', '%' . ltrim($request->search, '0') . '%');
+        }
+
+        $distributed = $query->paginate(10);
+
+        return view('agent.cylinders', compact('distributed', 'agent'));
     }
+
     public function customers()
     {
-        // Fetch all users with the role 'customer'
+        // Fetch all users with the role 'Customer'
         $users = User::where('position', 'Customer')->paginate(10);
 
         // Fetch states for the Add Customer form
         $states = State::all();
 
-        return view('management.accounts', compact('users', 'states'));
+        // **Add this line** to make $agent available to your agent‐navbar partial
+        $agent = Auth::user();
+
+        // Pass 'agent' into the view alongside 'users' and 'states'
+        return view('management.accounts', compact('users', 'states', 'agent'));
     }
 
     public function dashboard()
     {
         $user = Auth::user();
-        $warehouseCylinders = collect(); // Adjust or load data as needed
-        return view('users.profile', compact('user', 'warehouseCylinders'));
+        $agent = $user->position === 'Agent' ? $user : null; // Check if the user is an agent
+        $warehouseCylinders = collect();
+
+        return view('users.profile', compact('user', 'agent', 'warehouseCylinders'));
     }
 
     public function show($id)

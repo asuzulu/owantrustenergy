@@ -80,7 +80,7 @@
     </div>
 
     <style>
-        @media (max-width: 1400px) {
+        @media (max-width: 1080px) {
             /* center the whole button‐container row */
             .button-container {
                 justify-content: center !important;
@@ -95,7 +95,7 @@
             }
         }
 
-        @media (min-width: 1421px) {
+        @media (min-width: 1079px) {
             .customer-requests-btn {
                 /* override only on wide screens */
                 margin-left: 7rem !important;

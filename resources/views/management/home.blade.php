@@ -22,7 +22,7 @@
                             <div class="col-md-10 col-sm-12">
                                 <div class="d-flex justify-content-center align-items-center flex-wrap position-relative button-container">
                                     <a href="{{ route('management.orders.requests') }}" class="btn btn-primary mb-2 mx-2">
-                                        Customer Requests
+                                        Requests
                                     </a>
                                     <a href="{{ route('cylinders.unassigned') }}" class="btn btn-primary mb-2 mx-2">
                                         Unassigned

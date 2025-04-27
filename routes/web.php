@@ -97,7 +97,7 @@ Route::post('/register-modal', [RegisterController::class, 'registerModal'])->na
 Route::prefix('cylinders')->name('cylinders.')->group(function () {
     Route::get('/', [CylinderController::class, 'index'])->name('index');
     Route::get('detail/{id}', [CylinderController::class, 'show'])->name('show.detail');
-    Route::delete('destroy/{id}', [CylinderController::class, 'destroy'])->name('destroy');
+    Route::delete('destroy/{id}', [CylinderController::class, 'destroy'])->name('cylinders.destroy');
 });
 
 // Customer-specific routes
@@ -125,7 +125,7 @@ Route::get('/employee/profile', [EmployeeController::class, 'profile'])->name('e
 
 // Agent-specific routes
 Route::get('/agent/dashboard', [AgentController::class, 'dashboard'])->name('agent.dashboard');
-Route::get('/agent/cylinders', [AgentController::class, 'cylindersPage'])->name('agent.cylinders');
+Route::get('/agent/{id}/cylinders', [AgentController::class, 'cylindersPage'])->name('agent.cylinders');
 Route::get('/agent/customers', [AgentController::class, 'customers'])->name('agent.customers');
 Route::get('/agent/profile', [AgentController::class, 'dashboard'])->name('agent.profile');
 

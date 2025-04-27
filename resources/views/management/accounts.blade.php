@@ -28,10 +28,9 @@
                                         style="height: 55px;">
                                 </form>
 
-                                <!-- Customer Requests button: use mr-2 mb-2 always, but only get margin-left on large screens -->
                                 <a href="{{ route('management.orders.requests') }}"
                                     class="btn btn-primary mr-2 mb-2 customer-requests-btn" style="height: 100%;">
-                                    Customer Requests
+                                    Requests
                                 </a>
 
                                 <button class="btn btn-primary mx-2 mb-2 text-right ml-auto" data-toggle="modal"
@@ -85,7 +84,7 @@
     </div>
 
     <style>
-        @media (max-width: 1400px) {
+        @media (max-width: 1080px) {
             /* center the whole button‐container row */
             .button-container {
                 justify-content: center !important;
@@ -100,7 +99,7 @@
             }
         }
 
-        @media (min-width: 1421px) {
+        @media (min-width: 1079px) {
             .customer-requests-btn {
                 /* override only on wide screens */
                 margin-left: 7rem !important;

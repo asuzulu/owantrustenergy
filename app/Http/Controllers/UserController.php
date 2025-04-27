@@ -73,6 +73,7 @@ class UserController extends Controller
     public function cylinders($id)
     {
         $user = User::findOrFail($id);
+        $agent = User::find($id);
         $cylinders = Cylinder::where('user_id', $user->id)->get();
         $orders     = Order::where('customer_id', $user->id)->get();
 
@@ -89,7 +90,7 @@ class UserController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('users.cylinders', compact('user', 'cylinders', 'orders'));
+        return view('users.cylinders', compact('user', 'cylinders', 'orders', 'agent'));
     }
 
     // Update the profile image
@@ -138,9 +139,12 @@ class UserController extends Controller
                 ->get();
         }
 
+        // Pass $agent so the agent-navbar can read $agent->id
+        $agent = Auth::user();
+
         $users = Auth::user()->position === 'Manager' ? User::all() : null;
 
-        return view('users.profile', compact('user', 'orders', 'cylinders', 'warehouseCylinders', 'totalCylinders'));
+        return view('users.profile', compact('user', 'agent', 'orders', 'cylinders', 'warehouseCylinders', 'totalCylinders'));
     }
 
     public function edit($id)

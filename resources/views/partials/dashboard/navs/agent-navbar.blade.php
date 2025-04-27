@@ -18,8 +18,8 @@
             <li class="nav-item {{ request()->routeIs('.dashboard') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route($prefix . '.dashboard') }}">Profile</a>
             </li>
-            <li class="nav-item {{ request()->routeIs($prefix . '.cylinders') ? 'active' : '' }}">
-                <a href="{{ route($prefix . '.cylinders') }}" class="nav-link">Cylinders</a>
+            <li class="nav-item {{ request()->routeIs('agent.cylinders') ? 'active' : '' }}">
+                <a href="{{ route('agent.cylinders', ['id' => $agent->id]) }}" class="nav-link">Cylinders</a>
             </li>
             <li class="nav-item {{ request()->routeIs('.customers') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route($prefix . '.customers') }}">Customers</a>

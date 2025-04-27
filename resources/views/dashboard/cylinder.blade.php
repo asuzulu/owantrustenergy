@@ -121,7 +121,7 @@
     </div>
 @endsection
 
-@push
+@push('scripts')
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         let checkboxes = document.querySelectorAll(".order-checkbox");
