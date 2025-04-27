@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Cylinder;
 use App\Models\Warehouse;
@@ -97,28 +98,49 @@ class UserController extends Controller
     public function updateProfileImage(Request $request, $id)
     {
         $request->validate([
-            'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
         ]);
 
         $user = User::findOrFail($id);
+        $disk = Storage::disk('public');
+        $uploadedFile = $request->file('profile_image');
 
-        // Delete old image if it exists
-        if ($user->profile_image) {
-            Storage::disk('public')->delete('profile-images/' . $user->profile_image);
+        $extension = $uploadedFile->getClientOriginalExtension();
+        $todayFilename = $user->first_name . '_' . $user->last_name . '_' . now()->format('Ymd') . '.' . strtolower($extension);
+        $todayFilePath = 'profile-images/' . $todayFilename;
+
+        try {
+            // Step 1: If an existing image is passed, delete it
+            if ($request->filled('current_profile_image')) {
+                $existingImagePath = 'profile-images/' . $request->input('current_profile_image');
+                if ($disk->exists($existingImagePath)) {
+                    $disk->delete($existingImagePath);
+                    Log::info("Deleted old profile image for user {$user->id}: {$existingImagePath}");
+                }
+            }
+
+            // Step 2: Save the new image
+            $path = $uploadedFile->storeAs('profile-images', $todayFilename, 'public');
+
+            if (!$path) {
+                throw new \Exception('Failed to store the new profile image.');
+            }
+
+            // Step 3: Update the user record
+            $user->update([
+                'profile_image' => $todayFilename,
+            ]);
+
+            Log::info("Profile image updated successfully for user {$user->id}: $todayFilename");
+
+            return redirect()->route('profile.view', $user->id)
+                ->with('success', 'Profile image updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Profile image update failed: ' . $e->getMessage());
+
+            return redirect()->route('profile.view', $user->id)
+                ->with('error', 'Failed to update profile image. Please try again.');
         }
-
-        // Create new filename format: firstName_lastName_YYYYMMDD.extension
-        $filename = $user->first_name . '_' . $user->last_name . '_' . now()->format('Ymd') . '.' . $request->file('profile_image')->getClientOriginalExtension();
-
-        // Store image
-        $imagePath = $request->file('profile_image')->storeAs('profile-images', $filename, 'public');
-
-        // Update user record
-        $user->update([
-            'profile_image' => $filename,
-        ]);
-
-        return redirect()->route('profile.view', $user->id)->with('success', 'Profile image updated successfully.');
     }
 
     public function profile($id)

@@ -433,39 +433,41 @@ footer {
 ─────────────────────────────────────────────── */
 @media (max-width: 992px) {
     .pagination li.page-item:nth-child(n+6):not(:last-child) {
-      display: none;
+        display: none;
     }
-  }
+}
 
-  /* ───────────────────────────────────────────────
+/* ───────────────────────────────────────────────
      Mobile (≤576px): show only Prev, Current, Next
      & make the wrapper fixed at bottom-center
   ─────────────────────────────────────────────── */
-  @media (max-width: 576px) {
+@media (max-width: 576px) {
+
     /* Hide all page‐items… */
     .pagination li.page-item {
-      display: none;
+        display: none;
     }
+
     /* …then re‐show Prev, the active page, and Next */
     .pagination li.page-item:first-child,
     .pagination li.page-item.active,
     .pagination li.page-item:last-child {
-      display: inline-block;
+        display: inline-block;
     }
 
     /* Fix the pagination container to bottom-center */
     .d-flex.justify-content-center.mt-3 {
-      position: fixed;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255, 255, 255, 0.95);
-      padding: 0.5rem 1rem;
-      border-radius: 0.25rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      z-index: 1000;
+        position: fixed;
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.95);
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
     }
-  }
+}
 
 
 @media (min-width: 992px) {
@@ -622,22 +624,53 @@ footer {
    Mobile & down (≤576px): stack adjacent .btn’s full-width
 ─────────────────────────────────────────────────────────── */
 @media (max-width: 576px) {
+
     /* ANY .btn immediately after another .btn will stack */
-    .btn + .btn {
-      display: block !important;
-      width: 100% !important;
-      margin: .5rem 0 0 0 !important;
+    .btn+.btn {
+        display: block !important;
+        width: 100% !important;
+        margin: .5rem 0 0 0 !important;
     }
 
     /* If you use btn-group or btn-toolbar anywhere, stack those too */
     .btn-group,
     .btn-toolbar {
-      flex-direction: column !important;
-      width: 100%;
+        flex-direction: column !important;
+        width: 100%;
     }
+
     .btn-group .btn,
     .btn-toolbar .btn {
-      width: 100%;
-      margin-bottom: .5rem;
+        width: 100%;
+        margin-bottom: .5rem;
     }
-  }
+}
+
+.img-circle-wrap {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-block;
+    position: relative;
+}
+
+/* make sure the image is always centered and fills the circle */
+.profile-image-container {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-image-container .profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+}

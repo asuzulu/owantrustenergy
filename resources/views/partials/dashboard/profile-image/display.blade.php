@@ -2,10 +2,13 @@
 
 <div class="text-center">
     @if(!empty($user->profile_image) && file_exists(public_path('storage/profile-images/' . $user->profile_image)))
-        <img src="{{ asset('storage/profile-images/' . $user->profile_image) }}"
-             alt="Profile Image of {{ $user->name }}"
-             class="img-fluid rounded-circle"
-             style="max-width: 200px; height: auto;">
+        <div class="profile-image-container mx-auto">
+            <img
+              src="{{ asset('storage/profile-images/' . $user->profile_image) }}"
+              alt="Profile Image of {{ $user->name }}"
+              class="profile-image"
+            >
+        </div>
     @else
         <p>No profile image available.</p>
     @endif
