@@ -160,8 +160,6 @@
     {{-- CSRF Token --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    {{-- jQuery --}}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     {{-- Bootstrap JS (make sure it's included on your page) --}}
     <script>
         $(document).ready(function() {
