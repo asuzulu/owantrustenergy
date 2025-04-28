@@ -314,6 +314,7 @@ class ManagementController extends Controller
         // $id is the padded 9-digit string, e.g. "000123456"
         $cylinder   = Cylinder::findOrFail($id);
         $warehouses = DB::table('warehouses')->get();
+        $today = now()->toDateString();
 
         // Grab at most one matching delivery or pickup
         $delivery = Delivery::where('cylinder', $id)->first();
@@ -323,7 +324,8 @@ class ManagementController extends Controller
             'cylinder',
             'warehouses',
             'delivery',
-            'pickup'
+            'pickup',
+            'today'
         ));
     }
 

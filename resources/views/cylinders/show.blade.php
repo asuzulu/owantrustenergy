@@ -184,7 +184,7 @@
                         <input type="hidden" id="selectedDriverId">
                         <div class="form-group">
                             <label for="deliveryDate">Delivery Date:</label>
-                            <input type="date" id="deliveryDate" class="form-control">
+                            <input type="date" id="deliveryDate" class="form-control" min="{{ $today }}">
                         </div>
                         <div class="form-group">
                             <label for="deliveryTime">Delivery Time:</label>
@@ -196,16 +196,19 @@
                             <label for="pickupLocation">Pick Up Location:</label>
                             <select id="pickupLocation" class="form-control" style="height: 4rem;">
                                 @foreach ($warehouses as $warehouse)
-                                    <option value="{{ $warehouse->name }}"
-                                        {{ $cylinder->location === $warehouse->name ? 'selected' : '' }}>
-                                        {{ $warehouse->name }}
-                                    </option>
+                                    @if ($warehouse->name !== 'Unassigned')
+                                        <!-- Exclude 'Unassigned' warehouse -->
+                                        <option value="{{ $warehouse->name }}"
+                                            {{ $cylinder->location === $warehouse->name ? 'selected' : '' }}>
+                                            {{ $warehouse->name }}
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="pickupDate">Pick-Up Date:</label>
-                            <input type="date" id="pickupDate" class="form-control">
+                            <input type="date" id="pickupDate" class="form-control" min="{{ $today }}">
                         </div>
                     </div>
                 </div>
@@ -218,9 +221,18 @@
         </div>
     </div>
 
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" id="assignCylinderBtn" class="btn btn-primary" disabled>Assign
+            Cylinder</button>
+    </div>
+    </div>
+    </div>
+    </div>
+
     <!-- Delete Cylinder Modal -->
     <div class="modal fade" id="deleteCylinderModal" tabindex="-1" role="dialog"
-         aria-labelledby="deleteCylinderModalLabel" aria-hidden="true">
+        aria-labelledby="deleteCylinderModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -234,8 +246,7 @@
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">
                         Cancel
                     </button>
-                    <form action="{{ route('cylinders.destroy', $paddedId) }}"
-                          method="POST" class="d-inline">
+                    <form action="{{ route('cylinders.destroy', $paddedId) }}" method="POST" class="d-inline">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">

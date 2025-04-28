@@ -14,7 +14,8 @@ return new class extends Migration
             $table->string('cylinder', 9);
             $table->unsignedBigInteger('driver_id');
             $table->string('driver'); // Stores the driver's full name
-            $table->unsignedBigInteger('cylinder_id')->nullable(); // if you still use numeric FK elsewhere
+            $table->unsignedBigInteger('cylinder_id')->nullable();
+            $table->string('size');
             $table->unsignedBigInteger('customer_id');
             $table->string('customer');
             $table->date('delivery_date');
