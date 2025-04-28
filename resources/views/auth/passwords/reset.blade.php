@@ -10,7 +10,7 @@
         <form action="{{ route('password.update') }}" method="POST">
             @csrf <!-- Include CSRF token for form protection -->
             <input type="hidden" name="token" value="{{ $token }}">
-            
+
             <div class="form-row">
                 <div class="form-group col-md-12">
                     <label for="email">Email</label>
@@ -36,7 +36,7 @@
 
             <div class="form-row mt-3">
                 <div class="col-md-12 text-center">
-                    <p>Remembered your password? <a href="{{ route('signin') }}">Sign In</a></p>
+                    <p>Remembered your password? <a href="{{ route('login') }}">Sign In</a></p>
                 </div>
             </div>
         </form>

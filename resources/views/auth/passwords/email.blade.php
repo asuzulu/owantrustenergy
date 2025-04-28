@@ -11,9 +11,22 @@
             @csrf <!-- Include CSRF token for form protection -->
 
             <div class="form-row">
-                <div class="form-group col-md-12">
+                <div class="form-group col-md-6 mx-auto">
                     <label for="email">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required placeholder="Enter Email Address" />
+                    <input
+                        type="email"
+                        class="form-control @error('email') is-invalid @enderror"
+                        id="email"
+                        name="email"
+                        value="{{ old('email') }}"
+                        required
+                        placeholder="Enter Email Address"
+                    />
+                    @error('email')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
+                    @enderror
                 </div>
             </div>
 
@@ -21,7 +34,7 @@
 
             <div class="form-row mt-3">
                 <div class="col-md-12 text-center">
-                    <p>Remembered your password? <a href="{{ route('signin') }}">Sign In</a></p>
+                    <p>Remembered your password? <a href="{{ route('login') }}">Sign In</a></p>
                 </div>
             </div>
         </form>
