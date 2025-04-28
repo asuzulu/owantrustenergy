@@ -1,14 +1,20 @@
 <style>
+    /* For screens up to 500px: full width and slide left */
     @media (max-width: 500px) {
-        /* Make the dialog full width and flush left */
         #distributeCylindersModal .modal-dialog {
             max-width: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
-        }
-        /* Slide content to the left as viewport shrinks */
-        #distributeCylindersModal .modal-dialog {
             transition: transform 0.2s ease-out;
+        }
+    }
+
+    /* For screens wider than 500px: 80% width */
+    @media (min-width: 501px) {
+        #distributeCylindersModal .modal-dialog {
+            max-width: 80% !important;
+            margin: 1.75rem auto;
+            /* default Bootstrap modal-dialog centering */
         }
     }
 </style>
