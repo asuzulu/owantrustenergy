@@ -1,6 +1,21 @@
+<style>
+    @media (max-width: 500px) {
+        /* Make the dialog full width and flush left */
+        #distributeCylindersModal .modal-dialog {
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        /* Slide content to the left as viewport shrinks */
+        #distributeCylindersModal .modal-dialog {
+            transition: transform 0.2s ease-out;
+        }
+    }
+</style>
+
 <div class="modal fade" id="distributeCylindersModal" tabindex="-1" role="dialog"
     aria-labelledby="distributeCylindersModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document" style="max-width:100%;">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <form id="cylinderDistributionForm" action="{{ route('cylinders.distribute', ['id' => $user->id]) }}"
                 method="POST">
@@ -185,6 +200,23 @@
             @if (session('error'))
                 $('#errorModal').modal('show');
             @endif
+
+            // Slide to left as viewport shrinks under 500px
+            function slideDialog() {
+                var w = $(window).width();
+                if (w < 500) {
+                    // amount to slide: proportional to shrink
+                    var offset = Math.min(100, (500 - w) * 0.5);
+                    $('#distributeCylindersModal .modal-dialog')
+                        .css('transform', 'translateX(-' + offset + 'px)');
+                } else {
+                    $('#distributeCylindersModal .modal-dialog')
+                        .css('transform', 'translateX(0)');
+                }
+            }
+
+            $(window).on('resize', slideDialog);
+            slideDialog();
 
             // Distribution inputs calculation
             $('.distribution-input').on('input', function() {
