@@ -7,7 +7,7 @@
 </head>
 
 <body id="reportsPage">
-    <div id="home" class="">
+    <div id="home">
         <div class="container">
             {{-- Navbar --}}
             @include('partials.dashboard.navs.management-navbar')
@@ -24,8 +24,14 @@
                 $allowedPositions = ['Customer', 'Employee', 'Manager', 'Agent', 'Driver'];
             @endphp
 
-            @if (Auth::check() && in_array(Auth::user()->position, $allowedPositions))
-                {{-- Normal content rendering --}}
+            @if (Auth::check())
+                @if (in_array(Auth::user()->position, $allowedPositions))
+                    {{-- Normal content rendering --}}
+                @else
+                    <script>
+                        window.location.href = "{{ url('/') }}";
+                    </script>
+                @endif
             @else
                 <script>
                     window.location.href = "{{ url('/') }}";
@@ -37,14 +43,10 @@
         </div>
     </div>
 
+    {{-- Scripts --}}
     @yield('scripts')
     @stack('scripts')
     @include('partials.dashboard.scripts')
-    @if (Auth::guest())
-        <script>
-            window.location = "{{ url('/') }}";
-        </script>
-    @endif
 
 </body>
 

@@ -40,7 +40,7 @@
     </div>
 
     <!-- Add warehouse Modal -->
-    <div class="modal fade" id="addWarehouseModal" tabindex="-1" role="dialog" aria-labelledby="addWarehouseModalLabel"
+    <div class="modal fade" id="addWarehouseModal" tabindex="-1" aria-labelledby="addWarehouseModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -48,7 +48,6 @@
                     <h5 class="modal-title" id="addWarehouseModalLabel">Add New Warehouse</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
-                    </button>
                 </div>
                 <div class="modal-body">
                     <form id="warehouseForm" action="{{ route('warehouses.store') }}" method="POST">
@@ -61,8 +60,8 @@
                         <div class="form-group">
                             <label for="street">Street Address</label>
                             <input type="text" class="form-control" id="street" name="street" required
-                                placeholder="Enter Street Address" value="{{ old('street') }}"
-                                aria-label="Street Address" title="Must be a valid stree address"/>
+                                placeholder="Enter Street Address" value="{{ old('street') }}" aria-label="Street Address"
+                                title="Must be a valid stree address" />
                             @error('street')
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
@@ -82,7 +81,8 @@
                             <select class="form-control" id="state" name="state" required>
                                 <option value="" disabled selected>Select State</option>
                                 @foreach ($states as $state)
-                                    <option value="{{ $state->id }}" {{ old('state') == $state->id ? 'selected' : '' }}>
+                                    <option value="{{ $state->id }}"
+                                        {{ old('state') == $state->id ? 'selected' : '' }}>
                                         {{ $state->name }}
                                     </option>
                                 @endforeach
@@ -109,13 +109,12 @@
 
     <!-- Success Modal -->
     @if (session('success'))
-        <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel"
-            aria-hidden="true">
+        <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="successModalLabel">Success</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -123,7 +122,7 @@
                         {{ session('success') }}
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
