@@ -1,6 +1,6 @@
 <div class="modal fade" id="distributeCylindersModal" tabindex="-1" role="dialog"
     aria-labelledby="distributeCylindersModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document" style="max-width:80%;">
+    <div class="modal-dialog" role="document" style="max-width:100%;">
         <div class="modal-content">
             <form id="cylinderDistributionForm" action="{{ route('cylinders.distribute', ['id' => $user->id]) }}"
                 method="POST">
