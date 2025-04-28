@@ -34,7 +34,7 @@
 
             <div class="form-row mt-3">
                 <div class="col-md-12 text-center">
-                    <p>Remembered your password? <a href="{{ route('login') }}">Sign In</a></p>
+                    <a href="{{ route('login') }} " style="color:white;"><p>Remembered your password? Sign In</a></p>
                 </div>
             </div>
         </form>

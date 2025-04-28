@@ -123,4 +123,36 @@ class User extends Authenticatable
             }
         });
     }
+
+    // MUTATORS
+
+    public function setFirstNameAttribute($value)
+    {
+        $this->attributes['first_name'] = ucwords(strtolower($value));
+    }
+
+    public function setLastNameAttribute($value)
+    {
+        $this->attributes['last_name'] = ucwords(strtolower($value));
+    }
+
+    public function setStreetAttribute($value)
+    {
+        $this->attributes['street'] = ucwords(strtolower($value));
+    }
+
+    public function setCityAttribute($value)
+    {
+        $this->attributes['city'] = ucwords(strtolower($value));
+    }
+
+    public function setStateAttribute($value)
+    {
+        $this->attributes['state'] = ucwords(strtolower($value));
+    }
+
+    public function setEmailAttribute($value)
+    {
+        $this->attributes['email'] = strtolower($value);
+    }
 }

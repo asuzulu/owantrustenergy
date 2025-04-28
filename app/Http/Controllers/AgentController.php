@@ -81,6 +81,7 @@ class AgentController extends Controller
         return view('users.profile', compact('user', 'agent', 'warehouseCylinders'));
     }
 
+
     public function show($id)
     {
         $agent = User::findOrFail($id);
