@@ -138,7 +138,7 @@
                     @endforeach
                     <div class="row">
                         <div class="col-12 text-center">
-                            <h4>Total Cylinders to be Distributed: <span id="grandTotal">0</span></h4>
+                            <h4>Total to be Distributed: <span id="grandTotal">0</span></h4>
                         </div>
                     </div>
                 </div>
