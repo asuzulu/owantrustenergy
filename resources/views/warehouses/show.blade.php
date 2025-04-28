@@ -36,18 +36,18 @@
                         <h2 class="tm-block-title d-inline-block">Warehouse Details</h2>
                     </div>
                     <div class="col-md-4 col-sm-12 text-right">
-                        <div class="d-flex justify-content-end align-items-center flex-wrap"
-                            style="white-space: nowrap;">
-                            <a href="{{ route('warehouses.index') }}" class="btn btn-small btn-secondary mb-2 mb-sm-0 mr-2">
+                        <div class="d-flex flex-column flex-sm-row justify-content-end align-items-center gap-2">
+                            <a href="{{ route('warehouses.index') }}" class="btn btn-small btn-secondary">
                                 Back to Warehouse List
                             </a>
+
                             @if (Auth::check() && Auth::user()->position === 'Manager')
-                                <button class="btn btn-small btn-primary mb-2 mb-sm-0 mr-2" data-toggle="modal"
-                                    data-target="#editModal">
+                                <button class="btn btn-small btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#editModal">
                                     Edit
                                 </button>
-                                <button class="btn btn-small btn-danger mb-2 mb-sm-0" data-toggle="modal"
-                                    data-target="#deleteModal">
+                                <button class="btn btn-small btn-danger" data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal">
                                     Delete
                                 </button>
                             @endif
