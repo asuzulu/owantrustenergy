@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('size');
             $table->unsignedBigInteger('customer_id');
             $table->string('customer');
+            $table->string('address')->nullable();
             $table->date('delivery_date');
             $table->time('delivery_time');
             $table->date('date_delivered')->nullable();

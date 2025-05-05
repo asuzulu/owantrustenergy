@@ -219,16 +219,7 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" id="assignCylinderBtn" class="btn btn-primary" disabled>Assign
-            Cylinder</button>
-    </div>
-    </div>
-    </div>
-    </div>
+    </div>  
 
     <!-- Delete Cylinder Modal -->
     <div class="modal fade" id="deleteCylinderModal" tabindex="-1" role="dialog"
