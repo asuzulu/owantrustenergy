@@ -16,6 +16,7 @@ class Delivery extends Model
         'driver',
         'cylinder',
         'size',
+        'customer_id',
         'customer',
         'address',
         'date_assigned',
@@ -23,15 +24,19 @@ class Delivery extends Model
         'delivery_time',
         'date_delivered',
         'time_delivered',
+        'driver_pickup_date',
+        'driver_pickup_time',
         'image_path',
     ];
 
     protected $casts = [
-        'date_assigned'  => 'date',
-        'delivery_date'  => 'date',
-        'date_delivered' => 'date',
-        'delivery_time'  => 'datetime:H:i:s',
-        'time_delivered' => 'datetime:H:i:s',
+        'date_assigned'        => 'date',
+        'delivery_date'        => 'date',
+        'date_delivered'       => 'date',
+        'driver_pickup_date'   => 'date',
+        'delivery_time'        => 'datetime:H:i:s',
+        'time_delivered'       => 'datetime:H:i:s',
+        'driver_pickup_time'   => 'datetime:H:i:s',
     ];
 
     public function driverUser()

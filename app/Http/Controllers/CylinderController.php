@@ -69,12 +69,15 @@ class CylinderController extends Controller
         // Fetch at most one matching pickup record
         $pickup   = Pickup::where('cylinder', $id)->first();
 
+        $today      = now()->toDateString(); // e.g. "2025-05-06"
+
         // Pass exactly these four variables into the view:
         return view('cylinders.show', compact(
             'cylinder',
             'warehouses',
             'delivery',
-            'pickup'
+            'pickup',
+            'today'
         ));
     }
 

@@ -14,6 +14,8 @@ return new class extends Migration
             $table->string('cylinder', 9);
             $table->unsignedBigInteger('driver_id');
             $table->string('driver');
+            $table->date('driver_pickup_date')->nullable();
+            $table->time('driver_pickup_time')->nullable();
             $table->string('size');
             $table->unsignedBigInteger('customer_id');
             $table->foreign('customer_id')->references('id')->on('users')->onDelete('cascade');
