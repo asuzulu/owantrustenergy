@@ -239,23 +239,6 @@ class ManagementController extends Controller
         return view('management.home', compact('cylinders', 'warehouses'));
     }
 
-    public function assignCylinder(Request $request, User $user)
-    {
-        $request->validate([
-            'cylinder_id' => 'required|exists:cylinders,id',
-        ]);
-
-        $user->assignedCylinder()->associate(Cylinder::find($request->cylinder_id));
-        $user->save();
-
-        // Assign the 'Employee' role to the user if not already assigned
-        if (!$user->hasRole('Employee')) {
-            $user->assignRole('Employee');
-        }
-
-        return redirect()->route('users.profile', $user->id)->with('success', 'Cylinder assigned and role updated successfully!');
-    }
-
     public function statistics()
     {
         // Fetch assigned cylinders per month

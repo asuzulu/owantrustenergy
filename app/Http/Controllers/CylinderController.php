@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Carbon\Carbon;
 
 class CylinderController extends Controller
 {
@@ -159,23 +160,40 @@ class CylinderController extends Controller
     public function assignCylinder(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'user_id'     => 'required|exists:users,id',
             'cylinder_id' => 'required|exists:cylinders,id',
+            'assignment_type' => 'required|in:delivery,pickup',
         ]);
 
-        $user = User::findOrFail($request->user_id);
+        $user     = User::findOrFail($request->user_id);
         $cylinder = Cylinder::findOrFail($request->cylinder_id);
 
         if ($user->position !== 'Customer') {
             return response()->json(['error' => 'Only customers can be assigned cylinders.'], 403);
         }
 
-        $cylinder->user_id = $user->id;
+        // 1) Update cylinder assignment
+        $cylinder->user_id  = $user->id;
         $cylinder->location = $user->first_name . ' ' . $user->last_name;
         $cylinder->save();
 
-        return response()->json(['success' => 'Cylinder assigned successfully.']);
+        // 2) Create a delivery record (stub) so customer_id is stored
+        // We only have customer_id here; further fields (driver, date, etc.) will be filled later in deliveries.store
+        $delivery = Delivery::create([
+            'cylinder'      => $cylinder->id,
+            'customer'      => $user->first_name . ' ' . $user->last_name,
+            'customer_id'   => $user->id,
+            'date_assigned' => Carbon::now()->toDateString(),
+            // leave other fields null or with defaults
+        ]);
+
+        return response()->json([
+            'success'     => true,
+            'message'     => 'Cylinder assigned successfully.',
+            'delivery_id' => $delivery->id,
+        ]);
     }
+
 
     public function assign(Request $request)
     {

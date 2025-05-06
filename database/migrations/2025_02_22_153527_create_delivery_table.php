@@ -13,10 +13,10 @@ return new class extends Migration
             // Store the cylinder ID _as a string_ so that leading zeros are preserved
             $table->string('cylinder', 9);
             $table->unsignedBigInteger('driver_id');
-            $table->string('driver'); // Stores the driver's full name
-            $table->unsignedBigInteger('cylinder_id')->nullable();
+            $table->string('driver');
             $table->string('size');
             $table->unsignedBigInteger('customer_id');
+            $table->foreign('customer_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('customer');
             $table->string('address');
             $table->string('date_assigned');

@@ -219,7 +219,7 @@
                 </div>
             </div>
         </div>
-    </div>  
+    </div>
 
     <!-- Delete Cylinder Modal -->
     <div class="modal fade" id="deleteCylinderModal" tabindex="-1" role="dialog"
