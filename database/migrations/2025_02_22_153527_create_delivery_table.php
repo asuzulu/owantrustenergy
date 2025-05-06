@@ -18,7 +18,6 @@ return new class extends Migration
             $table->time('driver_pickup_time')->nullable();
             $table->string('size');
             $table->unsignedBigInteger('customer_id');
-            $table->foreign('customer_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('customer');
             $table->string('address');
             $table->string('date_assigned');
@@ -29,8 +28,9 @@ return new class extends Migration
             $table->string('image_path')->nullable();
             $table->timestamps();
 
+            // Foreign keys
             $table->foreign('driver_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('customer_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('customer_id')->references('id')->on('users')->onDelete('cascade'); // only once!
         });
     }
 
