@@ -57,6 +57,9 @@
                                 <option value="Customer" {{ request('warehouse') === 'Customer' ? 'selected' : '' }}>
                                     Customers
                                 </option>
+                                <option value="Agent" {{ request('warehouse') === 'Agent' ? 'selected' : '' }}>
+                                    Agents
+                                </option>
                             </select>
                         </div>
 

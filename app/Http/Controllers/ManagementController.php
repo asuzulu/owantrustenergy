@@ -199,7 +199,7 @@ class ManagementController extends Controller
         // Base query for cylinders
         $query = Cylinder::orderBy('id', 'asc');
 
-        // Apply Location (warehouse/customer) filter
+        // Apply Location (warehouse/customer/agent) filter
         if ($request->filled('warehouse')) {
             if ($request->warehouse === 'Customer') {
                 $warehouseNames = $warehouses->pluck('name')->toArray();
@@ -211,6 +211,12 @@ class ManagementController extends Controller
 
                 $query->whereNotIn('location', $warehouseNames)
                     ->whereIn('location', $customerNames);
+            } elseif ($request->warehouse === 'Agent') {
+                $agentNames = DB::table('agent_cylinders_distribution')
+                    ->pluck('agent_name')
+                    ->toArray();
+
+                $query->whereIn('location', $agentNames);
             } else {
                 $query->where('location', $request->input('warehouse'));
             }
