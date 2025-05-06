@@ -18,9 +18,12 @@ class StatisticsController extends Controller
             : "DATE_FORMAT(created_at, '%Y-%m')";
 
         // 1. Cylinders assigned to users
-        $cylinders_assigned = Cylinder::whereIn('location', function ($query) {
-            $query->selectRaw("TRIM(first_name || ' ' || last_name) as full_name")
-                ->from('users');
+        $cylinders_assigned = Cylinder::whereIn('location', function ($query) use ($databaseConnection) {
+            $query->selectRaw($databaseConnection === 'sqlite'
+                ? "TRIM(first_name || ' ' || last_name)"
+                : "TRIM(CONCAT(first_name, ' ', last_name))")
+            ->from('users')
+            ->where('position', 'Customer');
         })->count();
 
         // 2. Cylinders in warehouses
