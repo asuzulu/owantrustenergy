@@ -116,7 +116,7 @@
         @endif
 
         {{-- Cylinders Distributed section shows for Employee, Manager, and Agent (not Customer) --}}
-        @if (in_array(Auth::user()->position, ['Employee', 'Manager', 'Agent']))
+        @if ($user->position === 'Agent' && in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
             <div class="row tm-content-row tm-mt-big">
                 <div class="bg-white tm-block">
                     <h3 class="tm-block-title text-center">Cylinders Distributed to Agent</h3>
@@ -178,7 +178,7 @@
                                         <input type="text" name="passcode" id="passcode"
                                             class="form-control mr-2 passcode-input" required>
                                         <button type="submit" class="btn btn-primary">
-                                            Update Pick-Up Date
+                                            Confirm
                                         </button>
                                     </div>
                                 </div>
@@ -239,4 +239,26 @@
             </div>
         @endif
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectAllCheckbox = document.getElementById('select_all');
+            const cylinderCheckboxes = document.querySelectorAll('input[name="selected_cylinders[]"]');
+
+            // Prevent checkbox clicks from triggering the row link
+            cylinderCheckboxes.forEach(cb => {
+                cb.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                });
+            });
+
+            // Select/Deselect all checkboxes when "Select All" is toggled
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function () {
+                    cylinderCheckboxes.forEach(cb => {
+                        cb.checked = this.checked;
+                    });
+                });
+            }
+        });
+    </script>
 @endsection

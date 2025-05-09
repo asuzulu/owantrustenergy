@@ -159,6 +159,36 @@ class CylinderController extends Controller
         return redirect()->back()->with('success', 'Cylinders assigned successfully.');
     }
 
+    public function returnToWarehouse(Request $request, $id)
+    {
+        $request->validate([
+            'warehouse' => 'required|string|exists:warehouses,name',
+        ]);
+
+        // $id IS the padded string (e.g. "000000123")
+        $paddedId = $id;
+
+        // Strip leading zeros just to find the Cylinder PK
+        $cylinder = Cylinder::findOrFail($paddedId);
+
++       // ── DELETE matching delivery AND pickup records by padded cylinder ID ──
+        Delivery::where('cylinder', $paddedId)->delete();
+        Pickup::where('cylinder', $paddedId)->delete();
+
+        // Reassign back to warehouse
+        $cylinder->user_id        = Auth::id();
+        $cylinder->location       = $request->input('warehouse');
+        $cylinder->allocated_date = Carbon::today()->toDateString();
+        $cylinder->save();
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true]);
+        }
+
+        return redirect()->back()
+                         ->with('success', 'Cylinder returned to warehouse and records cleared.');
+    }
+
     // Assign a cylinder to a user from User page
     public function assignCylinder(Request $request)
     {

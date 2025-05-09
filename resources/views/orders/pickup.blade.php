@@ -36,7 +36,7 @@
                                 <th>Customer</th>
                                 <th>Date Assigned</th>
                                 <th>Pick-Up Date</th>
-                                <th>Actions</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>

@@ -22,25 +22,40 @@ class Delivery extends Model
         'date_assigned',
         'delivery_date',
         'delivery_time',
+        'delivery_start',
         'date_delivered',
         'time_delivered',
         'driver_pickup_date',
         'driver_pickup_time',
         'image_path',
+        'approval',
+        'passcode',
     ];
 
     protected $casts = [
-        'date_assigned'        => 'date',
-        'delivery_date'        => 'date',
-        'date_delivered'       => 'date',
-        'driver_pickup_date'   => 'date',
-        'delivery_time'        => 'datetime:H:i:s',
-        'time_delivered'       => 'datetime:H:i:s',
-        'driver_pickup_time'   => 'datetime:H:i:s',
+        'date_assigned'      => 'date',
+        'delivery_date'      => 'date',
+        'delivery_start'     => 'datetime',
+        'date_delivered'     => 'date',
+        'driver_pickup_date' => 'date',
+        'delivery_time'      => 'datetime:H:i:s',
+        'time_delivered'     => 'datetime:H:i:s',
+        'driver_pickup_time' => 'datetime:H:i:s',
     ];
 
+    /**
+     * Get the driver (user) who is assigned.
+     */
     public function driverUser()
     {
         return $this->belongsTo(User::class, 'driver_id');
+    }
+
+    /**
+     * Get the customer (user) who is receiving.
+     */
+    public function customerUser()
+    {
+        return $this->belongsTo(User::class, 'customer_id');
     }
 }

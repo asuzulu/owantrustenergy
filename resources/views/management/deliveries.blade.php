@@ -6,14 +6,19 @@
 @endif
 
 @if (Auth::user()->position === null)
-    <script>window.location.href = "/";</script>
+    <script>
+        window.location.href = "/";
+    </script>
 @endif
 
 @extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.default-dashboard')))
+
 @section('content')
     <div class="container" style="margin-top: -6rem;">
         <div class="row tm-content-row tm-mt-big">
             <div class="bg-white tm-block h-100">
+
+                {{-- Page Header & Nav Buttons --}}
                 <div class="row">
                     <div class="col-md-3 col-sm-12">
                         <h2 class="tm-block-title d-inline-block">Deliveries</h2>
@@ -24,10 +29,13 @@
                     <div class="col-md-6 col-sm-12 text-end">
                         <div class="d-flex justify-content-end">
                             <a href="{{ route('orders.pickup') }}" class="btn btn-primary me-3">Pick Up Orders</a>
-                            <a href="{{ route('management.orders.requests') }}" class="btn btn-primary">Customers' Requests</a>
+                            <a href="{{ route('management.orders.requests') }}" class="btn btn-primary">Customers'
+                                Requests</a>
                         </div>
                     </div>
                 </div>
+
+                {{-- Deliveries Table --}}
                 <div class="table-responsive">
                     <table class="table table-hover table-striped tm-table-striped-even mt-3">
                         <thead>
@@ -40,8 +48,17 @@
                                 <th scope="col">Delivery Date</th>
                                 <th scope="col">Delivery Time</th>
                                 <th scope="col">Status</th>
-                                @if (Auth::user()->position === 'Manager' || Auth::user()->position === 'Employee')
-                                    <th scope="col">Actions</th>
+                                @php
+                                    $hasActiveActions = $deliveries
+                                        ->filter(function ($delivery) {
+                                            return is_null($delivery->driver_pickup_date) ||
+                                                is_null($delivery->driver_pickup_time);
+                                        })
+                                        ->isNotEmpty();
+                                @endphp
+
+                                @if ($hasActiveActions)
+                                    <th>Action</th>
                                 @endif
                             </tr>
                         </thead>
@@ -50,19 +67,22 @@
                                 <tr id="delivery-row-{{ $delivery->id }}">
                                     <td>{{ $delivery->id }}</td>
                                     <td>
-                                        <a href="{{ route('cylinders.show', $delivery->cylinder) }}" style="text-decoration: none; color: inherit;">
+                                        <a href="{{ route('cylinders.show', $delivery->cylinder) }}"
+                                            style="text-decoration: none; color: inherit;">
                                             {{ $delivery->cylinder }}
                                         </a>
                                     </td>
                                     <td>{{ $delivery->size }}</td>
                                     <td>
-                                        <a href="{{ route('drivers.profile', $delivery->driver_id) }}" style="text-decoration: none; color: inherit;">
+                                        <a href="{{ route('drivers.profile', $delivery->driver_id) }}"
+                                            style="text-decoration: none; color: inherit;">
                                             {{ $delivery->driver }}
                                         </a>
                                     </td>
                                     <td>
-                                        @if(isset($delivery->customer_id))
-                                            <a href="{{ route('users.profile', $delivery->customer_id) }}" style="text-decoration: none; color: inherit;">
+                                        @if (isset($delivery->customer_id))
+                                            <a href="{{ route('users.profile', $delivery->customer_id) }}"
+                                                style="text-decoration: none; color: inherit;">
                                                 {{ $delivery->customer }}
                                             </a>
                                         @else
@@ -73,59 +93,82 @@
                                     <td>{{ \Carbon\Carbon::parse($delivery->delivery_time)->format('h:i A') }}</td>
                                     <td>
                                         @if ($delivery->date_delivered)
-                                            Delivered on {{ \Carbon\Carbon::parse($delivery->date_delivered)->format('d-m-Y') }}
+                                            Delivered on
+                                            {{ \Carbon\Carbon::parse($delivery->date_delivered)->format('d-m-Y') }}
                                         @else
                                             Pending
                                         @endif
                                     </td>
-                                    @if (Auth::user()->position === 'Manager' || Auth::user()->position === 'Employee')
+
+                                    @if (in_array(Auth::user()->position, ['Manager', 'Employee']))
                                         <td>
-                                            <button class="btn btn-danger btn-sm delete-delivery" data-id="{{ $delivery->id }}">Delete</button>
+                                            {{-- ── CHANGED: if delivered, show Approve/Disapprove or archived label --}}
+                                            @if ($delivery->date_delivered && !$delivery->approval)
+                                                <form action="{{ route('deliveries.approve', $delivery->id) }}"
+                                                    method="POST" style="display:inline-block">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                                </form>
+                                                <form action="{{ route('deliveries.disapprove', $delivery->id) }}"
+                                                    method="POST" style="display:inline-block">
+                                                    @csrf
+                                                    <button type="submit"
+                                                        class="btn btn-warning btn-sm">Disapprove</button>
+                                                </form>
+                                            @elseif($delivery->approval)
+                                                {{ ucfirst($delivery->approval) }} {{-- Show “Approved” or “Disapproved” --}}
+                                            @else
+                                                &mdash; {{-- no action until delivered --}}
+                                            @endif
                                         </td>
                                     @endif
+
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
+
+                {{-- Pagination --}}
+                @if ($deliveries->hasPages())
+                    <div style="text-align: center; margin-top: 20px;">
+                        {{ $deliveries->links('pagination::bootstrap-4') }}
+                    </div>
+                @endif
+
             </div>
-            @if ($deliveries->hasPages())
-                <div style="text-align: center; margin-top: 20px;">
-                    {{ $deliveries->links('pagination::bootstrap-4') }}
-                </div>
-            @endif
         </div>
     </div>
-    @endsection
+@endsection
 
-    @section('scripts')
+@section('scripts')
     @include('partials.dashboard.scripts')
-    @if (Auth::user()->position === 'Manager' || Auth::user()->position === 'Employee')
+
+    @if (in_array(Auth::user()->position, ['Manager', 'Employee']))
         <script>
             $(document).ready(function() {
                 $('.delete-delivery').click(function() {
                     let deliveryId = $(this).data('id');
-                    if (confirm('Are you sure you want to delete this delivery?')) {
-                        $.ajax({
-                            url: "{{ route('management.deliveries.delete') }}",
-                            type: "DELETE",
-                            data: {
-                                _token: "{{ csrf_token() }}",
-                                id: deliveryId
-                            },
-                            success: function(response) {
-                                if (response.success) {
-                                    $('#delivery-row-' + deliveryId).remove();
-                                    alert('Delivery deleted successfully.');
-                                } else {
-                                    alert('Error deleting delivery.');
-                                }
-                            },
-                            error: function() {
+                    if (!confirm('Are you sure you want to delete this delivery?')) return;
+                    $.ajax({
+                        url: "{{ route('management.deliveries.delete') }}",
+                        type: "DELETE",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            id: deliveryId
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                $('#delivery-row-' + deliveryId).remove();
+                                alert('Delivery deleted successfully.');
+                            } else {
                                 alert('Error deleting delivery.');
                             }
-                        });
-                    }
+                        },
+                        error: function() {
+                            alert('Error deleting delivery.');
+                        }
+                    });
                 });
             });
         </script>

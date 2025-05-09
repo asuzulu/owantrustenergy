@@ -90,9 +90,24 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td><strong>Assigned User</strong></td>
+                                {{-- Changed label based on assigned user position --}}
+                                @php
+                                    $label = 'Assigned to Customer';
+                                    if (!$cylinder->user) {
+                                        $label = 'Created By';
+                                    } elseif ($cylinder->user->position === 'Agent') {
+                                        $label = 'In Possession of Agent';
+                                    } elseif ($cylinder->user->position !== 'Customer') {
+                                        $label = 'Created By';
+                                    }
+                                @endphp
+                                <td><strong>{{ $label }}</strong></td>
                                 <td>
-                                    {{ $cylinder->user ? $cylinder->user->first_name . ' ' . $cylinder->user->last_name : 'Not Assigned' }}
+                                    @if ($cylinder->user)
+                                        {{ $cylinder->user->first_name . ' ' . $cylinder->user->last_name }}
+                                    @else
+                                        {{ auth()->user()->first_name }} {{ auth()->user()->last_name }}
+                                    @endif
                                 </td>
                             </tr>
 
@@ -123,10 +138,19 @@
                     </a>
 
                     @if (in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
-                        <button type="button" class="btn btn-primary mr-2" data-toggle="modal"
-                            data-target="#assignCylinderModal">
-                            Assign to User
-                        </button>
+                        @if ($cylinder->user && $cylinder->user->position === 'Customer')
+                            {{-- Return to Warehouse button --}}
+                            <button type="button" class="btn btn-warning mr-2" data-toggle="modal"
+                                data-target="#returnWarehouseModal">
+                                Return to Warehouse
+                            </button>
+                        @else
+                            {{-- Assign to User button --}}
+                            <button type="button" class="btn btn-primary mr-2" data-toggle="modal"
+                                data-target="#assignCylinderModal">
+                                Assign to User
+                            </button>
+                        @endif
                     @endif
 
                     @if (Auth::user()->position === 'Manager')
@@ -270,6 +294,81 @@
         </div>
     </div>
 
+    <!-- Return to Warehouse Modal -->
+    <div class="modal fade" id="returnWarehouseModal" tabindex="-1" role="dialog"
+        aria-labelledby="returnWarehouseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="returnWarehouseModalLabel" class="modal-title">Return Cylinder to Warehouse</h5>
+                    <button class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label><strong>Select Warehouse:</strong></label>
+                        <select id="warehouseSelect" class="form-control" style="height:4rem;">
+                            @foreach ($warehouses as $wh)
+                                @if ($wh->name !== 'Unassigned')
+                                    <option value="{{ $wh->name }}">{{ $wh->name }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button id="triggerReturnWarning" class="btn btn-primary">Confirm Return</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warning Modal -->
+    <div class="modal fade" id="returnWarningModal" tabindex="-1" role="dialog"
+        aria-labelledby="returnWarningModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 id="returnWarningModalLabel" class="modal-title">Confirm Action</h5>
+                    <button class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>For making this change you will be logged for this action.<br>
+                        Are you sure you want to continue?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button id="submitReturnForm" class="btn btn-warning">Yes, Proceed</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="returnSuccessModal" tabindex="-1" role="dialog"
+        aria-labelledby="returnSuccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 id="returnSuccessModalLabel" class="modal-title">Success</h5>
+                    <button class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Cylinder was returned to the warehouse successfully.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form id="returnForm" method="POST" action="{{ route('cylinders.return', ['id' => $paddedId]) }}"
+        style="display:none;">
+        @csrf
+        <input type="hidden" name="warehouse" id="returnWarehouseInput">
+    </form>
+
     <style>
         .search-container {
             position: relative;
@@ -293,13 +392,20 @@
 
     <script>
         $(document).ready(function() {
+            // ── CSRF SETUP ───────────────────────────────────────
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            // ── ASSIGNMENT LOGIC (unchanged) ─────────────────────
             function enableAssignButton() {
-                let isCustomerSelected = $('#selectedUserId').val() ? $('#selectedUserId').val().length > 0 : false;
+                let isCustomerSelected = $('#selectedUserId').val()?.length > 0;
                 let isAssignmentTypeSelected = $('input[name="assignmentType"]:checked').length > 0;
                 let isValid = isCustomerSelected && isAssignmentTypeSelected;
                 if ($('input[name="assignmentType"]:checked').val() === 'delivery') {
-                    let isDriverSelected = $('#selectedDriverId').val() ? $('#selectedDriverId').val().length > 0 :
-                        false;
+                    let isDriverSelected = $('#selectedDriverId').val()?.length > 0;
                     isValid = isValid && isDriverSelected;
                 }
                 $('#assignCylinderBtn').prop('disabled', !isValid);
@@ -309,7 +415,7 @@
                 $(inputSelector).on('input', function() {
                     let query = $(this).val().trim();
                     let dropdown = $(dropdownSelector);
-                    if (query.length === 0) {
+                    if (!query) {
                         dropdown.hide();
                         return;
                     }
@@ -317,26 +423,26 @@
                         url: route,
                         type: "GET",
                         data: {
-                            query: query
+                            query
                         },
                         success: function(response) {
                             dropdown.empty().show();
-                            if (response.length === 0) {
+                            if (!response.length) {
                                 dropdown.append(
                                     '<div class="dropdown-item text-muted">No matches found</div>'
-                                );
+                                    );
                             } else {
                                 response.forEach(user => {
                                     let item = $('<div class="dropdown-item"></div>')
                                         .text(user.first_name + ' ' + user.last_name)
-                                        .attr('data-id', user.id).on('click',
-                                            function() {
-                                                $(inputSelector).val($(this).text());
-                                                $(hiddenInputSelector).val($(this).attr(
-                                                    'data-id'));
-                                                dropdown.hide();
-                                                enableAssignButton();
-                                            });
+                                        .attr('data-id', user.id)
+                                        .on('click', function() {
+                                            $(inputSelector).val($(this).text());
+                                            $(hiddenInputSelector).val($(this).data(
+                                                'id'));
+                                            dropdown.hide();
+                                            enableAssignButton();
+                                        });
                                     dropdown.append(item);
                                 });
                             }
@@ -344,28 +450,28 @@
                     });
                 });
             }
+
             setupSearch('#customerSearch', '#customerDropdown', "{{ route('search.customers') }}",
                 '#selectedUserId');
             setupSearch('#driverSearch', '#driverDropdown', "{{ route('search.drivers') }}", '#selectedDriverId');
+
             $('input[name="assignmentType"]').on('change', function() {
                 if ($('#deliveryOption').is(':checked')) {
                     $('#deliveryFields').show();
                     $('#pickupFields').hide();
-                } else if ($('#pickupOption').is(':checked')) {
+                } else {
                     $('#pickupFields').show();
                     $('#deliveryFields').hide();
                 }
                 enableAssignButton();
             });
+
             $('#assignCylinderBtn').on('click', function() {
                 let userId = $('#selectedUserId').val().trim();
                 if (!userId) {
                     alert("Please select a customer before assigning the cylinder.");
                     return;
                 }
-            });
-            $('#assignCylinderBtn').on('click', function() {
-                let userId = $('#selectedUserId').val().trim();
                 let cylinderId = "{{ $paddedId }}";
                 let assignmentType = $('input[name="assignmentType"]:checked').val();
                 let driverId = $('#selectedDriverId').val() || null;
@@ -373,41 +479,84 @@
                 let deliveryTime = $('#deliveryTime').val();
                 let pickupLocation = $('#pickupLocation').val();
                 let pickupDate = $('#pickupDate').val();
-                if (!userId) {
-                    alert("Please select a customer before assigning the cylinder.");
-                    return;
-                }
+
                 if (assignmentType === 'delivery' && !driverId) {
                     alert("Please select a driver before assigning a delivery.");
                     return;
                 }
+
                 $.post("{{ route('cylinders.assign') }}", {
-                    _token: "{{ csrf_token() }}",
-                    user_id: userId,
-                    cylinder_id: cylinderId,
-                    assignment_type: assignmentType
-                }).done(function() {
-                    alert("Cylinder assignment successful.");
-                    let postData = {
                         _token: "{{ csrf_token() }}",
+                        user_id: userId,
                         cylinder_id: cylinderId,
-                        customer_id: userId
-                    };
-                    if (assignmentType === 'delivery') {
-                        postData.driver_id = driverId;
-                        postData.delivery_date = deliveryDate;
-                        postData.delivery_time = deliveryTime;
-                        $.post("{{ route('deliveries.store') }}", postData).done(() => location
-                            .reload()).fail(xhr => alert('Delivery record failed: ' + xhr
-                            .responseText));
-                    } else {
-                        postData.pickup_location = pickupLocation;
-                        postData.pick_up_date = pickupDate;
-                        $.post("{{ route('pickups.store') }}", postData).done(() => location
-                            .reload()).fail(xhr => alert('Pickup record failed: ' + xhr
-                            .responseText));
-                    }
-                }).fail(xhr => alert('Cylinder assignment failed: ' + xhr.responseText));
+                        assignment_type: assignmentType
+                    })
+                    .done(function() {
+                        alert("Cylinder assignment successful.");
+                        let postData = {
+                            _token: "{{ csrf_token() }}",
+                            cylinder_id: cylinderId,
+                            customer_id: userId
+                        };
+                        if (assignmentType === 'delivery') {
+                            postData.driver_id = driverId;
+                            postData.delivery_date = deliveryDate;
+                            postData.delivery_time = deliveryTime;
+                            $.post("{{ route('deliveries.store') }}", postData)
+                                .done(() => location.reload())
+                                .fail(xhr => alert('Delivery record failed: ' + xhr.responseText));
+                        } else {
+                            postData.pickup_location = pickupLocation;
+                            postData.pick_up_date = pickupDate;
+                            $.post("{{ route('pickups.store') }}", postData)
+                                .done(() => location.reload())
+                                .fail(xhr => alert('Pickup record failed: ' + xhr.responseText));
+                        }
+                    })
+                    .fail(xhr => alert('Cylinder assignment failed: ' + xhr.responseText));
+            });
+
+            // ── RETURN TO WAREHOUSE FLOW ─────────────────────────
+            $('#triggerReturnWarning').click(function(e) {
+                e.preventDefault();
+                let wh = $('#warehouseSelect').val();
+                $('#returnWarehouseInput').val(wh);
+                $('#returnWarehouseModal').modal('hide');
+                $('#returnWarningModal').modal('show');
+            });
+
+            // ── FIXED SNIPPET #1: ONLY “Cancel” IN RETURN/WARNING MODALS ───
+            $('#returnWarehouseModal, #returnWarningModal').on('click', '.btn-secondary', function(e) {
+                e.preventDefault();
+                $(this).closest('.modal').modal('hide');
+            });
+
+            // ── FIXED SNIPPET #2: “Yes, Proceed” SUBMITS VIA AJAX ────────
+            $('#submitReturnForm').click(function(e) {
+                e.preventDefault();
+                let url = $('#returnForm').attr('action');
+                let data = $('#returnForm').serialize();
+
+                $('#returnWarningModal').modal('hide');
+                $.post(url, data)
+                    .done(function() {
+                        $('#returnSuccessModal').modal('show');
+                    })
+                    .fail(function(xhr) {
+                        console.error('Return failed response:', xhr);
+                        alert('Return failed: ' + (xhr.responseJSON?.message || xhr.statusText));
+                    });
+            });
+
+            // ── SHOW SUCCESS & WIRE ITS “OK” ────────────────────────────
+            @if (session('success'))
+                $('#returnSuccessModal').modal('show');
+            @endif
+
+            $('#returnSuccessModal').on('click', '.btn-success', function(e) {
+                e.preventDefault();
+                $('#returnSuccessModal').modal('hide');
+                setTimeout(() => location.reload(), 200);
             });
         });
     </script>

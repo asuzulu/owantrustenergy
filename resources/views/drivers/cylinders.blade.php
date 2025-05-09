@@ -24,6 +24,8 @@
                                 <th scope="col">Size</th>
                                 <th scope="col">Customer</th>
                                 <th scope="col">Delivery Date</th>
+                                <th scope="col">Delivery Time</th>
+                                <th scope="col">Passcode</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -37,10 +39,12 @@
                                     <td>{{ $delivery->size }}</td>
                                     <td>{{ $delivery->customer }}</td>
                                     <td>{{ \Carbon\Carbon::parse($delivery->delivery_date)->format('d-m-Y') ?? 'N/A' }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($delivery->delivery_time)->format('H:i') ?? 'N/A' }}</td>
+                                    <td>{{ $delivery->passcode }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="text-center">No cylinders assigned for delivery.</td>
+                                    <td colspan="6" class="text-center">No cylinders assigned for delivery.</td>
                                 </tr>
                             @endforelse
                         </tbody>

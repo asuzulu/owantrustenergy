@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\RedirectIfNotAuthenticated;
 use App\Http\Middleware\AuthMiddleware;
 use App\Models\User;
@@ -22,6 +23,7 @@ use App\Http\Controllers\{
     SearchAutoCompleteController,
     DeliveryController,
     PickupController,
+    HomeController,
     OrdersController,
     CylinderDistributionController,
     GlobalSettingsController
@@ -73,44 +75,25 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/users/{id}/profile', [UserController::class, 'profile'])->name('users.profile');
 });
 
-// Cylinder management routes
-Route::middleware(['auth'])->prefix('management/cylinders')->name('management.cylinders.')->group(function () {
-    // Main Cylinder Management page (add a name here)
-    Route::get('/', [ManagementController::class, 'index'])->name('index');
+// Cylinder management routes (management/cylinders)
+Route::middleware(['auth'])
+    ->prefix('management/cylinders')
+    ->name('management.cylinders.')
+    ->group(function () {
+        Route::get('/', [ManagementController::class, 'index'])->name('index');
+        Route::get('/{id}', [ManagementController::class, 'showCylinder'])->name('show');
+        Route::get('/', [CylinderController::class, 'index'])->name('list');
+        Route::post('/assign-cylinder/{user}', [CylinderController::class, 'assignCylinder'])->name('assign-cylinder');
+    });
 
-    // Show a single cylinder
-    Route::get('/{id}', [ManagementController::class, 'showCylinder'])->name('show');
-
-    // List all cylinders (another listing route)
-    Route::get('/', [CylinderController::class, 'index'])->name('list');
-
-    // Assign a cylinder to a user
-    Route::post('/assign-cylinder/{user}', [CylinderController::class, 'assignCylinder'])->name('assign-cylinder');
-});
-
-// Cylinders list page
+// Cylinders list page (legacy)
 Route::get('/management/cylinders', [ManagementController::class, 'cylindersPage'])->name('management.cylinders');
-Route::post('/cylinders', [CylinderController::class, 'store'])->name('cylinders.store');
 Route::post('/register-modal', [RegisterController::class, 'registerModal'])->name('register.modal');
-
-// Cylinder detail routes
-Route::prefix('cylinders')->name('cylinders.')->group(function () {
-    Route::get('/', [CylinderController::class, 'index'])->name('index');
-    Route::get('detail/{id}', [CylinderController::class, 'show'])->name('show.detail');
-    Route::delete('destroy/{id}', [CylinderController::class, 'destroy'])->name('cylinders.destroy');
-});
 
 // Customer-specific routes
 Route::middleware(['auth'])->group(function () {
-    // Display Customer Cylinder page
     Route::get('/dashboard/cylinders', [CustomerController::class, 'showCylinders'])->name('dashboard.cylinder');
-
-    // Display Order Cylinder page
-    Route::get('/dashboard/ordercylinder', function () {
-        return view('dashboard.ordercylinder');
-    })->name('dashboard.ordercylinder');
-
-    // Handle Order Placement
+    Route::get('/dashboard/ordercylinder', fn() => view('dashboard.ordercylinder'))->name('dashboard.ordercylinder');
     Route::post('/order/place', [OrdersController::class, 'placeOrder'])->name('order.place');
 });
 
@@ -129,35 +112,45 @@ Route::get('/agent/{id}/cylinders', [AgentController::class, 'cylindersPage'])->
 Route::get('/agent/customers', [AgentController::class, 'customers'])->name('agent.customers');
 Route::get('/agent/profile', [AgentController::class, 'dashboard'])->name('agent.profile');
 
-// Driver-specific routes
+// Driver-specific routes (upload form)
 Route::get('/drivers/{id}/profile', [DriversController::class, 'driverProfile'])->name('drivers.profile');
-Route::middleware(['auth'])->group(function() {
-    // show the delivering upload form
-    Route::get('/drivers/delivering/{cylinder}', [DriversController::class, 'delivering'])
-         ->name('drivers.delivering');
-
-    // handle the image upload & mark delivered
-    Route::post('/drivers/delivering/{cylinder}', [DriversController::class, 'storeDeliveryImage'])
-         ->name('drivers.delivering.store');
+Route::middleware(['auth'])->group(function () {
+    // ── Delivery start ───────────────────────────────────────────────
+    Route::post('/deliveries/{delivery}/start', [DeliveryController::class, 'start'])
+        ->name('deliveries.start');
+    // ── Delivering page routes ───────────────────────────────────────────────
+    Route::get('/drivers/delivering/{cylinder}', [DriversController::class, 'delivering'])->name('drivers.delivering');
+    Route::post('/drivers/delivering/{cylinder}', [DriversController::class, 'storeDeliveryImage'])->name('drivers.delivering.store');
 });
+
+Route::post('/deliveries/{delivery}/approve', [DeliveryController::class, 'approve'])
+     ->name('deliveries.approve');
+Route::post('/deliveries/{delivery}/disapprove', [DeliveryController::class, 'disapprove'])
+     ->name('deliveries.disapprove');
 
 // Driver cylinders show page route
-Route::middleware(['auth'])->prefix('drivers/cylinders')->name('drivers.cylinders.')->group(function () {
-    Route::get('/', [DriversController::class, 'dashboard'])->name('index');
-    Route::get('/{id}', [DriversController::class, 'showCylinder'])->name('show');
-});
+Route::middleware(['auth'])
+    ->prefix('drivers/cylinders')
+    ->name('drivers.cylinders.')
+    ->group(function () {
+        Route::get('/', [DriversController::class, 'dashboard'])->name('index');
+        Route::get('/{id}', [DriversController::class, 'showCylinder'])->name('show');
+    });
 
 // Management routes
-Route::middleware(['auth'])->prefix('management')->name('management.')->group(function () {
-    Route::get('/orders/requests', [OrdersController::class, 'requests'])->name('orders.requests');
-});
+Route::middleware(['auth'])
+    ->prefix('management')
+    ->name('management.')
+    ->group(function () {
+        Route::get('/orders/requests', [OrdersController::class, 'requests'])->name('orders.requests');
+    });
 Route::get('/management/dashboard', [ManagementController::class, 'index'])->name('dashboard.management');
 Route::get('/management/statistics', [StatisticsController::class, 'index'])->name('management.statistics');
 Route::get('/management/accounts', [ManagementController::class, 'accounts'])->name('management.accounts');
 Route::post('/management/accounts', [ManagementController::class, 'store']);
 Route::get('/management/employees', [ManagementController::class, 'employees'])->name('management.employees');
 Route::get('/management/agents', [ManagementController::class, 'agents'])->name('management.agents');
-Route::get('management/drivers', [ManagementController::class, 'drivers'])->name('management.drivers');
+Route::get('/management/drivers', [ManagementController::class, 'drivers'])->name('management.drivers');
 Route::get('/management/deliveries', [DeliveryController::class, 'index'])->name('management.deliveries');
 Route::delete('/management/deliveries/delete', [DeliveryController::class, 'destroy'])->name('management.deliveries.delete');
 
@@ -175,7 +168,7 @@ Route::get('/employee/statistics', [StatisticsController::class, 'index'])
     ->name('employee.statistics')
     ->middleware(['auth']);
 
-// Cylinders details page
+// Cylinders details page (management)
 Route::get('/management/cylinders/{id}', [ManagementController::class, 'showCylinder'])
     ->name('management.cylinders.show')
     ->middleware(['auth']);
@@ -187,7 +180,6 @@ Route::post('/cylinders/distribute/{id}', [CylinderDistributionController::class
     ->name('cylinders.distribute');
 Route::post('/agents/{id}/update-pickup-date', [AgentController::class, 'updatePickUpDate'])->name('agent.updatePickUpDate');
 
-
 // Pick up distributed cylinder from warehouse by agent
 Route::post('/warehouses/{warehouse}/confirm-agent-pickup', [WarehouseController::class, 'confirmAgentPickup'])
     ->name('warehouses.confirmAgentPickup');
@@ -196,7 +188,6 @@ Route::post('/warehouses/{warehouse}/confirm-agent-pickup', [WarehouseController
 Route::get('/statistics/data', [StatisticsController::class, 'getStatisticsData']);
 
 // Assign Cylinder Search Bar
-Route::post('/assign-cylinder', [CylinderController::class, 'assign'])->name('cylinders.assign');
 Route::get('/search/customers', [SearchAutoCompleteController::class, 'searchCustomers'])->name('search.customers');
 Route::get('/search/drivers', [SearchAutoCompleteController::class, 'searchDrivers'])->name('search.drivers');
 
@@ -212,33 +203,22 @@ Route::post('/pickups/update', [PickupController::class, 'updatePickup'])->name(
 // Route for uploading NIN image
 Route::post('/users/{id}/upload-nin', [UserController::class, 'uploadNin'])->name('upload.nin');
 
+// Employee Management Routes under the 'management' prefix
 Route::middleware(['auth'])->group(function () {
-    // Employee Management Routes under the 'management' prefix
     Route::prefix('management')->group(function () {
-        // List all employees
         Route::get('/employees', [EmployeeController::class, 'index'])->name('management.employees');
-        // Show a single employee's details
         Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('employees.show');
-        // Store a new employee (from the modal form)
         Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
-        // Delete an employee (only Manager authorized)
         Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
     });
 });
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home.dashboard');
+Route::get('/home', [HomeController::class, 'index'])->name('home.dashboard');
 
 Route::middleware(['auth'])->group(function () {
-    // List all agents (paginated)
     Route::get('/agents', [AgentController::class, 'index'])->name('agents.index');
-
-    // Show a single agent's profile
     Route::get('/agents/{id}', [AgentController::class, 'show'])->name('agents.show');
-
-    // Store a new agent (from the modal form)
     Route::post('/agents/add', [AgentController::class, 'store'])->name('agents.store');
-
-    // Delete an agent (only Manager authorized)
     Route::delete('/agents/{id}', [AgentController::class, 'destroy'])->name('agents.destroy');
 });
 
@@ -264,13 +244,59 @@ Route::middleware(['auth', 'role:Manager'])->group(function () {
 
 // Show a specific user's cylinders (assigned + orders)
 Route::middleware(['auth'])
-     ->get('/users/{id}/cylinders', [UserController::class, 'cylinders'])
-     ->name('users.cylinders');
+    ->get('/users/{id}/cylinders', [UserController::class, 'cylinders'])
+    ->name('users.cylinders');
 
-// Unassigned cylinders list page
-Route::get('/cylinders/unassigned', [CylinderController::class, 'showUnassigned'])
-    ->name('cylinders.unassigned');
-Route::post('/cylinders/assign', [CylinderController::class, 'assignWarehouses'])->name('warehouses.assign');
+// Driver Cylinder Delivery Pick Up listing
+Route::get('/delivery-pickup', [DeliveryController::class, 'deliveryListing'])
+    ->middleware('auth')
+    ->name('delivery.pickup');
+
+// Handle approval
+Route::post('deliveries/approve', [DeliveryController::class, 'updateApproval'])
+    ->name(name: 'deliveries.updateApproval')
+    ->middleware('auth');
+
+// Confirm delivery (Manager/Employee/Agent)
+Route::post('/deliveries/{driver}/confirm', [DeliveryController::class, 'confirm'])
+    ->name('deliveries.confirm');
+
+// Driver start delivery
+Route::get('/deliveries/{id}/start', [DeliveryController::class, 'start'])->name('deliveries.start');
+
+
+// Centralized /cylinders routes
+Route::prefix('cylinders')->name('cylinders.')->group(function () {
+    // Listing & pagination & search
+    Route::get('/', [CylinderController::class, 'index'])->name('index');
+
+    // Unassigned cylinders view
+    Route::get('/unassigned', [CylinderController::class, 'showUnassigned'])->name('unassigned');
+
+    // Create a new cylinder
+    Route::post('/', [CylinderController::class, 'store'])->name('store');
+
+    // Show cylinder details
+    Route::get('/detail/{id}', [CylinderController::class, 'show'])->name('show');
+
+    // Delete a cylinder
+    Route::delete('/destroy/{id}', [CylinderController::class, 'destroy'])->name('destroy');
+
+    // Assign warehouse to cylinder
+    Route::post('/assign', [CylinderController::class, 'assignWarehouses'])->name('assign');
+
+    // Assign cylinder to user
+    Route::post('/assign-cylinder', [CylinderController::class, 'assign'])->name('assign-cylinder');
+
+    // Return cylinder to warehouse
+    Route::post('/{id}/return', [CylinderController::class, 'returnToWarehouse'])->name('return');
+
+    // Warehouse data for distribution
+    Route::get('/warehouse/data', [CylinderDistributionController::class, 'warehouseData'])->name('warehouse.data');
+
+    // Distribute cylinder
+    Route::post('/distribute/{id}', [CylinderDistributionController::class, 'distribute'])->name('distribute');
+});
 
 // Resource routes
 Route::resource('cylinders', CylinderController::class)->parameters(['cylinder' => 'id']);

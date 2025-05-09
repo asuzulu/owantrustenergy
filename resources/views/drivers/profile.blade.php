@@ -1,4 +1,4 @@
-@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : 'layouts.drivers-dashboard')
+@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : 'layouts.drivers-dashboard'))
 
 @section('content')
     <div class="container" style="-5rem;">
@@ -9,20 +9,13 @@
                         <div class="row">
                             <div class="col-24">
                                 <h2 class="tm-block-title">Driver Account Details</h2>
-                                Name: {{ $user->first_name }} {{ $user->last_name }}
-                                <br>
-                                Email: {{ $user->email }}
-                                <br>
-                                Gender: {{ $user->gender }}
-                                <br>
-                                Phone: {{ $user->phone_number }}
-                                <br>
-                                Street: {{ $user->street }}
-                                <br>
-                                City: {{ $user->city }}
-                                <br>
-                                State: {{ $user->state }}
-                                <br>
+                                Name: {{ $user->first_name }} {{ $user->last_name }}<br>
+                                Email: {{ $user->email }}<br>
+                                Gender: {{ $user->gender }}<br>
+                                Phone: {{ $user->phone_number }}<br>
+                                Street: {{ $user->street }}<br>
+                                City: {{ $user->city }}<br>
+                                State: {{ $user->state }}<br>
                                 Age: {{ $user->dob ? \Carbon\Carbon::parse($user->dob)->age : 'N/A' }}<br>
                                 <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary mt-3">Edit Profile</a>
                                 @if (Auth::user()->position === 'Manager' || !$user->photo_id)
@@ -45,84 +38,200 @@
             </div>
         </div>
 
-        <!-- Display the cylinders assigned to the driver -->
-        <div class="row tm-content-row tm-mt-big">
-            <div class="bg-white tm-block">
-                <h3 class="tm-block-title" style="text-align: center">Deliveries</h3>
-                @if ($deliveries->isNotEmpty())
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Cylinder #</th>
-                                <th>Size</th>
-                                <th>Customer</th>
-                                <th>Delivery Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($deliveries as $delivery)
-                                @php
-                                    $paddedId = str_pad($delivery->cylinder, 9, '0', STR_PAD_LEFT);
-                                @endphp
-                                <tr style="cursor: pointer;"
-                                    onclick="window.location='{{ route('cylinders.show', ['cylinder' => $paddedId]) }}';">
-                                    <td>{{ $paddedId }}</td>
-                                    <td>{{ $delivery->size }}</td>
-                                    <td>{{ $delivery->customer }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($delivery->delivery_date)->format('d-m-Y') ?? 'N/A' }}
-                                    </td>
+        {{-- DRIVER VIEW --}}
+        @if (Auth::user()->position === 'Driver')
+            <div class="row tm-content-row tm-mt-big">
+                <div class="bg-white tm-block">
+                    <h3 class="tm-block-title text-center">Your Assigned Deliveries</h3>
+                    @php
+                        $drvDeliveries = \App\Models\Delivery::where('driver_id', $user->id)
+                            ->orderBy('delivery_date', 'desc')
+                            ->get();
+                    @endphp
+                    @if ($drvDeliveries->isNotEmpty())
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Cylinder #</th>
+                                    <th>Size</th>
+                                    <th>Customer</th>
+                                    <th>Address</th>
+                                    <th>Delivery Date</th>
+                                    <th>Delivery Time</th>
+                                    <th>Passcode</th>
+                                    <th>Delivery</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                    {{ $deliveries->links('pagination::bootstrap-4') }}
-                @else
-                    <p>No cylinders assigned to this driver.</p>
-                @endif
-                <p style="text-align: center">You have been assigned a total of <strong>{{ $totalCylinders }}</strong>
-                    cylinder(s).</p>
+                            </thead>
+                            <tbody>
+                                @foreach ($drvDeliveries as $d)
+                                    <tr>
+                                        <td>{{ str_pad($d->cylinder, 9, '0', STR_PAD_LEFT) }}</td>
+                                        <td>{{ $d->size }}</td>
+                                        <td>{{ $d->customer }}</td>
+                                        <td>{{ $d->address }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($d->delivery_date)->format('d-m-Y') }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($d->delivery_time)->format('H:i') }}</td>
+                                        <td>
+                                            {{ $d->date_delivered && $d->time_delivered ? 'Picked up' : $d->passcode }}
+                                        </td>
+                                        <td>
+                                            @if (is_null($d->delivery_start))
+                                                <form action="{{ route('deliveries.start', $d->id) }}" method="POST">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-primary">Start</button>
+                                                </form>
+                                            @elseif(is_null($d->date_delivered))
+                                                <a href="{{ route('drivers.delivering', $d->cylinder) }}"
+                                                    class="btn btn-sm btn-success">
+                                                    Close Delivery
+                                                </a>
+                                            @else
+                                                Delivered
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @else
+                        <p class="text-center">No deliveries assigned to you yet.</p>
+                    @endif
+                </div>
             </div>
-        </div>
 
-        @include('partials.dashboard.nin-modal')
+            {{-- MANAGER/EMPLOYEE/AGENT VIEW --}}
+        @elseif(in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
+            <div class="row tm-content-row tm-mt-big">
+                <div class="bg-white tm-block">
+                    <h3 class="tm-block-title text-center">Deliveries Assigned to {{ $user->first_name }}</h3>
+                    @php
+                        $drvDeliveries = \App\Models\Delivery::where('driver_id', $user->id)
+                            ->orderBy('delivery_date', 'desc')
+                            ->get();
+                    @endphp
+                    @if ($drvDeliveries->isNotEmpty())
+                        <form action="{{ route('deliveries.confirm', $user->id) }}" method="POST">
+                            @csrf
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox" id="select_all_deliveries"> Select All</th>
+                                        <th>Cylinder #</th>
+                                        <th>Size</th>
+                                        <th>Customer</th>
+                                        <th>Address</th>
+                                        <th>Delivery Date</th>
+                                        <th>Delivery Time</th>
+                                        <th>Status</th>
+                                        <th>Approval</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($drvDeliveries as $d)
+                                        <tr>
+                                            <td>
+                                                @if (is_null($d->date_delivered))
+                                                    <input type="checkbox" name="selected_deliveries[]"
+                                                        value="{{ $d->id }}">
+                                                @endif
+                                            </td>
+                                            <td>{{ str_pad($d->cylinder, 9, '0', STR_PAD_LEFT) }}</td>
+                                            <td>{{ $d->size }}</td>
+                                            <td>{{ $d->customer }}</td>
+                                            <td>{{ $d->address }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($d->delivery_date)->format('d-m-Y') }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($d->delivery_time)->format('H:i') }}</td>
+                                            <td>
+                                                @if (is_null($d->date_delivered))
+                                                    @if (!is_null($d->delivery_start))
+                                                        Being Delivered
+                                                    @elseif(!is_null($d->driver_pickup_date))
+                                                        With Driver
+                                                    @else
+                                                        Still at warehouse
+                                                    @endif
+                                                @else
+                                                    Delivered on
+                                                    {{ \Carbon\Carbon::parse($d->date_delivered)->format('d-m-Y') }}
+                                                    at {{ \Carbon\Carbon::parse($d->time_delivered)->format('H:i') }}
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if (!is_null($d->date_delivered) && !is_null($d->time_delivered))
+                                                    <a href="{{ route('drivers.delivering', $d->cylinder) }}"
+                                                        class="btn btn-sm btn-primary">
+                                                        Approve Delivery
+                                                    </a>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
 
-    @endsection
-
-    @section('scripts')
-        @if (Auth::guest())
-            <script>
-                window.location = "{{ url('/') }}";
-            </script>
+                            @if ($drvDeliveries->whereNull('date_delivered')->isNotEmpty())
+                                <div class="form-group row passcode-form mt-4">
+                                    <label for="passcode" class="col-sm-3 col-form-label text-sm-right text-center">
+                                        Enter Passcode:
+                                    </label>
+                                    <div class="col-sm-6 col-md-4 d-flex passcode-controls">
+                                        <input type="text" name="passcode" id="passcode"
+                                            class="form-control mr-2 passcode-input" required>
+                                        <button type="submit" class="btn btn-primary">Confirm</button>
+                                    </div>
+                                </div>
+                            @endif
+                        </form>
+                    @else
+                        <p class="text-center">No deliveries to confirm for this driver.</p>
+                    @endif
+                </div>
+            </div>
         @endif
+
+    </div>
+
+    @include('partials.dashboard.nin-modal')
+
+    <style>
+        .passcode-controls .form-control,
+        .passcode-controls .btn {
+            height: 50px; /* or use the height from Bootstrap inputs */
+        }
+    </style>
+
+@endsection
+
+@section('scripts')
+    @if (Auth::guest())
         <script>
-            $(document).ready(function() {
-                $("#editDriverForm").on("submit", function(e) {
-                    e.preventDefault(); // Prevent normal form submission
+            window.location = "{{ url('/') }}";
+        </script>
+    @endif
+    <script>
+        $(document).ready(function() {
+            $("#editDriverForm").on("submit", function(e) {
+                e.preventDefault();
+                let formData = $(this).serialize();
+                let actionUrl = $(this).attr("action");
 
-                    let formData = $(this).serialize(); // Serialize form data
-                    let actionUrl = $(this).attr("action");
+                $.ajax({
+                    url: actionUrl,
+                    type: "POST",
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            $("#editDriverModal").modal("hide");
+                            $("#editFirstName").val(response.user.first_name);
+                            $("#editLastName").val(response.user.last_name);
+                            $("#editPhoneNumber").val(response.user.phone_number);
+                            $("#editStreet").val(response.user.street);
+                            $("#editCity").val(response.user.city);
+                            $("#editState").val(response.user.state);
+                            $("#editEmail").val(response.user.email);
+                            $("#editDob").val(response.user.dob);
 
-                    $.ajax({
-                        url: actionUrl,
-                        type: "POST",
-                        data: formData,
-                        success: function(response) {
-                            if (response.success) {
-                                // Close the modal
-                                $("#editDriverModal").modal("hide");
-
-                                // Update user details on the page dynamically
-                                $("#editFirstName").val(response.user.first_name);
-                                $("#editLastName").val(response.user.last_name);
-                                $("#editPhoneNumber").val(response.user.phone_number);
-                                $("#editStreet").val(response.user.street);
-                                $("#editCity").val(response.user.city);
-                                $("#editState").val(response.user.state);
-                                $("#editEmail").val(response.user.email);
-                                $("#editDob").val(response.user.dob);
-
-                                // Update displayed profile details
-                                $(".tm-block").html(`\
+                            $(".tm-block").html(`\
                                 Name: ${response.user.first_name} ${response.user.last_name}<br>\
                                 Email: ${response.user.email}<br>\
                                 Gender: ${response.user.gender}<br>\
@@ -133,16 +242,28 @@
                                 Age: ${response.user.age}<br>\
                             `);
 
-                                alert("Profile updated successfully!");
-                            } else {
-                                alert("Something went wrong. Please try again.");
-                            }
-                        },
-                        error: function(xhr) {
-                            alert("Error updating profile: " + xhr.responseJSON.message);
+                            alert("Profile updated successfully!");
+                        } else {
+                            alert("Something went wrong. Please try again.");
                         }
-                    });
+                    },
+                    error: function(xhr) {
+                        alert("Error updating profile: " + xhr.responseJSON.message);
+                    }
                 });
             });
-        </script>
-    @endsection
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAll = document.getElementById('select_all_deliveries');
+            if (selectAll) {
+                const cbs = document.querySelectorAll('input[name="selected_deliveries[]"]');
+                cbs.forEach(cb => cb.addEventListener('click', e => e.stopPropagation()));
+                selectAll.addEventListener('change', function() {
+                    cbs.forEach(cb => cb.checked = this.checked);
+                });
+            }
+        });
+    </script>
+@endsection

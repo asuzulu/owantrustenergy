@@ -24,10 +24,17 @@
                                         placeholder="Search drivers..." value="{{ request('search') }}"
                                         aria-label="Search Drivers" style="height: 55px;">
                                 </form>
-                                <button class="btn btn-primary mx-2 mb-2 ml-auto" data-toggle="modal" data-target="#addDriverModal"
-                                    style="height: 100%;">
-                                    Add New Driver
-                                </button>
+
+                                <div class="ml-auto d-flex">
+                                    <a href="{{ route('delivery.pickup') }}" class="btn btn-primary mx-2 mb-2"
+                                        style="height: 100%;">
+                                        Delivery Pick Up
+                                    </a>
+                                    <button class="btn btn-primary mx-2 mb-2" data-toggle="modal"
+                                        data-target="#addDriverModal" style="height: 100%;">
+                                        Add New Driver
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     @endif
@@ -74,10 +81,12 @@
 
                 <style>
                     @media (max-width: 1080px) {
+
                         /* center the whole button‐container row */
                         .button-container {
                             justify-content: center !important;
                         }
+
                         /* remove auto margins on each item */
                         .button-container form,
                         .button-container a,
@@ -186,8 +195,9 @@
                             <label for="street">Street Address</label>
                             <input type="text" class="form-control" id="street" name="street" required
                                 placeholder="Enter Street Address" value="{{ old('street') }}"
-                                aria-label="Street Address" pattern=".*[a-zA-Z]+.*" title="Must be a valid stree address" />
-                                @error('street')
+                                aria-label="Street Address" pattern=".*[a-zA-Z]+.*"
+                                title="Must be a valid stree address" />
+                            @error('street')
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
                         </div>

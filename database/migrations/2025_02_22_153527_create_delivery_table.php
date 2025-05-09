@@ -23,14 +23,19 @@ return new class extends Migration
             $table->string('date_assigned');
             $table->date('delivery_date');
             $table->time('delivery_time');
+            $table->timestamp('delivery_start')->nullable();
             $table->date('date_delivered')->nullable();
             $table->time('time_delivered')->nullable();
             $table->string('image_path')->nullable();
+            // approval status: 'approved', 'disapproved' or null
+            $table->string('approval')->nullable();
+            //  7-digit numeric passcode for pickup confirmation**
+            $table->string('passcode', 7);
             $table->timestamps();
 
             // Foreign keys
             $table->foreign('driver_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('customer_id')->references('id')->on('users')->onDelete('cascade'); // only once!
+            $table->foreign('customer_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
