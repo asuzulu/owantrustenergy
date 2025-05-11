@@ -22,9 +22,9 @@
 
                 {{-- Header + Search --}}
                 <div class="row mb-3 align-items-center">
-                    <div class="col-md-4"><h2 class="tm-block-title">Deliveries</h2></div>
+                    <div class="col-md-4"><h2 class="tm-block-title">Completed Deliveries</h2></div>
                     <div class="col-md-8">
-                        <form method="GET" action="{{ route('delivery.pickup') }}" class="d-flex">
+                        <form method="GET" action="{{ route('management.deliveries') }}" class="d-flex">
                             <input
                                 type="text"
                                 name="search"

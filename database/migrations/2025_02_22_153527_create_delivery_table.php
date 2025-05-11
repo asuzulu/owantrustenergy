@@ -30,7 +30,7 @@ return new class extends Migration
             // approval status: 'approved', 'disapproved' or null
             $table->string('approval')->nullable();
             //  7-digit numeric passcode for pickup confirmation**
-            $table->string('passcode', 7);
+            $table->string('passcode', 7)->nullable();
             $table->timestamps();
 
             // Foreign keys

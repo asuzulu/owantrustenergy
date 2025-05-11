@@ -94,11 +94,11 @@
                                 @php
                                     $label = 'Assigned to Customer';
                                     if (!$cylinder->user) {
-                                        $label = 'Created By';
+                                        $label = 'Allocated By';
                                     } elseif ($cylinder->user->position === 'Agent') {
                                         $label = 'In Possession of Agent';
                                     } elseif ($cylinder->user->position !== 'Customer') {
-                                        $label = 'Created By';
+                                        $label = 'Allocated By';
                                     }
                                 @endphp
                                 <td><strong>{{ $label }}</strong></td>
@@ -245,34 +245,6 @@
         </div>
     </div>
 
-    <!-- Delete Cylinder Modal -->
-    <div class="modal fade" id="deleteCylinderModal" tabindex="-1" role="dialog"
-        aria-labelledby="deleteCylinderModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirm Delete</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to delete this cylinder?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        Cancel
-                    </button>
-                    <form action="{{ route('cylinders.destroy', $paddedId) }}" method="POST" class="d-inline">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">
-                            Yes, Delete
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Success Modal -->
     <div class="modal fade" id="assignSuccessModal" tabindex="-1" role="dialog"
         aria-labelledby="assignSuccessModalLabel" aria-hidden="true">
@@ -368,6 +340,34 @@
         @csrf
         <input type="hidden" name="warehouse" id="returnWarehouseInput">
     </form>
+
+        <!-- Delete Cylinder Modal -->
+    <div class="modal fade" id="deleteCylinderModal" tabindex="-1" role="dialog"
+        aria-labelledby="deleteCylinderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this cylinder?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <form action="{{ route('cylinders.destroy', $paddedId) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">
+                            Yes, Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <style>
         .search-container {

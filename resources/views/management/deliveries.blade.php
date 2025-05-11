@@ -28,7 +28,7 @@
                     </div>
                     <div class="col-md-6 col-sm-12 text-end">
                         <div class="d-flex justify-content-end">
-                            <a href="{{ route('orders.pickup') }}" class="btn btn-primary me-3">Pick Up Orders</a>
+                            <a href="{{ route('orders.pickup') }}" class="btn btn-primary me-3">Pick Ups</a>
                             <a href="{{ route('management.orders.requests') }}" class="btn btn-primary">Customers'
                                 Requests</a>
                         </div>
@@ -48,17 +48,8 @@
                                 <th scope="col">Delivery Date</th>
                                 <th scope="col">Delivery Time</th>
                                 <th scope="col">Status</th>
-                                @php
-                                    $hasActiveActions = $deliveries
-                                        ->filter(function ($delivery) {
-                                            return is_null($delivery->driver_pickup_date) ||
-                                                is_null($delivery->driver_pickup_time);
-                                        })
-                                        ->isNotEmpty();
-                                @endphp
-
-                                @if ($hasActiveActions)
-                                    <th>Action</th>
+                                @if (in_array(Auth::user()->position, ['Manager', 'Employee']))
+                                    <th scope="col">Action</th> {{-- ── NEW: only for Manager/Employee --}}
                                 @endif
                             </tr>
                         </thead>

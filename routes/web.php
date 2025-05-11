@@ -124,9 +124,9 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::post('/deliveries/{delivery}/approve', [DeliveryController::class, 'approve'])
-     ->name('deliveries.approve');
+    ->name('deliveries.approve');
 Route::post('/deliveries/{delivery}/disapprove', [DeliveryController::class, 'disapprove'])
-     ->name('deliveries.disapprove');
+    ->name('deliveries.disapprove');
 
 // Driver cylinders show page route
 Route::middleware(['auth'])
@@ -251,6 +251,10 @@ Route::middleware(['auth'])
 Route::get('/delivery-pickup', [DeliveryController::class, 'deliveryListing'])
     ->middleware('auth')
     ->name('delivery.pickup');
+
+Route::get('/delivery-index', [DeliveryController::class, 'index'])
+    ->middleware('auth')
+    ->name('deliveries.index');
 
 // Handle approval
 Route::post('deliveries/approve', [DeliveryController::class, 'updateApproval'])

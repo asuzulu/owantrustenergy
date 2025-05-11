@@ -26,10 +26,16 @@
                                 </form>
 
                                 <div class="ml-auto d-flex">
+                                    <a href="{{ route('deliveries.index') }}" class="btn btn-primary mx-2 mb-2"
+                                        style="height: 100%;">
+                                        Delivery List
+                                    </a>
+                                    
                                     <a href="{{ route('delivery.pickup') }}" class="btn btn-primary mx-2 mb-2"
                                         style="height: 100%;">
-                                        Delivery Pick Up
+                                        Delivery Approval
                                     </a>
+
                                     <button class="btn btn-primary mx-2 mb-2" data-toggle="modal"
                                         data-target="#addDriverModal" style="height: 100%;">
                                         Add New Driver

@@ -156,6 +156,12 @@ return [
             'path'   => storage_path('logs/cylinder_deletion.log'),
             'level'  => env('LOG_LEVEL', 'info'),
         ],
+
+        'return_to_warehouse' => [
+            'driver' => 'single',
+            'path'   => storage_path('logs/return_to_warehouse.log'),
+            'level'  => 'info',
+        ],
     ],
 
 ];

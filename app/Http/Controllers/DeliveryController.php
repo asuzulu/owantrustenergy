@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use App\Models\Delivery;
 use App\Models\Cylinder;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 
 class DeliveryController extends Controller
 {
@@ -40,8 +39,8 @@ class DeliveryController extends Controller
             $delivery = new Delivery();
             $delivery->date_assigned = Carbon::now()->toDateString();
 
-            // ── ALPHANUMERIC PASSCODE GENERATION ───────────────────────────────────────────
-            $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            // ── ALPHANUMERIC PASSCODE GENERATION (UPPERCASE + DIGITS ONLY) ────────────
+            $chars    = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             $passcode = '';
             for ($i = 0; $i < 7; $i++) {
                 $passcode .= $chars[random_int(0, strlen($chars) - 1)];
@@ -80,61 +79,32 @@ class DeliveryController extends Controller
         return view('management.deliveries', compact('deliveries'));
     }
 
-    /**
-     * Show driver profile (and assigned deliveries for manager/agent/employee or driver view).
-     */
-    public function driverProfile($id)
+    public function destroy(Request $request)
     {
-        // Load user (driver)
-        $user = User::findOrFail($id);
-
-        // Fetch *all* deliveries assigned to this driver, ordered most recent first
-        $drvDeliveries = Delivery::where('driver_id', $id)
-            ->orderByDesc('delivery_date')
-            ->get();
-
-        return view('drivers.profile', compact('user', 'drvDeliveries'));
+        $delivery = Delivery::find($request->id);
+        if ($delivery) {
+            $delivery->delete();
+            return response()->json(['success' => true]);
+        }
+        return response()->json(['success' => false]);
     }
 
-    public function startDelivery($id)
+    public function deliveryListing(Request $request)
     {
-        $delivery = Delivery::findOrFail($id);
+        $query = Delivery::with('driverUser')->whereNotNull('image_path');
 
-        $delivery->delivery_start = Carbon::now();
-        $delivery->save();
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('cylinder', 'like', "%{$search}%")
+                    ->orWhere('customer', 'like', "%{$search}%");
+            });
+        }
 
-        return redirect()->back()->with('success', 'Delivery started.');
-    }
+        $deliveries = $query->orderByDesc('created_at')
+            ->paginate(10)
+            ->appends($request->only('search'));
 
-    /**
-     * Handle the photo upload, stamp date_delivered/time_delivered,
-     * store the image, and redirect back.
-     */
-    public function storeDeliveryImage(Request $request, $cylinder)
-    {
-        $delivery = Delivery::where('cylinder', ltrim($cylinder, '0'))->firstOrFail();
-
-        // Validate incoming file
-        $request->validate([
-            'delivery_image' => 'required|image|max:5120', // up to 5MB
-        ]);
-
-        // Store the uploaded image under public/delivery_images/
-        $path = $request->file('delivery_image')
-            ->store('delivery_images', 'public');
-
-        // Update delivery record: image path + stamp delivered date/time
-        $delivery->image_path      = $path;
-        $delivery->date_delivered  = Carbon::today();
-        $delivery->time_delivered  = Carbon::now()->format('H:i:s');
-        $delivery->save();
-
-        return redirect()
-            ->route('drivers.delivering', $delivery->cylinder)
-            ->with([
-                'success'   => 'Delivery completed successfully.',
-                'imagePath' => $path,
-            ]);
+        return view('management.deliverypickup', compact('deliveries', 'search'));
     }
 
     public function updateApproval(Request $request)
@@ -180,68 +150,5 @@ class DeliveryController extends Controller
         }
 
         return redirect()->back()->with('success', 'Deliveries confirmed successfully.');
-    }
-
-    public function destroy(Request $request)
-    {
-        $delivery = Delivery::find($request->id);
-        if ($delivery) {
-            $delivery->delete();
-            return response()->json(['success' => true]);
-        }
-        return response()->json(['success' => false]);
-    }
-
-    /**
-     * Manager/Employee clicked "Approve Delivery"
-     */
-    public function approve(Request $request, $id)
-    {
-        $delivery = Delivery::findOrFail($id);
-        $approver = Auth::user();
-
-        // Log full delivery info in user-friendly format to storage/logs/deliveries.log
-        Log::channel('deliveries')->info(sprintf(
-            "Approved Delivery | Cylinder: %s | Driver: %s (%d) | Customer: %s (%d) | Address: %s | Assigned: %s | Pickup: %s %s | Delivered: %s %s | Image: %s | Approved by: %s (%d)",
-            $delivery->cylinder,
-            $delivery->driver,
-            $delivery->driver_id,
-            $delivery->customer,
-            $delivery->customer_id,
-            $delivery->address,
-            $delivery->date_assigned,
-            $delivery->driver_pickup_date,
-            $delivery->driver_pickup_time,
-            $delivery->date_delivered,
-            $delivery->time_delivered,
-            $delivery->image_path,
-            $approver->name,
-            $approver->id
-        ));
-
-        // Mark approved (optional, for audit)
-        $delivery->approval = 'approved';
-        $delivery->save();
-
-        // Remove record from deliveries table now it's logged ──
-        $delivery->delete();
-
-        return back()->with('success', 'Delivery approved and archived.');
-    }
-
-    /**
-     * Manager/Employee clicked "Disapprove Delivery"
-     */
-    public function disapprove(Request $request, $id)
-    {
-        $delivery = Delivery::findOrFail($id);
-
-        // Mark disapproved
-        $delivery->approval = 'disapproved';
-        $delivery->save();
-
-        // (Leave the record in the table so they can re-review if needed)
-
-        return back()->with('success', 'Delivery disapproved.');
     }
 }
