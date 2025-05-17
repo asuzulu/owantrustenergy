@@ -9,6 +9,10 @@ class Cylinder extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'id';
+    public $incrementing = false;
+    protected $keyType    = 'string';
+
     protected $fillable = [
         'id',
         'size',
@@ -29,5 +33,12 @@ class Cylinder extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function delivery()
+    {
+        return $this
+            ->hasOne(\App\Models\Delivery::class, 'cylinder', 'id')
+            ->latestOfMany();  // or ->orderBy('date_assigned','desc') if you prefer
     }
 }

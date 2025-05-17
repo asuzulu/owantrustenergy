@@ -17,19 +17,22 @@
     <div class="container" style="margin-top: -6rem;">
         <div class="row tm-content-row tm-mt-big">
             <div class="bg-white tm-block h-100">
-
-                {{-- Page Header & Nav Buttons --}}
                 <div class="row">
-                    <div class="col-md-3 col-sm-12">
+                    <div class="col-md-2 col-sm-12">
                         <h2 class="tm-block-title d-inline-block">Deliveries</h2>
                     </div>
-                    <div class="col-md-3 col-sm-12">
-                        <a href="{{ route('management.cylinders') }}" class="btn btn-primary">Back to Cylinders List</a>
-                    </div>
-                    <div class="col-md-6 col-sm-12 text-end">
-                        <div class="d-flex justify-content-end">
-                            <a href="{{ route('orders.pickup') }}" class="btn btn-primary me-3">Pick Ups</a>
-                            <a href="{{ route('management.orders.requests') }}" class="btn btn-primary">Customers'
+                    <div class="col-md-10 col-sm-12">
+                        <div
+                            class="d-flex justify-content-center align-items-center flex-wrap position-relative button-container">
+                            <a href="{{ route('management.cylinders') }}" class="btn btn-primary mb-2 mx-2">Back to Cylinders
+                                List</a>
+
+                            <a href="{{ route('drivers.index') }}" class="btn btn-primary mb-2 mx-2">Back to Drivers
+                                List</a>
+
+                            <a href="{{ route('orders.pickup') }}" class="btn btn-primary mb-2 mx-2">Pick Ups</a>
+
+                            <a href="{{ route('management.orders.requests') }}" class="btn btn-primary mb-2 mx-2">Customers'
                                 Requests</a>
                         </div>
                     </div>
@@ -57,20 +60,20 @@
                             @foreach ($deliveries as $delivery)
                                 <tr id="delivery-row-{{ $delivery->id }}">
                                     <td>{{ $delivery->id }}</td>
-                                    <td>
+                                    <td class=click style="color: rgb(2, 216, 2)">
                                         <a href="{{ route('cylinders.show', $delivery->cylinder) }}"
                                             style="text-decoration: none; color: inherit;">
                                             {{ $delivery->cylinder }}
                                         </a>
                                     </td>
                                     <td>{{ $delivery->size }}</td>
-                                    <td>
+                                    <td class=click style="color: rgb(2, 216, 2);">
                                         <a href="{{ route('drivers.profile', $delivery->driver_id) }}"
                                             style="text-decoration: none; color: inherit;">
                                             {{ $delivery->driver }}
                                         </a>
                                     </td>
-                                    <td>
+                                    <td class=click style="color: rgb(2, 216, 2);">
                                         @if (isset($delivery->customer_id))
                                             <a href="{{ route('users.profile', $delivery->customer_id) }}"
                                                 style="text-decoration: none; color: inherit;">
@@ -82,14 +85,7 @@
                                     </td>
                                     <td>{{ \Carbon\Carbon::parse($delivery->delivery_date)->format('d-m-Y') }}</td>
                                     <td>{{ \Carbon\Carbon::parse($delivery->delivery_time)->format('h:i A') }}</td>
-                                    <td>
-                                        @if ($delivery->date_delivered)
-                                            Delivered on
-                                            {{ \Carbon\Carbon::parse($delivery->date_delivered)->format('d-m-Y') }}
-                                        @else
-                                            Pending
-                                        @endif
-                                    </td>
+                                    <td>{{ $delivery->status }}</td>
 
                                     @if (in_array(Auth::user()->position, ['Manager', 'Employee']))
                                         <td>
@@ -130,6 +126,12 @@
             </div>
         </div>
     </div>
+
+    <style>
+        .click:hover {
+            font-weight: 800;
+        }
+    </style>
 @endsection
 
 @section('scripts')

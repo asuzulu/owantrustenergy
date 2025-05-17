@@ -1,12 +1,4 @@
-@extends(
-    auth()->check() && auth()->user()->position === 'Manager'
-    ? 'layouts.management-dashboard'
-    : (auth()->check() && auth()->user()->position === 'Employee'
-        ? 'layouts.employee-dashboard'
-        : (auth()->check() && auth()->user()->position === 'Driver'
-            ? 'layouts.drivers-dashboard'
-            : 'layouts.default-dashboard'))
-)
+@extends(auth()->check() && auth()->user()->position === 'Manager' ? 'layouts.management-dashboard' : (auth()->check() && auth()->user()->position === 'Employee' ? 'layouts.employee-dashboard' : (auth()->check() && auth()->user()->position === 'Driver' ? 'layouts.drivers-dashboard' : 'layouts.default-dashboard')))
 
 @php
     if (!auth()->check()) {
@@ -22,17 +14,13 @@
 
                 {{-- Header + Search --}}
                 <div class="row mb-3 align-items-center">
-                    <div class="col-md-4"><h2 class="tm-block-title">Completed Deliveries</h2></div>
+                    <div class="col-md-4">
+                        <h2 class="tm-block-title">Completed Deliveries</h2>
+                    </div>
                     <div class="col-md-8">
                         <form method="GET" action="{{ route('management.deliveries') }}" class="d-flex">
-                            <input
-                                type="text"
-                                name="search"
-                                value="{{ $search ?? '' }}"
-                                class="form-control"
-                                placeholder="Search by cylinder or customer..."
-                                aria-label="Search Deliveries"
-                            >
+                            <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control"
+                                placeholder="Search by cylinder or customer..." aria-label="Search Deliveries">
                             <button class="btn btn-primary ml-2">Search</button>
                         </form>
                     </div>
@@ -60,10 +48,15 @@
                                 @forelse($deliveries as $d)
                                     @php
                                         $pickup = $d->driver_pickup_date
-                                            ? $d->driver_pickup_date->format('F j, Y') . ' at ' . $d->driver_pickup_time->format('H:i')
+                                            ? $d->driver_pickup_date->format('F j, Y') .
+                                                ' at ' .
+                                                $d->driver_pickup_time->format('H:i')
                                             : '-';
 
-                                        $sched = $d->delivery_date->format('F j, Y') . ' at ' . $d->delivery_time->format('H:i');
+                                        $sched =
+                                            $d->delivery_date->format('F j, Y') .
+                                            ' at ' .
+                                            $d->delivery_time->format('H:i');
 
                                         if (!$d->driver_pickup_date) {
                                             $status = 'Pending';
@@ -79,12 +72,8 @@
                                     @endphp
                                     <tr>
                                         <td>
-                                            @if($status==='Delivered')
-                                                <input
-                                                    type="checkbox"
-                                                    name="deliveries[]"
-                                                    value="{{ $d->id }}"
-                                                >
+                                            @if ($status === 'Delivered')
+                                                <input type="checkbox" name="deliveries[]" value="{{ $d->id }}">
                                             @endif
                                         </td>
                                         <td>{{ $d->cylinder }}</td>
@@ -94,37 +83,32 @@
                                         <td>{{ $sched }}</td>
                                         <td>{{ $status }}</td>
                                         <td>{{ ucfirst($d->approval ?? '—') }}</td>
+                                        <td>{{ ucfirst($d->approval ?? '—') }}</td>
                                         <td>
-                                            @if($d->image_path)
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-sm btn-info"
-                                                    data-toggle="modal"
-                                                    data-target="#imageModal{{ $d->id }}"
-                                                >View</button>
+                                            @if ($d->image_path)
+                                                <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
+                                                    data-target="#imageModal{{ $d->id }}">View</button>
 
                                                 {{-- Image Modal --}}
-                                                <div class="modal fade" id="imageModal{{ $d->id }}" tabindex="-1" role="dialog">
+                                                <div class="modal fade" id="imageModal{{ $d->id }}" tabindex="-1"
+                                                    role="dialog">
                                                     <div class="modal-dialog modal-dialog-centered" role="document">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
                                                                 <h5 class="modal-title">Delivery Image</h5>
-                                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                                <button type="button" class="close"
+                                                                    data-dismiss="modal">&times;</button>
                                                             </div>
                                                             <div class="modal-body text-center">
-                                                                <img
-                                                                    src="{{ $d->image_path }}"
-                                                                    alt="Delivery Image"
-                                                                    class="img-fluid"
-                                                                >
+                                                                <img src="{{ $d->image_path }}" alt="Delivery Image"
+                                                                    class="img-fluid">
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            @else
-                                                —
                                             @endif
                                         </td>
+
                                     </tr>
                                 @empty
                                     <tr>
@@ -147,7 +131,7 @@
                 </form>
 
                 {{-- Pagination --}}
-                @if($deliveries->hasPages())
+                @if ($deliveries->hasPages())
                     <div class="d-flex justify-content-center mt-3">
                         {{ $deliveries->links('pagination::bootstrap-4') }}
                     </div>
@@ -159,6 +143,8 @@
 
     <style>
         .tm-table-striped-even th,
-        .tm-table-striped-even td { padding: 15px; }
+        .tm-table-striped-even td {
+            padding: 15px;
+        }
     </style>
 @endsection

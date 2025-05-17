@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Warehouse;
-use App\Models\State;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\Warehouse;
+use App\Models\State;
+use App\Models\Cylinder;
+use App\Models\Delivery;
+use App\Models\Pickup;
+use Carbon\Carbon;
 
 class WarehouseController extends Controller
 {
@@ -197,5 +201,66 @@ class WarehouseController extends Controller
 
         return redirect()->route('warehouses.show', $warehouseId)
             ->with('success', 'Selected cylinders have been confirmed as picked up.');
+    }
+
+    public function returnToWarehouse(Request $request, $id)
+    {
+        $request->validate([
+            'warehouse' => 'required|string|exists:warehouses,name',
+        ]);
+
+        // $id IS the padded string (e.g. "000000123")
+        $paddedId = $id;
+
+        // Strip leading zeros just to find the Cylinder PK
+        $cylinder = Cylinder::findOrFail($paddedId);
+
+        // Reassign back to warehouse
+        $cylinder->user_id        = Auth::id();
+        $cylinder->location       = $request->input('warehouse');
+        $cylinder->allocated_date = Carbon::today()->toDateString();
+        $cylinder->save();
+
+        // ── Logging ──
+        $user      = Auth::user();
+        $timestamp = Carbon::now()->toDateTimeString();
+
+        $deliveries = Delivery::where('cylinder', $paddedId)->get();
+
+        if ($deliveries->isEmpty()) {
+            $message = "[{$timestamp}] Cylinder {$paddedId} returned to '{$cylinder->location}' by "
+                . "{$user->first_name} {$user->last_name} (ID: {$user->id}). No pending deliveries.";
+            Log::channel('return_to_warehouse')->info($message . PHP_EOL);
+        } else {
+            foreach ($deliveries as $d) {
+                $logData = [
+                    'timestamp'         => $timestamp,
+                    'cylinder'          => $d->cylinder,
+                    'delivery_id'        => $d->id,
+                    'driver_id'          => $d->driver_id,
+                    'driver'             => $d->driver,
+                    'size'               => $d->size,
+                    'customer_id'        => $d->customer_id,
+                    'customer'           => $d->customer,
+                    'address'            => $d->address,
+                    'date_assigned'      => $d->date_assigned,
+                    'delivery_date'      => $d->delivery_date->toDateString(),
+                    'delivery_time'      => $d->delivery_time->format('H:i:s'),
+                    'passcode'          => $d->passcode,
+                    'returned_to_wh'    => $cylinder->location,
+                    'returned_by'       => "{$user->first_name} {$user->last_name}",
+                    'returned_by_id'    => $user->id,
+                ];
+                Log::channel('return_to_warehouse')->info(json_encode($logData) . PHP_EOL);
+            }
+        }
+
+        // ── DELETE matching delivery AND pickup records by padded cylinder ID ──
+        Delivery::where('cylinder', $paddedId)->delete();
+        Pickup::where('cylinder', $paddedId)->delete();
+
+        return $request->ajax()
+            ? response()->json(['success' => true])
+            : redirect()->back()->with('success', 'Cylinder returned to warehouse and delivery records logged.');
     }
 }
