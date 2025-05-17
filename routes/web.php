@@ -116,17 +116,24 @@ Route::get('/agent/profile', [AgentController::class, 'dashboard'])->name('agent
 Route::get('/drivers/{id}/profile', [DriversController::class, 'driverProfile'])->name('drivers.profile');
 Route::middleware(['auth'])->group(function () {
     // ── Delivery start ───────────────────────────────────────────────
-    Route::post('/deliveries/{delivery}/start', [DeliveryController::class, 'start'])
+    Route::post('/deliveries/{id}/start', [DeliveryController::class, 'start'])
         ->name('deliveries.start');
     // ── Delivering page routes ───────────────────────────────────────────────
     Route::get('/drivers/delivering/{cylinder}', [DriversController::class, 'delivering'])->name('drivers.delivering');
     Route::post('/drivers/delivering/{cylinder}', [DriversController::class, 'storeDeliveryImage'])->name('drivers.delivering.store');
 });
 
-Route::post('/deliveries/{delivery}/approve', [DeliveryController::class, 'approve'])
+
+Route::post('/deliveries/{delivery}/approve',   [DeliveryController::class, 'approve'])
     ->name('deliveries.approve');
+
 Route::post('/deliveries/{delivery}/disapprove', [DeliveryController::class, 'disapprove'])
     ->name('deliveries.disapprove');
+
+Route::get(
+    '/deliveries/{delivery}/review',
+    [DeliveryController::class, 'review']
+)->name('deliveries.review');
 
 // Driver cylinders show page route
 Route::middleware(['auth'])
@@ -264,10 +271,6 @@ Route::post('deliveries/approve', [DeliveryController::class, 'updateApproval'])
 // Confirm delivery (Manager/Employee/Agent)
 Route::post('/deliveries/{driver}/confirm', [DeliveryController::class, 'confirm'])
     ->name('deliveries.confirm');
-
-// Driver start delivery
-Route::get('/deliveries/{id}/start', [DeliveryController::class, 'start'])->name('deliveries.start');
-
 
 // Centralized /cylinders routes
 Route::prefix('cylinders')->name('cylinders.')->group(function () {

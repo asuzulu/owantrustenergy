@@ -107,6 +107,41 @@ class DeliveryController extends Controller
         return view('management.deliverypickup', compact('deliveries', 'search'));
     }
 
+    /**
+     * Mark this delivery as approved.
+     */
+    public function approve(Delivery $delivery)
+    {
+        $delivery->approval = 'approved';
+        $delivery->save();
+
+        return redirect()
+            ->back()
+            ->with('success', 'Delivery has been approved.');
+    }
+
+    /**
+     * Mark this delivery as disapproved.
+     */
+    public function disapprove(Delivery $delivery)
+    {
+        $delivery->approval = 'disapproved';
+        $delivery->save();
+
+        return redirect()
+            ->back()
+            ->with('success', 'Delivery has been disapproved.');
+    }
+
+    /**
+     * Show the “Review Delivery” page.
+     */
+    public function review(Delivery $delivery)
+    {
+        // pass the delivery (with image_path, approval, etc.) into a dedicated view
+        return view('deliveries.review', compact('delivery'));
+    }
+
     public function updateApproval(Request $request)
     {
         $request->validate([
@@ -150,5 +185,25 @@ class DeliveryController extends Controller
         }
 
         return redirect()->back()->with('success', 'Deliveries confirmed successfully.');
+    }
+
+    public function start($id)
+    {
+        $delivery = Delivery::findOrFail($id);
+
+        $user = Auth::user();
+
+        // Only allow the assigned driver or a manager/employee to start the delivery
+        if (
+            $user->id !== $delivery->driver_id &&
+            !in_array($user->position, ['Manager', 'Employee'])
+        ) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $delivery->delivery_start = Carbon::now();
+        $delivery->save();
+
+        return redirect()->back()->with('success', 'Delivery started.');
     }
 }

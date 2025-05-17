@@ -1,6 +1,10 @@
 @extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : 'layouts.drivers-dashboard'))
 
 @section('content')
+    @php
+        // BEFORE any checks that reference $delivery
+        $delivery = \App\Models\Delivery::where('cylinder', ltrim($paddedId, '0'))->first();
+    @endphp
     <div class="container" style="margin-top: -6rem;">
         <div class="row tm-content-row tm-mt-big">
             <div class="bg-white tm-block h-100">
@@ -27,6 +31,26 @@
                 @error('delivery_image')
                     <div class="alert alert-danger">{{ $message }}</div>
                 @enderror
+
+                {{-- Once approved or disapproved, show status + Review link --}}
+                @if (!is_null($delivery->approval))
+                    <div class="row mt-4">
+                        <div class="col text-center">
+                            <h4>
+                                Delivery
+                                @if ($delivery->approval === 'approved')
+                                    <span class="text-success">Approved</span>
+                                @else
+                                    <span class="text-danger">Disapproved</span>
+                                @endif
+                            </h4>
+
+                            <a href="{{ route('deliveries.review', $delivery->id) }}" class="btn btn-info mt-2">
+                                Review Delivery
+                            </a>
+                        </div>
+                    </div>
+                @endif
 
                 {{-- Driver flow: Upload button --}}
                 @if (Auth::user()->position === 'Driver')
@@ -92,7 +116,7 @@
                     <div class="row mt-4">
                         <div class="col text-center">
                             <div>
-                                @if(is_null($delivery->approval))
+                                @if (is_null($delivery->approval))
                                     {{-- Approve --}}
                                     <form action="{{ route('deliveries.approve', $delivery->id) }}" method="POST"
                                         style="display:inline-block">
@@ -101,6 +125,7 @@
                                             Approve Delivery
                                         </button>
                                     </form>
+
                                     {{-- Disapprove --}}
                                     <form action="{{ route('deliveries.disapprove', $delivery->id) }}" method="POST"
                                         style="display:inline-block">
@@ -109,12 +134,12 @@
                                             Disapprove Delivery
                                         </button>
                                     </form>
+
                                     {{-- Cancel --}}
                                     <a href="{{ route('management.home') }}" class="btn btn-secondary">
                                         Cancel
                                     </a>
                                 @else
-                                    {{-- After approve/disapprove, show only this link --}}
                                     <a href="{{ route('management.cylinders') }}" class="btn btn-primary">
                                         Return to Cylinders List
                                     </a>

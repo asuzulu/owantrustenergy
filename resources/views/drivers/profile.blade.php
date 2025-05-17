@@ -75,18 +75,24 @@
                                             {{ $d->date_delivered && $d->time_delivered ? 'Picked up' : $d->passcode }}
                                         </td>
                                         <td>
-                                            @if (is_null($d->delivery_start))
-                                                <form action="{{ route('deliveries.start', $d->id) }}" method="POST">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm btn-primary">Start</button>
-                                                </form>
-                                            @elseif(is_null($d->date_delivered))
-                                                <a href="{{ route('drivers.delivering', $d->cylinder) }}"
-                                                    class="btn btn-sm btn-success">
-                                                    Close Delivery
-                                                </a>
+                                            @if (is_null($d->driver_pickup_date) || is_null($d->driver_pickup_time))
+                                                {{-- Rule: can’t start until driver has picked up --}}
+                                                Awaiting driver pickup
                                             @else
-                                                Delivered
+                                                {{-- Driver has picked up; now decide if we show “Start” or “Close Delivery” --}}
+                                                @if (is_null($d->delivery_start))
+                                                    <form action="{{ route('deliveries.start', $d->id) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-sm btn-primary">Start</button>
+                                                    </form>
+                                                @elseif (is_null($d->date_delivered))
+                                                    <a href="{{ route('drivers.delivering', $d->cylinder) }}"
+                                                        class="btn btn-sm btn-success">
+                                                        Close Delivery
+                                                    </a>
+                                                @else
+                                                    Delivered
+                                                @endif
                                             @endif
                                         </td>
                                     </tr>
@@ -196,7 +202,8 @@
     <style>
         .passcode-controls .form-control,
         .passcode-controls .btn {
-            height: 50px; /* or use the height from Bootstrap inputs */
+            height: 50px;
+            /* or use the height from Bootstrap inputs */
         }
     </style>
 

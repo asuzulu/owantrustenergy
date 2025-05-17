@@ -100,7 +100,7 @@
                                 <th scope="col">Size</th>
                                 <th scope="col">Weight</th>
                                 <th scope="col">Location</th>
-                                <th scope="col">Date Allocated</th>
+                                <th scope="col">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -136,7 +136,7 @@
                                         @endswitch
                                     </td>
                                     <td>{{ $cylinder->location }}</td>
-                                    <td>{{ $cylinder->allocated_date->format('d-m-Y') }}</td>
+                                    <td>{{ $cylinder->status }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

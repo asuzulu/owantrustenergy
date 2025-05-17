@@ -18,11 +18,17 @@
                         <h2 class="tm-block-title">Completed Deliveries</h2>
                     </div>
                     <div class="col-md-8">
-                        <form method="GET" action="{{ route('management.deliveries') }}" class="d-flex">
-                            <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control"
-                                placeholder="Search by cylinder or customer..." aria-label="Search Deliveries">
-                            <button class="btn btn-primary ml-2">Search</button>
-                        </form>
+                        <div class="d-flex flex-wrap justify-content-center align-items-start position-relative button-container mb-4"
+                            style="min-height: 55px;">
+                            <form method="GET" action="{{ route('management.deliveries') }}" class="d-flex mb-2 mx-2">
+                                <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control"
+                                    placeholder="Search by cylinder or customer..." aria-label="Search Deliveries"
+                                    style="height: 55px; width: 300px;" />
+                                <button type="submit" class="btn btn-primary ml-2" style="height: 55px;">
+                                    Search
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
@@ -83,7 +89,6 @@
                                         <td>{{ $sched }}</td>
                                         <td>{{ $status }}</td>
                                         <td>{{ ucfirst($d->approval ?? '—') }}</td>
-                                        <td>{{ ucfirst($d->approval ?? '—') }}</td>
                                         <td>
                                             @if ($d->image_path)
                                                 <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
@@ -100,8 +105,8 @@
                                                                     data-dismiss="modal">&times;</button>
                                                             </div>
                                                             <div class="modal-body text-center">
-                                                                <img src="{{ $d->image_path }}" alt="Delivery Image"
-                                                                    class="img-fluid">
+                                                                <img src="{{ asset('storage/' . $d->image_path) }}"
+                                                                    alt="Delivery Image" class="img-fluid">
                                                             </div>
                                                         </div>
                                                     </div>
