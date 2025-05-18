@@ -170,14 +170,20 @@
                                             <td>
                                                 @if (!is_null($d->date_delivered) && !is_null($d->time_delivered))
                                                     @if ($d->approval === 'approved')
-                                                        {{-- Already approved: show “Approved” text and Review button --}}
                                                         <span class="text-success">Approved</span>
+                                                        <br>
                                                         <a href="{{ route('deliveries.review', $d->id) }}"
-                                                            class="btn btn-sm btn-secondary">
+                                                            class="btn btn-sm btn-secondary mt-1">
+                                                            Review
+                                                        </a>
+                                                    @elseif ($d->approval === 'disapproved')
+                                                        <span class="text-danger">Disapproved</span>
+                                                        <br>
+                                                        <a href="{{ route('deliveries.review', $d->id) }}"
+                                                            class="btn btn-sm btn-secondary mt-1">
                                                             Review
                                                         </a>
                                                     @else
-                                                        {{-- Not approved yet: show Approve Delivery button --}}
                                                         <form action="{{ route('deliveries.approve', $d->id) }}"
                                                             method="POST" style="display:inline;">
                                                             @csrf
