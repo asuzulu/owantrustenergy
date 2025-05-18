@@ -100,17 +100,18 @@ class Delivery extends Model
             return 'at warehouse';
         }
 
-        // 3. Awaiting customer pickup
-        $cylinderId = str_pad($this->cylinder, 9, '0', STR_PAD_LEFT);
+        // Ensure the cylinder ID is a 9-digit zero-padded string
+        $paddedCylinderId = str_pad($this->id, 9, '0', STR_PAD_LEFT);
 
+        // 3. Awaiting customer pickup
         $pickup = DB::table('pickups')
-            ->where('cylinder', $cylinderId)
+            ->where('cylinder', $paddedCylinderId)
             ->whereNull('date_picked_up')
             ->whereNull('time_picked_up')
             ->first();
 
         if ($pickup) {
-            return 'awaiting customer pickup';
+            return 'Awaiting customer pickup';
         }
 
         // 4. With customer
