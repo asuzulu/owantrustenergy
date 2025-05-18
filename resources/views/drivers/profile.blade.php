@@ -168,28 +168,24 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if (!is_null($d->date_delivered) && !is_null($d->time_delivered))
-                                                    @if ($d->approval === 'approved')
-                                                        <span class="text-success">Approved</span>
-                                                        <br>
-                                                        <a href="{{ route('deliveries.review', $d->id) }}"
-                                                            class="btn btn-sm btn-secondary mt-1">
-                                                            Review
-                                                        </a>
-                                                    @elseif ($d->approval === 'disapproved')
-                                                        <span class="text-danger">Disapproved</span>
-                                                        <br>
-                                                        <a href="{{ route('deliveries.review', $d->id) }}"
-                                                            class="btn btn-sm btn-secondary mt-1">
-                                                            Review
-                                                        </a>
-                                                    @else
-                                                        <form action="{{ route('deliveries.approve', $d->id) }}"
-                                                            method="POST" style="display:inline;">
+                                                {{-- Check if the user is a Driver --}}
+                                                @if (Auth::user()->position === 'Driver' && is_null($d->date_delivered))
+                                                    {{-- Show Start Delivery button only if driver_pickup_date and driver_pickup_time are NOT NULL AND delivery_start IS NULL --}}
+                                                    @if (!is_null($d->driver_pickup_date) && !is_null($d->driver_pickup_time) && is_null($d->delivery_start))
+                                                        <form action="{{ route('deliveries.start', $d->id) }}"
+                                                            method="POST">
                                                             @csrf
-                                                            <button type="submit" class="btn btn-sm btn-primary">
-                                                                Approve Delivery
-                                                            </button>
+                                                            <button type="submit" class="btn btn-sm btn-primary">Start
+                                                                Delivery</button>
+                                                        </form>
+
+                                                        {{-- Show Close Delivery button only if delivery_start is NOT NULL --}}
+                                                    @elseif (!is_null($d->delivery_start))
+                                                        <form action="{{ route('drivers.delivering', $d->id) }}"
+                                                            method="POST">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-sm btn-danger">Close
+                                                                Delivery</button>
                                                         </form>
                                                     @endif
                                                 @endif
