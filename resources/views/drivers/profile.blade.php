@@ -169,10 +169,23 @@
                                             </td>
                                             <td>
                                                 @if (!is_null($d->date_delivered) && !is_null($d->time_delivered))
-                                                    <a href="{{ route('drivers.delivering', $d->cylinder) }}"
-                                                        class="btn btn-sm btn-primary">
-                                                        Approve Delivery
-                                                    </a>
+                                                    @if ($d->approval === 'approved')
+                                                        {{-- Already approved: show “Approved” text and Review button --}}
+                                                        <span class="text-success">Approved</span>
+                                                        <a href="{{ route('deliveries.review', $d->id) }}"
+                                                            class="btn btn-sm btn-secondary">
+                                                            Review
+                                                        </a>
+                                                    @else
+                                                        {{-- Not approved yet: show Approve Delivery button --}}
+                                                        <form action="{{ route('deliveries.approve', $d->id) }}"
+                                                            method="POST" style="display:inline;">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                                Approve Delivery
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 @endif
                                             </td>
                                         </tr>
