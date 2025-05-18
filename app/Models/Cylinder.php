@@ -89,7 +89,7 @@ class Cylinder extends Model
             ->first();
 
         if ($pickup) {
-            return 'awaiting customer pickup';
+            return 'Awaiting customer pickup';
         }
 
         // 4) With customer

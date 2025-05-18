@@ -96,6 +96,12 @@ class Delivery extends Model
             ->where('cylinder', $this->cylinder)
             ->exists();
 
+        // Latest pickup stub
+        $pk = DB::table('pickups')
+            ->where('cylinder', $cylId)
+            ->latest('id')
+            ->first();
+
         // 2. At warehouse
         if ($isWarehouse && !$inPickup && !$inDelivery) {
             return 'at warehouse';
@@ -116,39 +122,20 @@ class Delivery extends Model
         }
 
         // 4) With customer
-        // ─────────────────────────────────────────────────────────────────────
-        // First, check if “this location” matches a Customer’s full name (case‐insensitive).
         $customerNameMatch = DB::table('users')
             ->where('position', 'Customer')
             ->whereRaw('LOWER(first_name || " " || last_name) = ?', [$loc])
             ->exists();
 
-        // Check if there is any approved delivery for this cylinder ID
         $hasCustomerDeliveryApproval = DB::table('deliveries')
             ->where('cylinder', $cylId)
             ->whereNotNull('approval')
             ->exists();
 
-        // Now fetch the latest pickup row (by auto‐increment ID) for this padded cylinder ID
-        $latestPickup = DB::table('pickups')
-            ->where('cylinder', $paddedCylinderId)
-            ->latest('id')
-            ->first();
-
-        /*
-     * We enter “With customer” if:
-     *   (1) The location string matches a Customer’s name, AND
-     *   either
-     *       (a) There is a latestPickup whose date_picked_up and time_picked_up are both NOT NULL, OR
-     *       (b) There is an approved delivery for this cylinder (customer has already approved).
-     */
         if (
             $customerNameMatch
             && (
-                ($latestPickup
-                    && ! is_null($latestPickup->date_picked_up)
-                    && ! is_null($latestPickup->time_picked_up)
-                )
+                ($pk && $pk->date_picked_up && $pk->time_picked_up)
                 || $hasCustomerDeliveryApproval
             )
         ) {
