@@ -76,13 +76,13 @@
                                         </td>
                                         <td>
                                             {{-- Check if the user is a Driver --}}
-                                            @if (Auth::user()->position === 'Driver' && $delivery && is_null($delivery->date_delivered))
+                                            @if (Auth::user()->position === 'Driver' && $d && is_null($d->date_delivered))
                                                 {{-- Show Start Delivery button only if driver_pickup_date and driver_pickup_time are NOT NULL AND delivery_start IS NULL --}}
                                                 @if (
-                                                    !is_null($delivery->driver_pickup_date) &&
-                                                        !is_null($delivery->driver_pickup_time) &&
-                                                        is_null($delivery->delivery_start))
-                                                    <form action="{{ route('deliveries.start', $delivery->id) }}"
+                                                    !is_null($d->driver_pickup_date) &&
+                                                        !is_null($d->driver_pickup_time) &&
+                                                        is_null($d->delivery_start))
+                                                    <form action="{{ route('deliveries.start', $d->id) }}"
                                                         method="POST">
                                                         @csrf
                                                         <button type="submit" class="btn btn-sm btn-primary">Start
@@ -90,8 +90,8 @@
                                                     </form>
 
                                                     {{-- Show Close Delivery button only if delivery_start is NOT NULL --}}
-                                                @elseif (!is_null($delivery->delivery_start))
-                                                    <form action="{{ route('deliveries.close', $delivery->id) }}"
+                                                @elseif (!is_null($d->delivery_start))
+                                                    <form action="{{ route('deliveries.close', $d->id) }}"
                                                         method="POST">
                                                         @csrf
                                                         <button type="submit" class="btn btn-sm btn-danger">Close
