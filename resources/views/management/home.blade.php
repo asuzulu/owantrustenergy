@@ -100,7 +100,7 @@
                                 <th scope="col">Size</th>
                                 <th scope="col">Weight</th>
                                 <th scope="col">Location</th>
-                                <th scope="col">Status</th>
+                                <th scope="col">Tracking</th>
                             </tr>
                         </thead>
                         <tbody>

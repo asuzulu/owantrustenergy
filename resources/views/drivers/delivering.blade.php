@@ -3,7 +3,7 @@
 @section('content')
     @php
         // BEFORE any checks that reference $delivery
-        $delivery = \App\Models\Delivery::where('cylinder', ltrim($paddedId, '0'))->first();
+        $delivery = \App\Models\Delivery::where('cylinder', $paddedId)->first();
     @endphp
     <div class="container" style="margin-top: -6rem;">
         <div class="row tm-content-row tm-mt-big">
@@ -33,7 +33,7 @@
                 @enderror
 
                 {{-- Once approved or disapproved, show status + Review link --}}
-                @if (!is_null($delivery->approval))
+                @if (!empty($delivery->approval))
                     <div class="row mt-4">
                         <div class="col text-center">
                             <h4>
@@ -70,10 +70,7 @@
                                 enctype="multipart/form-data">
                                 @csrf
                                 <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="deliverModalLabel">Upload Delivery Photo</h5>
-                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                    </div>
+                                    <div class="modal-header">…</div>
                                     <div class="modal-body">
                                         <div class="form-group">
                                             <input type="file" name="delivery_image" id="deliveryImageInput"
@@ -98,14 +95,16 @@
 
                 {{-- Display the uploaded image after success (all roles) --}}
                 @php
-                    $delivery = \App\Models\Delivery::where('cylinder', ltrim($paddedId, '0'))->first();
+                    // Convert back to integer in PHP and query normally
+                    $rawCylinder = (int) ltrim($paddedId, '0');
+                    $delivery = \App\Models\Delivery::where('cylinder', $paddedId)->first();
                 @endphp
 
                 @if ($delivery && $delivery->image_path)
                     <div class="row mt-4">
                         <div class="col text-center">
                             <h4>Delivery Image:</h4>
-                            <img src="{{ asset('storage/' . $delivery->image_path) }}" alt="Delivery Image"
+                            <img src="{{ asset('storage/' . rawurlencode($delivery->image_path)) }}" alt="Delivery Image"
                                 class="img-fluid mb-3">
                         </div>
                     </div>
@@ -156,13 +155,15 @@
 
 @push('scripts')
     <script>
-        // preview before upload
-        document.getElementById('deliveryImageInput')?.addEventListener('change', function(evt) {
-            const [file] = this.files;
-            if (!file) return;
-            const img = document.getElementById('imagePreview');
-            img.src = URL.createObjectURL(file);
-            img.style.display = 'block';
-        });
+        // === preview before upload ===
+        document
+            .getElementById('deliveryImageInput')
+            ?.addEventListener('change', function(evt) {
+                const [file] = this.files;
+                if (!file) return;
+                const img = document.getElementById('imagePreview');
+                img.src = URL.createObjectURL(file);
+                img.style.display = 'block';
+            });
     </script>
 @endpush

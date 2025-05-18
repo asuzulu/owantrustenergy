@@ -185,46 +185,49 @@ class DriversController extends Controller
     public function delivering($cylinderId)
     {
         $paddedId = str_pad($cylinderId, 9, '0', STR_PAD_LEFT);
-        return view('drivers.delivering', compact('paddedId'));
+        return view('drivers.delivering', compact('paddedId', 'cylinderId'));
     }
 
     /**
      * Process the delivery image upload, mark delivered, and log.
      */
-    public function storeDeliveryImage(Request $request, $cylinderId)
+    public function storeDeliveryImage(Request $request, $paddedId)
     {
         $request->validate([
             'delivery_image' => 'required|image|max:5120',
         ]);
 
         $driver   = Auth::user();
-        $paddedId = str_pad($cylinderId, 9, '0', STR_PAD_LEFT);
+        $paddedId = str_pad($paddedId, 9, '0', STR_PAD_LEFT);
         $date     = now()->format('Y-m-d');
         $ext      = $request->file('delivery_image')->extension();
 
-        // Retrieve existing delivery so we know the customer
+        $rawCylinder = (int) ltrim($paddedId, '0');
         $delivery = DB::table('deliveries')
-            ->where('cylinder', (int)$cylinderId)
+            ->where('cylinder', $paddedId)
             ->first();
 
-        $filename = "{$driver->first_name} {$driver->last_name}_{$paddedId}-{$date}-{$delivery->customer}.{$ext}";
+        // Sanitize filename
+        $rawName = "{$driver->first_name} {$driver->last_name}";
+        $rawCustomer = $delivery->customer;
+        $filename = str_replace(' ', '_', "{$rawName}_{$paddedId}-{$date}-{$rawCustomer}.{$ext}");
 
-        // Store the image under storage/app/public/deliveries/
+        // Store the image
         $path = $request->file('delivery_image')
-            ->storeAs('public/deliveries', $filename);
+            ->storeAs('deliveries', $filename, 'public');
 
-        // Update the deliveries table with the image path
+        // Update database
         DB::table('deliveries')
-            ->where('cylinder', (int)$cylinderId)
+            ->where('cylinder', $paddedId)
             ->update([
                 'date_delivered' => now()->toDateString(),
                 'time_delivered' => now()->format('H:i:s'),
                 'image_path'     => $path,
             ]);
 
-        // Fetch updated record for logging
+        // Fetch updated record
         $updated = DB::table('deliveries')
-            ->where('cylinder', (int)$cylinderId)
+            ->where('cylinder', $paddedId)
             ->first();
 
         $logMessage = sprintf(

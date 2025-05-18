@@ -15,7 +15,7 @@
                 {{-- Header + Search --}}
                 <div class="row mb-3 align-items-center">
                     <div class="col-md-4">
-                        <h2 class="tm-block-title">Completed Deliveries</h2>
+                        <h2 class="tm-block-title">Deliveries to be Approved</h2>
                     </div>
                     <div class="col-md-8">
                         <div class="d-flex flex-wrap justify-content-center align-items-start position-relative button-container mb-4"
@@ -39,7 +39,9 @@
                         <table class="table table-hover table-striped tm-table-striped-even">
                             <thead>
                                 <tr class="tm-bg-gray">
-                                    <th></th>
+                                    <th>
+                                        <input type="checkbox" id="select-all">
+                                    </th>
                                     <th>Cylinder #</th>
                                     <th>Customer</th>
                                     <th>Driver Name</th>
@@ -79,7 +81,8 @@
                                     <tr>
                                         <td>
                                             @if ($status === 'Delivered')
-                                                <input type="checkbox" name="deliveries[]" value="{{ $d->id }}">
+                                                <input type="checkbox" class="delivery-checkbox" name="deliveries[]"
+                                                    value="{{ $d->id }}">
                                             @endif
                                         </td>
                                         <td>{{ $d->cylinder }}</td>
@@ -152,4 +155,11 @@
             padding: 15px;
         }
     </style>
+
+    <script>
+        document.getElementById('select-all').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.delivery-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+    </script>
 @endsection

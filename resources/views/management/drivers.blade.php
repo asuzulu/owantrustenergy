@@ -30,8 +30,8 @@
                                         style="height: 100%;">
                                         Delivery List
                                     </a>
-                                    
-                                    <a href="{{ route('delivery.pickup') }}" class="btn btn-primary mx-2 mb-2"
+
+                                    <a href="{{ route('delivery.approval') }}" class="btn btn-primary mx-2 mb-2"
                                         style="height: 100%;">
                                         Delivery Approval
                                     </a>

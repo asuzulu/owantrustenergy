@@ -104,7 +104,7 @@ class DeliveryController extends Controller
             ->paginate(10)
             ->appends($request->only('search'));
 
-        return view('management.deliverypickup', compact('deliveries', 'search'));
+        return view('management.deliveryapproval', compact('deliveries', 'search'));
     }
 
     /**
@@ -179,7 +179,7 @@ class DeliveryController extends Controller
             if ($delivery->passcode !== $data['passcode']) {
                 return back()->withErrors(['passcode' => 'Incorrect passcode for one or more selections.']);
             }
-            $delivery->driver_pickup_date = Carbon::today();
+            $delivery->driver_pickup_date = Carbon::today()->toDateString();
             $delivery->driver_pickup_time = Carbon::now()->format('H:i:s');
             $delivery->save();
         }

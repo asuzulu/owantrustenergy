@@ -255,9 +255,9 @@ Route::middleware(['auth'])
     ->name('users.cylinders');
 
 // Driver Cylinder Delivery Pick Up listing
-Route::get('/delivery-pickup', [DeliveryController::class, 'deliveryListing'])
+Route::get('/delivery-approval', [DeliveryController::class, 'deliveryListing'])
     ->middleware('auth')
-    ->name('delivery.pickup');
+    ->name('delivery.approval');
 
 Route::get('/delivery-index', [DeliveryController::class, 'index'])
     ->middleware('auth')

@@ -56,8 +56,8 @@ class Cylinder extends Model
         $cylId = $this->id;
 
         // 1) Unassigned
-        if ($loc === 'unassigned') {
-            return 'unassigned';
+        if ($loc === 'Unassigned') {
+            return 'Unassigned';
         }
 
         // Existence flags
@@ -69,7 +69,7 @@ class Cylinder extends Model
             ->whereRaw('LOWER(name) = ?', [$loc])
             ->exists();
         if ($isWarehouse && ! $inPickup && ! $inDelivery) {
-            return 'at warehouse';
+            return 'At warehouse';
         }
 
         // Latest pickup stub
@@ -80,7 +80,7 @@ class Cylinder extends Model
 
         // 3) Waiting for customer pickup
         if ($pk && is_null($pk->date_picked_up) && is_null($pk->time_picked_up)) {
-            return 'waiting for customer pickup';
+            return 'Waiting for customer pickup';
         }
 
         // 4) With customer
@@ -102,7 +102,7 @@ class Cylinder extends Model
                 || $hasCustomerDeliveryApproval
             )
         ) {
-            return 'with customer';
+            return 'With customer';
         }
 
         // Latest delivery stub
@@ -114,7 +114,7 @@ class Cylinder extends Model
         if ($dl) {
             // 5) Waiting for driver pickup
             if (is_null($dl->driver_pickup_date) && is_null($dl->driver_pickup_time)) {
-                return 'waiting for driver pickup';
+                return 'Waiting for driver pickup';
             }
 
             // 6) With driver
@@ -122,7 +122,7 @@ class Cylinder extends Model
                 && $dl->driver_pickup_time
                 && is_null($dl->delivery_start)
             ) {
-                return 'with driver';
+                return 'With driver';
             }
 
             // 7) Being delivered
@@ -133,7 +133,7 @@ class Cylinder extends Model
                 && is_null($dl->date_delivered)
                 && is_null($dl->time_delivered)
             ) {
-                return 'being delivered';
+                return 'Being delivered';
             }
 
             // 8) Delivery pending approval
@@ -146,7 +146,7 @@ class Cylinder extends Model
                 && $dl->image_path
                 && is_null($dl->approval)
             ) {
-                return 'delivery pending approval';
+                return 'Delivery pending approval';
             }
         }
 
@@ -159,14 +159,14 @@ class Cylinder extends Model
         if ($ag) {
             // 9) Waiting for agent pickup
             if (is_null($ag->pick_up_date)) {
-                return 'waiting for agent pickup';
+                return 'Waiting for agent pickup';
             }
             // 10) With agent
             if ($ag->pick_up_date && ! $inPickup && ! $inDelivery) {
-                return 'with agent';
+                return 'With agent';
             }
         }
 
-        return 'unknown';
+        return 'Unknown';
     }
 }
