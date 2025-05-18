@@ -104,7 +104,7 @@ class Delivery extends Model
 
         // 2. At warehouse
         if ($isWarehouse && !$inPickup && !$inDelivery) {
-            return 'at warehouse';
+            return 'At warehouse';
         }
 
         // Ensure the cylinder ID is a 9-digit zero-padded string
