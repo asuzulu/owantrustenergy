@@ -101,23 +101,32 @@ class Delivery extends Model
         }
 
         // 3. Awaiting customer pickup
+        $cylinderId = str_pad($this->cylinder, 9, '0', STR_PAD_LEFT);
+
         $pickup = DB::table('pickups')
-            ->where('cylinder', $this->cylinder)
+            ->where('cylinder', $cylinderId)
+            ->whereNull('date_picked_up')
+            ->whereNull('time_picked_up')
             ->first();
-        if ($pickup && is_null($pickup->date_picked_up) && is_null($pickup->time_picked_up)) {
+
+        if ($pickup) {
             return 'awaiting customer pickup';
         }
 
         // 4. With customer
-        if ($cyl && $loc === $this->customer
+        if (
+            $cyl && $loc === $this->customer
             && (($pickup && $pickup->date_picked_up && $pickup->time_picked_up)
-                || !is_null($this->approval))) {
+                || !is_null($this->approval))
+        ) {
             return 'with customer';
         }
 
         // 5. Awaiting driver pickup
-        if (is_null($this->driver_pickup_date) && is_null($this->driver_pickup_time)
-            && !$inPickup && !($pickup && !is_null($pickup->date_picked_up))) {
+        if (
+            is_null($this->driver_pickup_date) && is_null($this->driver_pickup_time)
+            && !$inPickup && !($pickup && !is_null($pickup->date_picked_up))
+        ) {
             return 'awaiting driver pickup';
         }
 
@@ -127,15 +136,19 @@ class Delivery extends Model
         }
 
         // 7. Being delivered
-        if ($this->driver_pickup_date && $this->driver_pickup_time
-            && $this->delivery_start && is_null($this->date_delivered) && is_null($this->time_delivered)) {
+        if (
+            $this->driver_pickup_date && $this->driver_pickup_time
+            && $this->delivery_start && is_null($this->date_delivered) && is_null($this->time_delivered)
+        ) {
             return 'being delivered';
         }
 
         // 8. Delivery pending approval
-        if ($this->driver_pickup_date && $this->driver_pickup_time
+        if (
+            $this->driver_pickup_date && $this->driver_pickup_time
             && $this->delivery_start && $this->date_delivered && $this->time_delivered && $this->image_path
-            && is_null($this->approval)) {
+            && is_null($this->approval)
+        ) {
             return 'delivery pending approval';
         }
 

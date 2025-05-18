@@ -78,9 +78,17 @@ class Cylinder extends Model
             ->latest('id')
             ->first();
 
-        // 3) Waiting for customer pickup
-        if ($pk && is_null($pk->date_picked_up) && is_null($pk->time_picked_up)) {
-            return 'Waiting for customer pickup';
+        // 3. Awaiting customer pickup
+        $cylinderId = str_pad($this->cylinder, 9, '0', STR_PAD_LEFT);
+
+        $pickup = DB::table('pickups')
+            ->where('cylinder', $cylinderId)
+            ->whereNull('date_picked_up')
+            ->whereNull('time_picked_up')
+            ->first();
+
+        if ($pickup) {
+            return 'awaiting customer pickup';
         }
 
         // 4) With customer
@@ -118,7 +126,8 @@ class Cylinder extends Model
             }
 
             // 6) With driver
-            if ($dl->driver_pickup_date
+            if (
+                $dl->driver_pickup_date
                 && $dl->driver_pickup_time
                 && is_null($dl->delivery_start)
             ) {
