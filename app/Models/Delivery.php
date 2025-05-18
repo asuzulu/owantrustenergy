@@ -147,7 +147,7 @@ class Delivery extends Model
             is_null($this->driver_pickup_date) && is_null($this->driver_pickup_time)
             && !$inPickup && !($pickup && !is_null($pickup->date_picked_up))
         ) {
-            return 'awaiting driver pickup';
+            return 'Awaiting driver pickup';
         }
 
         // 6. With driver

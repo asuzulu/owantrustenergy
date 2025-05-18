@@ -161,7 +161,11 @@
                     @endif
 
                     {{-- Deliver button only for drivers on undelivered cylinders --}}
-                    @if (Auth::user()->position === 'Driver' && $delivery && is_null($delivery->date_delivered))
+                    @if (Auth::user()->position === 'Driver' &&
+                            $delivery &&
+                            is_null($delivery->date_delivered) &&
+                            !is_null($delivery->driver_pickup_date) &&
+                            !is_null($delivery->driver_pickup_time))
                         <button type="button" class="btn btn-success"
                             onclick="window.location='{{ route('drivers.delivering', $paddedId) }}'">
                             Deliver
@@ -341,7 +345,7 @@
         <input type="hidden" name="warehouse" id="returnWarehouseInput">
     </form>
 
-        <!-- Delete Cylinder Modal -->
+    <!-- Delete Cylinder Modal -->
     <div class="modal fade" id="deleteCylinderModal" tabindex="-1" role="dialog"
         aria-labelledby="deleteCylinderModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -430,7 +434,7 @@
                             if (!response.length) {
                                 dropdown.append(
                                     '<div class="dropdown-item text-muted">No matches found</div>'
-                                    );
+                                );
                             } else {
                                 response.forEach(user => {
                                     let item = $('<div class="dropdown-item"></div>')
