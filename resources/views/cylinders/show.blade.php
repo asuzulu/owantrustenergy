@@ -161,15 +161,38 @@
                     @endif
 
                     {{-- Deliver button only for drivers on undelivered cylinders --}}
-                    @if (Auth::user()->position === 'Driver' &&
-                            $delivery &&
-                            is_null($delivery->date_delivered) &&
-                            !is_null($delivery->driver_pickup_date) &&
-                            !is_null($delivery->driver_pickup_time))
-                        <button type="button" class="btn btn-success"
-                            onclick="window.location='{{ route('drivers.delivering', $paddedId) }}'">
-                            Deliver
-                        </button>
+                    @if (Auth::user()->position === 'Driver' && $delivery)
+                        {{-- 1) If the delivery is already closed, hide all buttons. --}}
+                        @if (!is_null($delivery->date_delivered) && !is_null($delivery->time_delivered))
+                            {{-- Delivery is fully completed; nothing to do here. --}}
+
+                            {{-- 2) Driver has not yet “picked up” from warehouse → no buttons yet. --}}
+                        @elseif(is_null($delivery->driver_pickup_date) || is_null($delivery->driver_pickup_time))
+                            {{--
+            The warehouse hasn’t set driver_pickup_date/time yet (or it got cleared).
+            In this state we don’t show any “Start” or “Close” buttons for the driver.
+        --}}
+
+                            {{-- 3) Driver has picked up but has not clicked “Start Delivery” yet → show “Start Delivery”. --}}
+                        @elseif(is_null($delivery->delivery_start))
+                            <form action="{{ route('deliveries.start', $delivery->id) }}" method="POST"
+                                style="display:inline">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    Start Delivery
+                                </button>
+                            </form>
+
+                            {{-- 4) Driver has clicked “Start Delivery” (so delivery_start is NOT null) but delivery not closed → show “Close Delivery”. --}}
+                        @elseif(!is_null($delivery->delivery_start) && (is_null($delivery->date_delivered) || is_null($delivery->time_delivered)))
+                            <form action="{{ route('deliveries.close', $delivery->id) }}" method="POST"
+                                style="display:inline">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-warning">
+                                    Close Delivery
+                                </button>
+                            </form>
+                        @endif
                     @endif
                 </div>
             </div>
