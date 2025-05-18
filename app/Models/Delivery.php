@@ -82,7 +82,7 @@ class Delivery extends Model
 
         // 1. Unassigned
         if ($lowerLoc === 'unassigned') {
-            return 'unassigned';
+            return 'Unassigned';
         }
 
         // Check if warehouse
@@ -152,7 +152,7 @@ class Delivery extends Model
 
         // 6. With driver
         if ($this->driver_pickup_date && $this->driver_pickup_time && is_null($this->delivery_start)) {
-            return 'with driver';
+            return 'With driver';
         }
 
         // 7. Being delivered
@@ -160,7 +160,7 @@ class Delivery extends Model
             $this->driver_pickup_date && $this->driver_pickup_time
             && $this->delivery_start && is_null($this->date_delivered) && is_null($this->time_delivered)
         ) {
-            return 'being delivered';
+            return 'Being delivered';
         }
 
         // 8. Delivery pending approval
@@ -169,7 +169,7 @@ class Delivery extends Model
             && $this->delivery_start && $this->date_delivered && $this->time_delivered && $this->image_path
             && is_null($this->approval)
         ) {
-            return 'delivery pending approval';
+            return 'Delivery pending approval';
         }
 
         // 9. Awaiting agent pickup
@@ -177,14 +177,14 @@ class Delivery extends Model
             ->where('cylinder_id', $this->cylinder)
             ->first();
         if ($agent && is_null($agent->pick_up_date)) {
-            return 'awaiting agent pickup';
+            return 'Awaiting agent pickup';
         }
 
         // 10. With agent
         if ($agent && !is_null($agent->pick_up_date) && !$inPickup && !$inDelivery) {
-            return 'with agent';
+            return 'With agent';
         }
 
-        return 'unknown';
+        return 'Unknown';
     }
 }
