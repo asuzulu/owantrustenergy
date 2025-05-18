@@ -296,7 +296,7 @@ Route::prefix('cylinders')->name('cylinders.')->group(function () {
     Route::post('/assign-cylinder', [CylinderController::class, 'assign'])->name('assign-cylinder');
 
     // Return cylinder to warehouse
-    Route::post('/{id}/return', [CylinderController::class, 'returnToWarehouse'])->name('return');
+    Route::post('/{id}/return', [WarehouseController::class, 'returnToWarehouse'])->name('return');
 
     // Warehouse data for distribution
     Route::get('/warehouse/data', [CylinderDistributionController::class, 'warehouseData'])->name('warehouse.data');
