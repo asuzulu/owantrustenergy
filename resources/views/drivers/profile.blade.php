@@ -78,25 +78,19 @@
                                             {{-- Check if the user is a Driver --}}
                                             @if (Auth::user()->position === 'Driver' && $d && is_null($d->date_delivered))
                                                 {{-- Show Start Delivery button only if driver_pickup_date and driver_pickup_time are NOT NULL AND delivery_start IS NULL --}}
-                                                @if (
-                                                    !is_null($d->driver_pickup_date) &&
-                                                        !is_null($d->driver_pickup_time) &&
-                                                        is_null($d->delivery_start))
-                                                    <form action="{{ route('deliveries.start', $d->id) }}"
-                                                        method="POST">
+                                                @if (!is_null($d->driver_pickup_date) && !is_null($d->driver_pickup_time) && is_null($d->delivery_start))
+                                                    <form action="{{ route('deliveries.start', $d->id) }}" method="POST">
                                                         @csrf
                                                         <button type="submit" class="btn btn-sm btn-primary">Start
                                                             Delivery</button>
                                                     </form>
 
                                                     {{-- Show Close Delivery button only if delivery_start is NOT NULL --}}
-                                                @elseif (!is_null($d->delivery_start))
-                                                    <form action="{{ route('drivers.delivering', $d->id) }}"
-                                                        method="POST">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-sm btn-danger">Close
-                                                            Delivery</button>
-                                                    </form>
+                                                @elseif(!is_null($d->delivery_start) && (is_null($d->date_delivered) || is_null($d->time_delivered)))
+                                                    <a href="{{ route('drivers.delivering', $d->cylinder) }}"
+                                                        class="btn btn-sm btn-warning">
+                                                        Close Delivery
+                                                    </a>
                                                 @endif
                                             @endif
                                         </td>
