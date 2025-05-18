@@ -91,7 +91,7 @@
 
                                                     {{-- Show Close Delivery button only if delivery_start is NOT NULL --}}
                                                 @elseif (!is_null($d->delivery_start))
-                                                    <form action="{{ route('deliveries.close', $d->id) }}"
+                                                    <form action="{{ route('drivers.delivering', $d->id) }}"
                                                         method="POST">
                                                         @csrf
                                                         <button type="submit" class="btn btn-sm btn-danger">Close

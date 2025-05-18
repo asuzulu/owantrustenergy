@@ -185,7 +185,7 @@
 
                             {{-- 4) Driver has clicked “Start Delivery” (so delivery_start is NOT null) but delivery not closed → show “Close Delivery”. --}}
                         @elseif(!is_null($delivery->delivery_start) && (is_null($delivery->date_delivered) || is_null($delivery->time_delivered)))
-                            <form action="{{ route('deliveries.close', $delivery->id) }}" method="POST"
+                            <form action="{{ route('drivers.delivering', $delivery->id) }}" method="POST"
                                 style="display:inline">
                                 @csrf
                                 <button type="submit" class="btn btn-sm btn-warning">
