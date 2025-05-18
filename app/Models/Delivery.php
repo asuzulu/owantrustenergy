@@ -78,6 +78,7 @@ class Delivery extends Model
         $cyl = DB::table('cylinders')->where('id', $this->cylinder)->first();
         $loc = $cyl->location ?? null;
         $lowerLoc = strtolower($loc ?: '');
+        $cylId = $this->id;
 
         // 1. Unassigned
         if ($lowerLoc === 'unassigned') {
@@ -114,13 +115,44 @@ class Delivery extends Model
             return 'Awaiting customer pickup';
         }
 
-        // 4. With customer
+        // 4) With customer
+        // ─────────────────────────────────────────────────────────────────────
+        // First, check if “this location” matches a Customer’s full name (case‐insensitive).
+        $customerNameMatch = DB::table('users')
+            ->where('position', 'Customer')
+            ->whereRaw('LOWER(first_name || " " || last_name) = ?', [$loc])
+            ->exists();
+
+        // Check if there is any approved delivery for this cylinder ID
+        $hasCustomerDeliveryApproval = DB::table('deliveries')
+            ->where('cylinder', $cylId)
+            ->whereNotNull('approval')
+            ->exists();
+
+        // Now fetch the latest pickup row (by auto‐increment ID) for this padded cylinder ID
+        $latestPickup = DB::table('pickups')
+            ->where('cylinder', $paddedCylinderId)
+            ->latest('id')
+            ->first();
+
+        /*
+     * We enter “With customer” if:
+     *   (1) The location string matches a Customer’s name, AND
+     *   either
+     *       (a) There is a latestPickup whose date_picked_up and time_picked_up are both NOT NULL, OR
+     *       (b) There is an approved delivery for this cylinder (customer has already approved).
+     */
         if (
-            $cyl && $loc === $this->customer
-            && (($pickup && $pickup->date_picked_up && $pickup->time_picked_up)
-                || !is_null($this->approval))
+            $customerNameMatch
+            && (
+                ($latestPickup
+                    && ! is_null($latestPickup->date_picked_up)
+                    && ! is_null($latestPickup->time_picked_up)
+                )
+                || $hasCustomerDeliveryApproval
+            )
         ) {
-            return 'with customer';
+            return 'With customer';
         }
 
         // 5. Awaiting driver pickup

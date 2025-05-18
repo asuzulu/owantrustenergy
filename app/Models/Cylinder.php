@@ -80,7 +80,7 @@ class Cylinder extends Model
 
         // Ensure the cylinder ID is a 9-digit zero-padded string
         $paddedCylinderId = str_pad($this->id, 9, '0', STR_PAD_LEFT);
-        
+
         // 3. Awaiting customer pickup
         $pickup = DB::table('pickups')
             ->where('cylinder', $paddedCylinderId)
@@ -93,21 +93,39 @@ class Cylinder extends Model
         }
 
         // 4) With customer
-        // Check if a Customer's full name matches this location
+        // ─────────────────────────────────────────────────────────────────────
+        // First, check if “this location” matches a Customer’s full name (case‐insensitive).
         $customerNameMatch = DB::table('users')
             ->where('position', 'Customer')
             ->whereRaw('LOWER(first_name || " " || last_name) = ?', [$loc])
             ->exists();
 
+        // Check if there is any approved delivery for this cylinder ID
         $hasCustomerDeliveryApproval = DB::table('deliveries')
             ->where('cylinder', $cylId)
             ->whereNotNull('approval')
             ->exists();
 
+        // Now fetch the latest pickup row (by auto‐increment ID) for this padded cylinder ID
+        $latestPickup = DB::table('pickups')
+            ->where('cylinder', $paddedCylinderId)
+            ->latest('id')
+            ->first();
+
+        /*
+     * We enter “With customer” if:
+     *   (1) The location string matches a Customer’s name, AND
+     *   either
+     *       (a) There is a latestPickup whose date_picked_up and time_picked_up are both NOT NULL, OR
+     *       (b) There is an approved delivery for this cylinder (customer has already approved).
+     */
         if (
             $customerNameMatch
             && (
-                ($pk && $pk->date_picked_up && $pk->time_picked_up)
+                ($latestPickup
+                    && ! is_null($latestPickup->date_picked_up)
+                    && ! is_null($latestPickup->time_picked_up)
+                )
                 || $hasCustomerDeliveryApproval
             )
         ) {
