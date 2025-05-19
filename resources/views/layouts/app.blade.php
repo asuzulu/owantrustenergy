@@ -34,6 +34,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
 
+    <!-- Bootstrap Icons (free) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+
     <!-- Bootstrap: Use Bootstrap 5 from CDN if useBootstrap5 is set, else fallback to local Bootstrap 4 -->
     @if (isset($useBootstrap5) && $useBootstrap5)
         <!-- Bootstrap 5 Bundle (includes Popper) -->
@@ -45,7 +48,6 @@
         <!-- Local fallback Bootstrap 4 Bundle -->
         <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
     @endif
-
 </head>
 
 <body>

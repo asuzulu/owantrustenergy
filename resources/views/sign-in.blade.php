@@ -19,8 +19,13 @@
                 <div class="form-row justify-content-center">
                     <div class="form-group col-md-4">
                         <label for="password">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required
-                            placeholder="Enter Password" />
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" required
+                                placeholder="Enter Password" />
+                            <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
+                                <i class="bi bi-eye-fill"></i>
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <div class="form-row justify-content-center">
@@ -41,7 +46,8 @@
                 </div>
                 <div class="form-row mt-2 justify-content-center">
                     <div class="col-md-4 text-center">
-                        <p>Don't have an account? <a href="{{ route('register') }}"><span style="color:green;">Sign Up</span></a></p>
+                        <p>Don't have an account? <a href="{{ route('register') }}"><span style="color:green;">Sign
+                                    Up</span></a></p>
                     </div>
                 </div>
             </form>
@@ -58,7 +64,7 @@
                     <button type="button" class="btn-close close-custom" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    @if(session('login_error'))
+                    @if (session('login_error'))
                         <p>{{ session('login_error') }}</p>
                     @elseif($errors->has('old_password'))
                         <p>{{ $errors->first('old_password') }}</p>
@@ -74,26 +80,32 @@
     </div>
 
     {{-- Only inject styles & script if there’s an error --}}
-    @if(session('login_error') || $errors->has('old_password'))
+    @if (session('login_error') || $errors->has('old_password'))
         <style>
             /* full-screen backdrop */
-            #customErrorModal + .backdrop {
+            #customErrorModal+.backdrop {
                 position: fixed;
-                top: 0; left: 0;
-                width: 100%; height: 100%;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
                 background: rgba(0, 0, 0, 0.5);
                 z-index: 1040;
             }
+
             /* modal container */
             #customErrorModal {
                 position: fixed;
-                top: 0; left: 0;
-                width: 100%; height: 100%;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
                 display: none;
                 align-items: center;
                 justify-content: center;
                 z-index: 1050;
             }
+
             /* show it */
             #customErrorModal.show {
                 display: flex !important;
@@ -117,4 +129,26 @@
             });
         </script>
     @endif
+    
+    <!-- Toggle Password Visibility Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+
+                const icon = this.querySelector('i');
+                if (type === 'password') {
+                    icon.classList.remove('bi-eye-slash-fill');
+                    icon.classList.add('bi-eye-fill');
+                } else {
+                    icon.classList.remove('bi-eye-fill');
+                    icon.classList.add('bi-eye-slash-fill');
+                }
+            });
+        });
+    </script>
 @endsection
