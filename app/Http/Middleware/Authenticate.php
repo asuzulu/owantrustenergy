@@ -14,6 +14,7 @@ class Authenticate
             return $next($request);
         }
 
-        return redirect()->route('login');
+        // ← Redirect to “home” if not authenticated, instead of “login”
+        return redirect()->route('home');
     }
 }
