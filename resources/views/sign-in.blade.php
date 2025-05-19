@@ -23,7 +23,8 @@
                             <input type="password" class="form-control" id="password" name="password" required
                                 placeholder="Enter Password" />
                             <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
-                                <i class="bi bi-eye-fill"></i>
+                                {{-- Bootstrap Icons eye (green) --}}
+                                <i class="bi bi-eye-fill" style="color: green;"></i>
                             </span>
                         </div>
                     </div>
@@ -129,7 +130,7 @@
             });
         </script>
     @endif
-    
+
     <!-- Toggle Password Visibility Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -137,16 +138,20 @@
             const passwordInput = document.getElementById('password');
 
             togglePassword.addEventListener('click', function() {
+                // Toggle input type
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
 
+                // Toggle the Bootstrap icon class and keep it green
                 const icon = this.querySelector('i');
                 if (type === 'password') {
                     icon.classList.remove('bi-eye-slash-fill');
                     icon.classList.add('bi-eye-fill');
+                    icon.style.color = 'green';
                 } else {
                     icon.classList.remove('bi-eye-fill');
                     icon.classList.add('bi-eye-slash-fill');
+                    icon.style.color = 'green';
                 }
             });
         });
