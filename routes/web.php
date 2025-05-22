@@ -32,6 +32,7 @@ use App\Http\Controllers\{
 | Public Pages
 |--------------------------------------------------------------------------
 */
+
 Route::view('/', 'home')->name('home');
 Route::view('/about', 'about')->name('about');
 Route::view('/products', 'products')->name('products');
@@ -116,7 +117,7 @@ Route::middleware(['auth'])->group(function () {
 */
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/cylinders', [CustomerController::class, 'showCylinders'])->name('dashboard.cylinder');
-    Route::get('/dashboard/ordercylinder', fn () => view('dashboard.ordercylinder'))->name('dashboard.ordercylinder');
+    Route::get('/dashboard/ordercylinder', fn() => view('dashboard.ordercylinder'))->name('dashboard.ordercylinder');
     Route::post('/order/place', [OrdersController::class, 'placeOrder'])->name('order.place');
 });
 
@@ -143,6 +144,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/employee/cylinders', [ManagementController::class, 'cylindersPage'])->name('employee.cylinders');
     Route::get('/employee/profile', [EmployeeController::class, 'profile'])->name('employee.profile');
     Route::get('/employee/statistics', [StatisticsController::class, 'index'])->name('employee.statistics');
+    Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('employees.show');
+    Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
 });
 
 /*
@@ -153,7 +156,6 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::prefix('management')->group(function () {
         Route::get('/employees', [EmployeeController::class, 'index'])->name('management.employees');
-        Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('employees.show');
         Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
         Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
     });
@@ -379,7 +381,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/accounts', [ManagementController::class, 'store']);
         Route::get('/employees', [ManagementController::class, 'employees'])->name('employees');
         Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('employees.show');
-        Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
         Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
         Route::get('/agents', [ManagementController::class, 'agents'])->name('agents');
         Route::get('/drivers', [ManagementController::class, 'drivers'])->name('drivers');

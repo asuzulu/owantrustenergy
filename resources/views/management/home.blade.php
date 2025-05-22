@@ -99,7 +99,7 @@
                                 <th scope="col">Cylinder #</th>
                                 <th scope="col">Size</th>
                                 <th scope="col">Weight</th>
-                                <th scope="col">Location</th>
+                                <th scope="col">In Possession Of</th>
                                 <th scope="col">Tracking</th>
                             </tr>
                         </thead>
