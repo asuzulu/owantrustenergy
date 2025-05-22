@@ -22,11 +22,11 @@
             <li class="nav-item {{ request()->routeIs('management.agents') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('management.agents') }}">Agents</a>
             </li>
-            <li class="nav-item {{ request()->routeIs('management.drivers') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->routeIs('drivers.index') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('drivers.index') }}">Drivers</a>
             </li>
             <li class="nav-item {{ request()->routeIs('warehouses.index') ? 'active' : '' }}">
-                <a href="{{ route('warehouses.index') }}" class="nav-link">Warehouses</a>
+                <a class="nav-link" href="{{ route('warehouses.index') }}">Warehouses</a>
             </li>
             <li class="nav-item {{ request()->routeIs('management.statistics') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('management.statistics') }}">Statistics</a>
@@ -43,7 +43,7 @@
         </ul>
         <ul class="navbar-nav">
             <li class="nav-item">
-                @if(Auth::check())
+                @if (Auth::check())
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                         @csrf
                     </form>
@@ -60,14 +60,15 @@
 </nav>
 
 <style>
-  /* Scale the image down to 2/3 of its current size */
-  .tm-site-icon {
-      width: 32px;
-      height: 32px;
-  }
-  /* Reduce the font size of the title and nav links */
-  .tm-site-title,
-  .nav-link {
-      font-size: 0.7em;
-  }
+    /* Scale the image down to 2/3 of its current size */
+    .tm-site-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    /* Reduce the font size of the title and nav links */
+    .tm-site-title,
+    .nav-link {
+        font-size: 0.7em;
+    }
 </style>

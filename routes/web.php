@@ -411,6 +411,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/drivers/cylinders', [DriversController::class, 'dashboard'])->name('drivers.cylinders');
 });
 
+Route::get('/layouts.default-dashboard', function () {
+    return redirect('/');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Resource Routes
