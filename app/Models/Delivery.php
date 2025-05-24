@@ -160,7 +160,7 @@ class Delivery extends Model
             $this->driver_pickup_date && $this->driver_pickup_time
             && $this->delivery_start && is_null($this->date_delivered) && is_null($this->time_delivered)
         ) {
-            return 'Being delivered';
+            return 'Being delivered to customer';
         }
 
         // 8. Delivery pending approval

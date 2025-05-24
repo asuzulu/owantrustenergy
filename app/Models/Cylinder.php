@@ -161,7 +161,7 @@ class Cylinder extends Model
                 && is_null($dl->date_delivered)
                 && is_null($dl->time_delivered)
             ) {
-                return 'Being delivered';
+                return 'Being delivered to customer';
             }
 
             // 8) Delivery pending approval

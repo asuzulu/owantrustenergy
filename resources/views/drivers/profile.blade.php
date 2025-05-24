@@ -149,9 +149,9 @@
                                             <td>
                                                 @if (is_null($d->date_delivered))
                                                     @if (!is_null($d->delivery_start))
-                                                        Being Delivered
+                                                        Being delivered to customer
                                                     @elseif(!is_null($d->driver_pickup_date))
-                                                        With Driver
+                                                        With driver
                                                     @else
                                                         Still at warehouse
                                                     @endif

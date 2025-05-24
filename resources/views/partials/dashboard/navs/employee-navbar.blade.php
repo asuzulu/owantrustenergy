@@ -23,6 +23,9 @@
             <li class="nav-item {{ request()->routeIs('employee.agents') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('employee.agents') }}">Agents</a>
             </li>
+            <li class="nav-item {{ request()->routeIs('drivers.index') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('drivers.index') }}">Drivers</a>
+            </li>
             <li class="nav-item {{ request()->routeIs('employee.statistics') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('employee.statistics') }}">Statistics</a>
             </li>

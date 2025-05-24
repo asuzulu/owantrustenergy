@@ -1,11 +1,14 @@
 @extends('layouts.management-dashboard')
+
+@section('title', 'Warehouses List - Owan Trust Energy')
+
 @section('content')
     <div class="container" style="margin-top: -6rem;">
         <div class="row tm-content-row tm-mt-big">
             <div class="bg-white tm-block h-100">
                 <div class="row">
                     <div class="col-md-8 col-sm-12">
-                        <h2 class="tm-block-title d-inline-block">Warehouses</h2>
+                        <h2 class="tm-block-title d-inline-block">Warehouses List</h2>
                     </div>
                     <div class="col-md-4 col-sm-12 text-right">
                         <button class="btn btn-small btn-primary" data-toggle="modal" data-target="#addWarehouseModal">Add New
