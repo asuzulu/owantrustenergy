@@ -70,7 +70,7 @@
                                     <th scope="col" class="text-center" style="width: 20%;">Weight</th>
                                     <th scope="col" class="text-center" style="width: 20%;">Order Type</th>
                                     <th scope="col" style="width: 20%;">Order Date</th>
-                                    <th scope="col" style="width: 20%;">Retrieval</th>
+                                    <th scope="col" style="width: 20%;">Retrieval Method</th>
                                 </tr>
                             </thead>
                             <tbody>

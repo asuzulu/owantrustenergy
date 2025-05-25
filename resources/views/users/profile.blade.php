@@ -67,7 +67,7 @@
                 <!-- Check if the user has 'Customer' position -->
                 <a href="{{ route('users.cylinders', ['id' => $user->id]) }}" class="text-decoration-none text-dark">
                     <div class="bg-white tm-block" style="cursor: pointer;">
-                        <h3 class="tm-block-title">Cylinders Assigned:</h3>
+                        <h3 class="tm-block-title">Cylinders Assigned (Summary):</h3>
                         <p>You have been assigned a total of {{ $totalCylinders }} cylinder(s).</p>
                     </div>
                 </a>

@@ -48,18 +48,18 @@
                             <select name="warehouse" id="warehouseFilter" class="form-control" style="height: 60px;"
                                 onchange="this.form.submit()">
                                 <option value="">All Cylinders</option>
-                                @foreach ($warehouses as $warehouseOption)
-                                    <option value="{{ $warehouseOption->name }}"
-                                        {{ request('warehouse') === $warehouseOption->name ? 'selected' : '' }}>
-                                        {{ $warehouseOption->name }}
-                                    </option>
-                                @endforeach
                                 <option value="Customer" {{ request('warehouse') === 'Customer' ? 'selected' : '' }}>
                                     Customers
                                 </option>
                                 <option value="Agent" {{ request('warehouse') === 'Agent' ? 'selected' : '' }}>
                                     Agents
                                 </option>
+                                @foreach ($warehouses as $warehouseOption)
+                                    <option value="{{ $warehouseOption->name }}"
+                                        {{ request('warehouse') === $warehouseOption->name ? 'selected' : '' }}>
+                                        {{ $warehouseOption->name }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
 

@@ -41,7 +41,7 @@
     <div class="column">
         <a href="{{ route('dashboard.cylinder', ['userId' => auth()->id()]) }}" class="text-decoration-none text-dark">
             <div class="bg-white tm-block" style="margin-top: -10px; cursor: pointer;">
-                <h3 class="tm-block-title">Cylinders Assigned:</h3>
+                <h3 class="tm-block-title">Cylinders Assigned (Summary):</h3>
                 <p>You have been assigned a total of {{ $totalCylinders }} cylinder(s).</p>
             </div>
         </a>

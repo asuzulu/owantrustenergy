@@ -29,7 +29,7 @@
                                 <th>Cylinder Size</th>
                                 <th>Weight</th>
                                 <th>Order Type</th>
-                                <th>Retrieval</th>
+                                <th>Retrieval Method</th>
                             </tr>
                         </thead>
                         <tbody>

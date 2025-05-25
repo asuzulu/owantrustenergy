@@ -169,20 +169,20 @@
             </div>
         </div>
     </div>
-
-    <!-- Agent Cylinders Distribution Section -->
+    
+    <!-- Cylinders Stored at this Warehouse (by size filter) -->
     <div class="row tm-content-row tm-mt-big">
         <div class="col-12">
-            @include('partials.dashboard.agent-distribution')
+            @include('partials.dashboard.warehouse-cylinders-table')
         </div>
     </div>
 @endsection
 
 @section('content2')
-    <!-- Cylinders Stored at this Warehouse (by size filter) -->
+    <!-- Agent Cylinders Distribution Section -->
     <div class="row tm-content-row tm-mt-big">
         <div class="col-12">
-            @include('partials.dashboard.warehouse-cylinders-table')
+            @include('partials.dashboard.agent-distribution')
         </div>
     </div>
 @endsection

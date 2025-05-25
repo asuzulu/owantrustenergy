@@ -1,11 +1,61 @@
+{{-- ============================================
+     SUCCESS & ERROR MODALS (Bootstrap 4/5)
+     ============================================ --}}
+@if (session('success'))
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-success">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="successModalLabel">Success</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {{ session('success') }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
+
+@if (session('error'))
+    <!-- Error Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-danger">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {{ session('error') }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
+
 <div class="bg-white tm-block">
     <h3 class="tm-block-title text-center">Cylinders Distributed to Agents</h3>
 
     @php
         $agentCylinders = \Illuminate\Support\Facades\DB::table('agent_cylinders_distribution')
-            ->where('warehouse', $warehouse->name)
-            ->orderBy('agent_name')
-            ->orderByRaw("
+        ->where('warehouse', $warehouse->name)
+        ->whereNull('pick_up_date')                        // ← only those not yet picked up
+        ->orderBy('agent_name')
+        ->orderByRaw("
                 CASE cylinder_size
                     WHEN 'Small' THEN 1
                     WHEN 'Medium' THEN 2
@@ -76,7 +126,7 @@
     @endif
 </div>
 
-{{-- add the same CSS styles you used in the other view for .passcode-form, .passcode-controls, .passcode-input --}}
+
 <style>
     .passcode-form { justify-content: flex-start !important; }
     .passcode-form .passcode-controls {
@@ -92,3 +142,35 @@
       .passcode-form .passcode-controls button { margin-top:0; }
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1) Trigger Success Modal if session('success') exists
+        @if (session('success'))
+            $('#successModal').modal('show');
+        @endif
+
+        // 2) Trigger Error Modal if session('error') exists
+        @if (session('error'))
+            $('#errorModal').modal('show');
+        @endif
+
+        // 3) Prevent each row’s checkbox click from triggering row‐link (in case you add row‐onclick later)
+        const cylinderCheckboxes = document.querySelectorAll('input[name="pickup[]"]');
+        cylinderCheckboxes.forEach(cb => {
+            cb.addEventListener('click', function (event) {
+                event.stopPropagation();
+            });
+        });
+
+        // 4) (Optional) “Select All” logic if you ever add a <th><input id="select_all_agents"></th>
+        const selectAllCheckbox = document.getElementById('select_all_agents');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', function () {
+                cylinderCheckboxes.forEach(cb => {
+                    cb.checked = this.checked;
+                });
+            });
+        }
+    });
+</script>

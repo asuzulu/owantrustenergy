@@ -145,34 +145,42 @@ class CylinderDistributionController extends Controller
 
     public function updatePickUpDate(Request $request)
     {
-        $cylinderIds = $request->input('selected_cylinders', []);
+        // 1) pull the distribution‐record IDs
+        $distIds         = $request->input('pickup', []);       // these are `agent_cylinders_distribution.id`
         $enteredPasscode = $request->input('passcode');
 
-        // Get cylinders that are selected and not yet picked up
-        $cylinders = DB::table('agent_cylinders_distribution')
-            ->whereIn('cylinder_id', $cylinderIds)
-            ->whereNull('pick_up_date') // Only process cylinders that don't have a pick-up date
+        if (empty($distIds)) {
+            return redirect()->back()->with('error', 'No cylinders selected.');
+        }
+
+        // 2) fetch only those not yet picked up
+        $records = DB::table('agent_cylinders_distribution')
+            ->whereIn('id', $distIds)
+            ->whereNull('pick_up_date')
+            ->select('id', 'passcode')
             ->get();
 
-        $updatedCount = 0;
-
-        foreach ($cylinders as $cylinder) {
-            // Check if the entered passcode matches
-            if ($cylinder->passcode === $enteredPasscode) {
-                DB::table('agent_cylinders_distribution')
-                    ->where('cylinder_id', $cylinder->cylinder_id)
-                    ->update(['pick_up_date' => now()]);
-
-                Log::info("Pick up date updated for cylinder ID {$cylinder->cylinder_id}");
-
-                $updatedCount++;
-            }
+        if ($records->isEmpty()) {
+            return redirect()->back()->with('error', 'Selected cylinders are already picked up or invalid.');
         }
 
-        if ($updatedCount > 0) {
-            return redirect()->back()->with('success', 'Pick-up date updated successfully.');
-        } else {
-            return redirect()->back()->with('error', 'Invalid passcode or no cylinders selected.');
+        // 3) make sure every selected record has the same passcode
+        $uniqueCodes = $records->pluck('passcode')->unique();
+        if ($uniqueCodes->count() > 1) {
+            return redirect()->back()->with('error', 'Selected cylinders have mismatched passcodes.');
         }
+
+        $storedPasscode = $uniqueCodes->first();
+        if ($storedPasscode !== $enteredPasscode) {
+            return redirect()->back()->with('error', 'Invalid passcode.');
+        }
+
+        // 4) everything’s good: bulk‐update
+        DB::table('agent_cylinders_distribution')
+            ->whereIn('id', $distIds)
+            ->whereNull('pick_up_date')
+            ->update(['pick_up_date' => now()]);
+
+        return redirect()->back()->with('success', 'Pick-up date set for ' . count($distIds) . ' cylinder(s).');
     }
 }
