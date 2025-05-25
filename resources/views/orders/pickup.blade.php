@@ -68,61 +68,63 @@
     </div>
 
     <!-- Pickup Confirmation Modal -->
-    <div class="modal fade" id="pickupModal" tabindex="-1" aria-labelledby="pickupModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="pickupModalLabel">Confirm Pick-Up</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to confirm customer pick-up?</p>
-                </div>
-                <div class="modal-footer">
-                    <input type="hidden" id="pickupId"> {{-- Hidden field to hold the pickup record ID --}}
-                    <input type="hidden" name="_token" id="csrfToken" value="{{ csrf_token() }}"> {{-- CSRF token --}}
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" id="confirmPickupBtn" class="btn btn-primary">Yes, Confirm</button>
-                </div>
+<div class="modal fade" id="pickupModal" tabindex="-1" aria-labelledby="pickupModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pickupModalLabel">Confirm Pick-Up</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to confirm customer pick-up?</p>
+            </div>
+            <div class="modal-footer">
+                <input type="hidden" id="pickupId"> {{-- Holds the pickup ID --}}
+                <input type="hidden" name="_token" id="csrfToken" value="{{ csrf_token() }}"> {{-- CSRF token --}}
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="confirmPickupBtn" class="btn btn-primary">Yes, Confirm</button>
             </div>
         </div>
     </div>
+</div>
 @endsection
 
-<script>
-    $(document).ready(function() {
-        // When "Mark as Picked Up" button is clicked, store its pickup ID and show the modal
-        $('.mark-picked-up-btn').click(function() {
-            let pickupId = $(this).data('id');
-            $('#pickupId').val(pickupId);
-            let modal = new bootstrap.Modal(document.getElementById('pickupModal'));
-            modal.show();
-        });
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            // When "Mark as Picked Up" button is clicked, store its ID and show modal
+            $('.mark-picked-up-btn').click(function() {
+                let pickupId = $(this).data('id');
+                $('#pickupId').val(pickupId);
+                let modal = new bootstrap.Modal(document.getElementById('pickupModal'));
+                modal.show();
+            });
 
-        // When "Yes, Confirm" in the modal is clicked, send AJAX to update with current date/time
-        $('#confirmPickupBtn').click(function() {
-            let pickupId = $('#pickupId').val();
-            let token = $('#csrfToken').val();
+            // When "Yes, Confirm" is clicked, send AJAX to update with current date/time
+            $('#confirmPickupBtn').click(function() {
+                let pickupId = $('#pickupId').val();
+                let token = $('#csrfToken').val();
 
-            $.ajax({
-                url: "{{ route('pickups.update') }}",
-                method: "POST",
-                data: {
-                    _token: token,
-                    pickup_id: pickupId
-                },
-                success: function(response) {
-                    if (response.success) {
-                        $('#pickupModal').modal('hide');
-                        location.reload();
-                    } else {
-                        alert("Error updating pickup. Please try again.");
+                $.ajax({
+                    url: "{{ route('pickups.update') }}",
+                    method: "POST",
+                    data: {
+                        _token: token,
+                        pickup_id: pickupId
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#pickupModal').modal('hide');
+                            location.reload();
+                        } else {
+                            alert("Error updating pickup. Please try again.");
+                        }
+                    },
+                    error: function() {
+                        alert("An error occurred while processing the request.");
                     }
-                },
-                error: function() {
-                    alert("An error occurred while processing the request.");
-                }
+                });
             });
         });
-    });
-</script>
+    </script>
+@endpush

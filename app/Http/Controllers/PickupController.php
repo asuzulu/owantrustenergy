@@ -60,10 +60,11 @@ class PickupController extends Controller
 
         $pickup = Pickup::findOrFail($request->pickup_id);
 
-        // Update the pickup details
+        // Instead of reading date/time from the request, we stamp “now”:
+        $now = Carbon::now();
         $pickup->update([
-            'date_picked_up' => $request->pickup_date,
-            'time_picked_up' => $request->pickup_time
+            'date_picked_up' => $now->toDateString(),
+            'time_picked_up' => $now->toTimeString(),
         ]);
 
         return response()->json(['success' => true]);
