@@ -75,32 +75,23 @@
                     <h5 class="modal-title" id="pickupModalLabel">Confirm Pick-Up</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="pickupForm">
-                    @csrf
-                    <input type="hidden" name="pickup_id" id="pickupId">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="pickupDate" class="form-label">Pick-Up Date</label>
-                            <input type="date" class="form-control" id="pickupDate" name="pickup_date" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="pickupTime" class="form-label">Pick-Up Time</label>
-                            <input type="time" class="form-control" id="pickupTime" name="pickup_time" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </div>
-                </form>
+                <div class="modal-body">
+                    <p>Are you sure you want to confirm customer pick-up?</p>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" id="pickupId"> {{-- Hidden field to hold the pickup record ID --}}
+                    <input type="hidden" name="_token" id="csrfToken" value="{{ csrf_token() }}"> {{-- CSRF token --}}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="confirmPickupBtn" class="btn btn-primary">Yes, Confirm</button>
+                </div>
             </div>
         </div>
     </div>
 @endsection
 
-@push('scripts')
 <script>
     $(document).ready(function() {
+        // When "Mark as Picked Up" button is clicked, store its pickup ID and show the modal
         $('.mark-picked-up-btn').click(function() {
             let pickupId = $(this).data('id');
             $('#pickupId').val(pickupId);
@@ -108,14 +99,18 @@
             modal.show();
         });
 
-        $('#pickupForm').submit(function(e) {
-            e.preventDefault();
-            let formData = $(this).serialize();
+        // When "Yes, Confirm" in the modal is clicked, send AJAX to update with current date/time
+        $('#confirmPickupBtn').click(function() {
+            let pickupId = $('#pickupId').val();
+            let token = $('#csrfToken').val();
 
             $.ajax({
                 url: "{{ route('pickups.update') }}",
                 method: "POST",
-                data: formData,
+                data: {
+                    _token: token,
+                    pickup_id: pickupId
+                },
                 success: function(response) {
                     if (response.success) {
                         $('#pickupModal').modal('hide');
@@ -131,4 +126,3 @@
         });
     });
 </script>
-@endpush

@@ -56,8 +56,6 @@ class PickupController extends Controller
     {
         $request->validate([
             'pickup_id' => 'required|exists:pickups,id',
-            'pickup_date' => 'required|date',
-            'pickup_time' => 'required'
         ]);
 
         $pickup = Pickup::findOrFail($request->pickup_id);
