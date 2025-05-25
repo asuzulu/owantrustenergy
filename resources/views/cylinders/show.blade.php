@@ -9,8 +9,13 @@
 
 @section('content')
     @php
-        // Always pad to 9 digits for display & links
+        // Compute the 9-digit, zero-padded cylinder ID:
         $paddedId = str_pad($cylinder->id, 9, '0', STR_PAD_LEFT);
+
+        // Check if this padded ID is in the agent_cylinders_distribution table:
+        $inAgentDistribution = \Illuminate\Support\Facades\DB::table('agent_cylinders_distribution')
+            ->where('cylinder_id', $paddedId)
+            ->exists();
     @endphp
 
     <div class="container" style="margin-top: -6rem;">
@@ -139,17 +144,28 @@
 
                     @if (in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
                         @if ($cylinder->user && $cylinder->user->position === 'Customer')
-                            {{-- Return to Warehouse button --}}
+                            {{-- Return to Warehouse button always shows when it’s currently with a Customer --}}
                             <button type="button" class="btn btn-warning mr-2" data-toggle="modal"
                                 data-target="#returnWarehouseModal">
                                 Return to Warehouse
                             </button>
                         @else
-                            {{-- Assign to User button --}}
-                            <button type="button" class="btn btn-primary mr-2" data-toggle="modal"
-                                data-target="#assignCylinderModal">
-                                Assign to User
-                            </button>
+                            {{--
+    Assign to User button:
+    • Show for Managers and Agents unconditionally.
+    • For Employees, only show if cylinder is NOT in agent_cylinders_distribution.
+--}}
+                            @php
+                                // Current user is Employee AND cylinder is in agent_cylinders_distribution?
+                                $hideForEmployee = Auth::user()->position === 'Employee' && $inAgentDistribution;
+                            @endphp
+
+                            @if (!$hideForEmployee)
+                                <button type="button" class="btn btn-primary mr-2" data-toggle="modal"
+                                    data-target="#assignCylinderModal">
+                                    Assign to User
+                                </button>
+                            @endif
                         @endif
                     @endif
 
@@ -164,14 +180,11 @@
                     @if (Auth::user()->position === 'Driver' && $delivery)
                         {{-- 1) If the delivery is already closed, hide all buttons. --}}
                         @if (!is_null($delivery->date_delivered) && !is_null($delivery->time_delivered))
-                            {{-- Delivery is fully completed; nothing to do here. --}}
+                            {{-- Delivery is fully completed; nothing to show here. --}}
 
                             {{-- 2) Driver has not yet “picked up” from warehouse → no buttons yet. --}}
                         @elseif(is_null($delivery->driver_pickup_date) || is_null($delivery->driver_pickup_time))
-                            {{--
-            The warehouse hasn’t set driver_pickup_date/time yet (or it got cleared).
-            In this state we don’t show any “Start” or “Close” buttons for the driver.
-        --}}
+                            {{-- Warehouse hasn’t set driver_pickup_date/time yet → no “Start” or “Close” buttons. --}}
 
                             {{-- 3) Driver has picked up but has not clicked “Start Delivery” yet → show “Start Delivery”. --}}
                         @elseif(is_null($delivery->delivery_start))
