@@ -38,6 +38,14 @@
                     </div>
                 </div>
 
+                {{-- Compute a flag indicating if any delivery has image_path --}}
+                @php
+                    // $deliveries is the collection/array passed to this view
+                    $showActionColumn = $deliveries->contains(function ($d) {
+                        return !is_null($d->image_path);
+                    });
+                @endphp
+
                 {{-- Deliveries Table --}}
                 <div class="table-responsive">
                     <table class="table table-hover table-striped tm-table-striped-even mt-3">
@@ -50,9 +58,12 @@
                                 <th scope="col">Customer</th>
                                 <th scope="col">Delivery Date</th>
                                 <th scope="col">Delivery Time</th>
-                                <th scope="col">Status</th>
-                                @if (in_array(Auth::user()->position, ['Manager', 'Employee']))
-                                    <th scope="col">Action</th> {{-- ── NEW: only for Manager/Employee --}}
+                                <th scope="col">Tracking</th>
+                                {{-- Only show “Action” header if:
+                                1) user is Manager or Employee
+                                2) and at least one $delivery has image_path != null --}}
+                                @if (in_array(Auth::user()->position, ['Manager', 'Employee']) && $showActionColumn)
+                                    <th scope="col">Action</th>
                                 @endif
                             </tr>
                         </thead>
@@ -87,9 +98,12 @@
                                     <td>{{ \Carbon\Carbon::parse($delivery->delivery_time)->format('h:i A') }}</td>
                                     <td>{{ $delivery->status }}</td>
 
-                                    @if (in_array(Auth::user()->position, ['Manager', 'Employee']))
+                                    {{-- Only render the <td> for Action if:
+                                    1) user is Manager or Employee
+                                    2) this specific $delivery->image_path is NOT null --}}
+                                    @if (in_array(Auth::user()->position, ['Manager', 'Employee']) && !is_null($delivery->image_path))
                                         <td>
-                                            {{-- ── CHANGED: if delivered, show Approve/Disapprove or archived label --}}
+                                            {{-- if delivered, show Approve/Disapprove or archived label --}}
                                             @if ($delivery->date_delivered && !$delivery->approval)
                                                 <form action="{{ route('deliveries.approve', $delivery->id) }}"
                                                     method="POST" style="display:inline-block">
@@ -99,17 +113,18 @@
                                                 <form action="{{ route('deliveries.disapprove', $delivery->id) }}"
                                                     method="POST" style="display:inline-block">
                                                     @csrf
-                                                    <button type="submit"
-                                                        class="btn btn-warning btn-sm">Disapprove</button>
+                                                    <button type="button" class="btn btn-warning btn-sm disapprove-btn"
+                                                        data-id="{{ $delivery->id }}">
+                                                        Disapprove
+                                                    </button>
                                                 </form>
                                             @elseif($delivery->approval)
                                                 {{ ucfirst($delivery->approval) }} {{-- Show “Approved” or “Disapproved” --}}
                                             @else
-                                                &mdash; {{-- no action until delivered --}}
+                                                &mdash; 
                                             @endif
                                         </td>
                                     @endif
-
                                 </tr>
                             @endforeach
                         </tbody>
@@ -122,8 +137,36 @@
                         {{ $deliveries->links('pagination::bootstrap-4') }}
                     </div>
                 @endif
-
             </div>
+        </div>
+    </div>
+
+    <!-- Disapprove Delivery Modal -->
+    <div class="modal fade" id="disapproveModal" tabindex="-1" role="dialog" aria-labelledby="disapproveModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <form id="disapproveForm" method="POST" action="{{ route('deliveries.disapprove', 0) }}">
+                @csrf
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="disapproveModalLabel">Disapprove Delivery</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="disapproveReason">Reason for Disapproval</label>
+                            <textarea class="form-control" id="disapproveReason" name="reason" rows="4"
+                                placeholder="Please explain why you are disapproving this delivery..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="submitDisapproveBtn" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -162,6 +205,38 @@
                             alert('Error deleting delivery.');
                         }
                     });
+                });
+                // === Disapprove Delivery modal trigger ===
+                $('.disapprove-btn').click(function() {
+                    let deliveryId = $(this).data('id');
+                    // Update form action to include correct delivery ID
+                    let form = $('#disapproveForm');
+                    let baseAction = form.attr('action'); // e.g., "/deliveries/0/disapprove"
+                    let newAction = baseAction.replace(/\/0(?!.*\/0)/, '/' + deliveryId);
+                    form.attr('action', newAction);
+
+                    // Clear any previous reason text
+                    $('#disapproveReason').val('');
+
+                    // Show the modal
+                    $('#disapproveModal').modal('show');
+                });
+
+                // === Disapprove form validation ===
+                $('#disapproveForm').on('submit', function(e) {
+                    let text = $('#disapproveReason').val().trim();
+                    // Count words: split on whitespace, filter out empty
+                    let wordCount = text.split(/\s+/).filter(function(w) {
+                        return w.length > 0;
+                    }).length;
+
+                    if (wordCount < 10) {
+                        e.preventDefault();
+                        alert('Response is too short.');
+                        return false;
+                    }
+                    // Otherwise, allow the form to submit normally
+                    return true;
                 });
             });
         </script>

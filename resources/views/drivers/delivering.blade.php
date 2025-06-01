@@ -129,7 +129,8 @@
                                     <form action="{{ route('deliveries.disapprove', $delivery->id) }}" method="POST"
                                         style="display:inline-block">
                                         @csrf
-                                        <button type="submit" class="btn btn-warning mr-2">
+                                        <button type="button" class="btn btn-warning mr-2" data-toggle="modal"
+                                            data-target="#disapproveModal">
                                             Disapprove Delivery
                                         </button>
                                     </form>
@@ -147,7 +148,36 @@
                         </div>
                     </div>
                 @endif
-
+                <!-- Disapprove Delivery Modal -->
+                <div class="modal fade" id="disapproveModal" tabindex="-1" role="dialog"
+                    aria-labelledby="disapproveModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <form id="disapproveForm" method="POST"
+                            action="{{ route('deliveries.disapprove', $delivery->id) }}">
+                            @csrf
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="disapproveModalLabel">Disapprove Delivery</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="disapproveReason">Reason for Disapproval</label>
+                                        <textarea class="form-control" id="disapproveReason" name="reason" rows="4"
+                                            placeholder="Please explain why you are disapproving this delivery..." required></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <button type="submit" id="submitDisapproveBtn"
+                                        class="btn btn-primary">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -165,5 +195,24 @@
                 img.src = URL.createObjectURL(file);
                 img.style.display = 'block';
             });
+
+            // === disapprove-modal validation ===
+        $(document).ready(function() {
+            $('#disapproveForm').on('submit', function(e) {
+                let text = $('#disapproveReason').val().trim();
+                // Count words: split on whitespace, filter out any empty strings
+                let wordCount = text.split(/\s+/).filter(function(w) {
+                    return w.length > 0;
+                }).length;
+
+                if (wordCount < 10) {
+                    e.preventDefault();
+                    alert('Response is too short.');
+                    return false;
+                }
+                // Otherwise, allow form to submit normally (will write "disapproved" in approval column)
+                return true;
+            });
+        });
     </script>
 @endpush

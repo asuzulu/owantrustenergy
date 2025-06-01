@@ -31,6 +31,10 @@ class Delivery extends Model
         'driver_pickup_time',
         'image_path',
         'approval',
+        'disapproval_reason',
+        'disapproval_customer_response',
+        'disapproval_driver_response',
+        'was_cylinder_delivered',
         'passcode',
     ];
 

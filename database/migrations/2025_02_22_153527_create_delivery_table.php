@@ -29,6 +29,11 @@ return new class extends Migration
             $table->string('image_path')->nullable();
             // approval status: 'approved', 'disapproved' or null
             $table->string('approval')->nullable();
+            $table->text('disapproval_reason')->nullable();
+            $table->text('disapproval_customer_response')->nullable();
+            $table->text('disapproval_driver_response')->nullable();
+            $table->text('was_cylinder_delivered')->nullable();
+
             //  7-digit numeric passcode for pickup confirmation**
             $table->string('passcode', 7)->nullable();
             $table->timestamps();

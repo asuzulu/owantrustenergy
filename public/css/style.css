@@ -45,7 +45,7 @@ body {
     font-family: Raleway;
     line-height: 1.80857;
     font-weight: normal;
-    overflow-x: hidden;
+    /*overflow-x: hidden;*/
     margin-left: auto !important;
     margin-right: auto !important;
 }

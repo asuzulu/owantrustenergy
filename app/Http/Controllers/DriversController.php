@@ -194,7 +194,7 @@ class DriversController extends Controller
     public function storeDeliveryImage(Request $request, $paddedId)
     {
         $request->validate([
-            'delivery_image' => 'required|image|max:5120',
+            'delivery_image' => 'required|image|max:15000',
         ]);
 
         $driver   = Auth::user();

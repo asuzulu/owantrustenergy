@@ -123,11 +123,32 @@ class DeliveryController extends Controller
     /**
      * Mark this delivery as disapproved.
      */
-    public function disapprove(Delivery $delivery)
+    public function disapprove(Request $request, Delivery $delivery)
     {
+        // 1) Validate that a non-empty "reason" field was submitted:
+        $request->validate([
+            'reason' => ['required', 'string'],
+        ]);
+
+        // 2) Count words in the submitted reason (split on whitespace, ignore empty segments):
+        $text      = trim($request->input('reason'));
+        $wordCount = count(array_filter(preg_split('/\s+/', $text), fn($w) => strlen($w) > 0));
+
+        if ($wordCount < 10) {
+            // If fewer than 10 words, redirect back with an error—but
+            // do NOT reveal "10 words" requirement, just a generic message:
+            return redirect()
+                ->back()
+                ->withErrors(['reason' => 'Response is too short.'])
+                ->withInput();
+        }
+
+        // 3) Save "disapproved" status and store the reason on the model:
         $delivery->approval = 'disapproved';
+        $delivery->disapproval_reason  = $text;
         $delivery->save();
 
+        // 4) Redirect back with success message
         return redirect()
             ->back()
             ->with('success', 'Delivery has been disapproved.');
@@ -138,25 +159,57 @@ class DeliveryController extends Controller
      */
     public function review(Delivery $delivery)
     {
+        // Load relationships if necessary (e.g., customer, driver) and return the review view
+        $delivery->load('customerUser');
+
         // pass the delivery (with image_path, approval, etc.) into a dedicated view
-        return view('deliveries.review', compact('delivery'));
+        return view('deliveries.review', [
+            'delivery' => $delivery,
+            'driverResponse' => $delivery->disapproval_driver_response,
+            'customerResponse' => $delivery->disapproval_customer_response,
+            'imagePath' => $delivery->image_path,
+            'approvalStatus' => $delivery->approval,
+        ]);
     }
 
     public function updateApproval(Request $request)
     {
-        $request->validate([
+        // 1) First validate and grab everything
+        $data = $request->validate([
             'deliveries'   => 'required|array',
             'deliveries.*' => 'exists:deliveries,id',
             'action'       => 'required|in:approved,disapproved',
+            'reason'       => 'nullable|string|min:10', // we'll enforce word-count below
         ]);
 
-        \DB::transaction(function () use ($request) {
-            foreach ($request->deliveries as $id) {
-                Delivery::where('id', $id)
-                    ->update(['approval' => $request->action]);
+        $action = $data['action'];
+        $reason = $data['reason'] ?? '';
+
+        // 2) If disapproving, ensure at least 10 words
+        if ($action === 'disapproved') {
+            $words = preg_split('/\s+/', trim($reason));
+            $count = count(array_filter($words, fn($w) => strlen($w) > 0));
+            if ($count < 10) {
+                return back()
+                    ->withErrors(['reason' => 'Response is too short.'])
+                    ->withInput();
+            }
+        }
+
+        // 3) Apply in a transaction
+        \DB::transaction(function () use ($data, $action, $reason) {
+            foreach ($data['deliveries'] as $id) {
+                $update = ['approval' => $action];
+
+                if ($action === 'disapproved') {
+                    $update['disapproval_reason'] = $reason;
+                }
+
+                Delivery::where('id', $id)->update($update);
             }
         });
 
+        // 4) Redirect with success
         return redirect()->back()->with('success', 'Approval statuses updated.');
     }
 

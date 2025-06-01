@@ -415,6 +415,26 @@ Route::get('/layouts.default-dashboard', function () {
     return redirect('/');
 });
 
+// Mark delivered (no‐reason) or show “was not delivered” form
+Route::post('/deliveries/mark-delivered', [DeliveryController::class, 'markDelivered'])
+    ->name('deliveries.markDelivered');
+
+// Contact customer response
+Route::post('/deliveries/contact-customer', [DeliveryController::class, 'contactCustomer'])
+    ->name('deliveries.contactCustomer');
+
+// Contact driver response
+Route::post('/deliveries/contact-driver', [DeliveryController::class, 'contactDriver'])
+    ->name('deliveries.contactDriver');
+
+// Return JSON with customer contact info
+Route::get('/deliveries/customer-info', [DeliveryController::class, 'customerInfo'])
+    ->name('deliveries.customerInfo');
+
+// Return JSON with driver contact info
+Route::get('/deliveries/driver-info', [DeliveryController::class, 'driverInfo'])
+    ->name('deliveries.driverInfo');
+
 /*
 |--------------------------------------------------------------------------
 | Resource Routes
