@@ -22,7 +22,7 @@
                 {{-- Header --}}
                 <div class="row d-flex justify-content-between align-items-center">
                     <div class="col">
-                        <h2 class="tm-block-title">Order Details</h2>
+                        <h2 class="tm-block-title">Review Order Details</h2>
                     </div>
                     <div class="col-auto">
                         <a href="{{ url()->previous() }}" class="btn btn-secondary">← Back to List</a>
