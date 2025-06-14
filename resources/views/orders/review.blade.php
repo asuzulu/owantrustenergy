@@ -1,4 +1,3 @@
-{{-- resources/views/orders/review.blade.php --}}
 @extends(
     match (Auth::user()->position) {
         'Manager' => 'layouts.management-dashboard',
@@ -139,7 +138,7 @@
                 $('#contactCustomerBtn').click(function() {
                     $.getJSON("{{ route('orders.contactCustomer', $order->id) }}", function(user) {
                         $('#custName').text(user.first_name + ' ' + user.last_name);
-                        $('#custPhone').text(user.phone);
+                        $('#custPhone').text(user.phone_number);
                         $('#custEmail').text(user.email);
                         $('#contactCustomerModal').modal('show');
                     });
