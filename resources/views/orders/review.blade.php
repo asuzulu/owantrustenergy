@@ -148,17 +148,6 @@
                 $('#approveOrderBtn').on('click', function() {
                     window.location = "{{ route('orders.approveOrder', $order->id) }}";
                 });
-
-                // Assign to User → redirect to cylinder show, open modal,
-                // prefill with customer name & assignmentType
-                $('#assignToUserBtn').click(function() {
-                    const cylId = "{{ $order->cylinder_id }}";
-                    const custName = encodeURIComponent("{{ $order->first_name }} {{ $order->last_name }}");
-                    const assignType = "{{ $order->retrieval === 'delivery' ? 'delivery' : 'pickup' }}";
-                    const url =
-                        `/cylinders/${cylId}?openAssign=1&customerName=${custName}&assignmentType=${assignType}`;
-                    window.location = url;
-                });
             });
         </script>
     @endpush

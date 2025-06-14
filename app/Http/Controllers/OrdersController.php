@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Cylinder;
 use App\Models\Warehouse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrdersController extends Controller
 {
@@ -107,7 +108,9 @@ class OrdersController extends Controller
     {
         $warehouseNames = Warehouse::pluck('name')->toArray();
 
+        // Get a random cylinder matching size (case-insensitive) and warehouse location
         $cylinder = Cylinder::whereIn('location', $warehouseNames)
+            ->whereRaw('LOWER(size) = ?', [strtolower($order->cylinder_size)])
             ->inRandomOrder()
             ->firstOrFail();
 
@@ -118,7 +121,6 @@ class OrdersController extends Controller
             route('cylinders.show', $cylinder->id) . "?openAssign=1&cust={$custName}&type={$assignType}"
         );
     }
-
 
     public function pickup()
     {
