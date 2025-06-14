@@ -436,6 +436,29 @@
                 }
             });
 
+            // On page load, check query params
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('openAssign') === '1') {
+                const cust = decodeURIComponent(params.get('cust') || '');
+                const type = params.get('type') || 'delivery';
+
+                // Prefill customer search
+                $('#customerSearch').val(cust).trigger('input');
+
+                // Delay the assignment type and modal show to ensure search fires
+                setTimeout(() => {
+                    // Select assignment type
+                    if (type === 'delivery') {
+                        $('#deliveryOption').prop('checked', true).trigger('change');
+                    } else {
+                        $('#pickupOption').prop('checked', true).trigger('change');
+                    }
+
+                    // Show modal after inputs are set
+                    $('#assignCylinderModal').modal('show');
+                }, 300);
+            }
+
             // ── ASSIGNMENT LOGIC (unchanged) ─────────────────────
             function enableAssignButton() {
                 let isCustomerSelected = $('#selectedUserId').val()?.length > 0;

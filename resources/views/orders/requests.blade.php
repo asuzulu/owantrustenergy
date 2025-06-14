@@ -34,7 +34,8 @@
                         </thead>
                         <tbody>
                             @forelse($orders as $order)
-                                <tr>
+                                <tr class="clickable-row" data-href="{{ route('orders.review', $order->id) }}"
+                                    style="cursor: pointer;">
                                     <td>{{ $order->id }}</td>
                                     <td>{{ $order->first_name }}</td>
                                     <td>{{ $order->last_name }}</td>
@@ -45,7 +46,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center">No orders found.</td>
+                                    <td colspan="7" class="text-center">No orders found.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -60,3 +61,14 @@
         </div>
     </div>
 @endsection
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.clickable-row').forEach(function(row) {
+                row.addEventListener('click', function() {
+                    window.location.href = this.dataset.href;
+                });
+            });
+        });
+    </script>
+@endpush

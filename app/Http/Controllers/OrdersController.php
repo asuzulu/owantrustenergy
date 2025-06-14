@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\Cylinder;
+use App\Models\Warehouse;
 use Illuminate\Support\Facades\Auth;
 
 class OrdersController extends Controller
@@ -37,7 +39,7 @@ class OrdersController extends Controller
         ]);
 
         \Log::info('Order created successfully', ['order_id' => $order->id]);
-        
+
         return response()->json(['message' => 'Order placed successfully!'], 201);
     }
 
@@ -72,6 +74,49 @@ class OrdersController extends Controller
             ->paginate(10);
 
         return view('orders.requests', compact('orders'));
+    }
+
+    public function review(Order $order)
+    {
+        return view('orders.review', compact('order'));
+    }
+
+    /**
+     * Return the matching customer (first+last name + position=Customer).
+     */
+    public function contactCustomer(Order $order)
+    {
+        $user = User::where('first_name', $order->first_name)
+            ->where('last_name',  $order->last_name)
+            ->where('position',   'Customer')
+            ->firstOrFail([
+                'first_name',
+                'last_name',
+                'phone_number',
+                'email'
+            ]);
+
+        return response()->json($user);
+    }
+
+    /**
+     * Find a random cylinder whose location is a warehouse name,
+     * then redirect to its show page.
+     */
+    public function approveOrder(Order $order)
+    {
+        $warehouseNames = Warehouse::pluck('name')->toArray();
+
+        $cylinder = Cylinder::whereIn('location', $warehouseNames)
+            ->inRandomOrder()
+            ->firstOrFail();
+
+        $custName = urlencode($order->first_name . ' ' . $order->last_name);
+        $assignType = $order->retrieval;
+
+        return redirect()->to(
+            route('cylinders.show', $cylinder->id) . "?openAssign=1&cust={$custName}&type={$assignType}"
+        );
     }
 
 

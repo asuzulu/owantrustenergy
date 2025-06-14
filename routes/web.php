@@ -132,6 +132,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/orders/requests', [OrdersController::class, 'requests'])->name('orders.requests');
 });
 
+Route::get('orders/{order}/review', [OrdersController::class, 'review'])->name('orders.review');
+
+// → Fetch customer info for the modal
+Route::get('orders/{order}/contact', [OrdersController::class, 'contactCustomer'])
+     ->name('orders.contactCustomer');
+
+// → Pick a random cylinder & redirect to its show page
+Route::get('/orders/{order}/approve', [OrdersController::class, 'approveOrder'])->name('orders.approveOrder');
+
+
 /*
 |--------------------------------------------------------------------------
 | Employee-Specific Routes
