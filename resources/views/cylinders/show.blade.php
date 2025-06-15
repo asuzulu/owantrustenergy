@@ -151,18 +151,18 @@
                             </button>
                         @else
                             {{--
-    Assign to User button:
-    • Show for Managers and Agents unconditionally.
-    • For Employees, only show if cylinder is NOT in agent_cylinders_distribution.
---}}
+        Assign to User button:
+        • Show for Managers and Agents unconditionally.
+        • For Employees, only show if cylinder is NOT in agent_cylinders_distribution.
+    --}}
                             @php
                                 // Current user is Employee AND cylinder is in agent_cylinders_distribution?
                                 $hideForEmployee = Auth::user()->position === 'Employee' && $inAgentDistribution;
                             @endphp
 
                             @if (!$hideForEmployee)
-                                <button type="button" class="btn btn-primary mr-2" data-toggle="modal"
-                                    data-target="#assignCylinderModal">
+                                <button type="button" class="btn btn-primary mr-2" data-bs-toggle="modal"
+                                    data-bs-target="#assignCylinderModal">
                                     Assign to User
                                 </button>
                             @endif
@@ -274,9 +274,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" id="assignCylinderBtn" class="btn btn-primary" disabled>Assign
-                        Cylinder</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="assignCylinderBtn" class="btn btn-primary" disabled>
+                        Assign Cylinder
+                    </button>
                 </div>
             </div>
         </div>
@@ -346,7 +347,7 @@
                         Are you sure you want to continue?</p>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button class="btn btn-secondary" data-ismiss="modal">Cancel</button>
                     <button id="submitReturnForm" class="btn btn-warning">Yes, Proceed</button>
                 </div>
             </div>
@@ -426,7 +427,9 @@
             width: 50%;
         }
     </style>
+@endsection
 
+@push('scripts')
     <script>
         $(document).ready(function() {
             // ── CSRF SETUP ───────────────────────────────────────
@@ -436,16 +439,37 @@
                 }
             });
 
+            // Prepare Bootstrap 5 Modal instance for Assign Cylinder
+            const assignModalEl = document.getElementById('assignCylinderModal');
+            const assignModal = new bootstrap.Modal(assignModalEl);
+
             // On page load, check query params
             const params = new URLSearchParams(window.location.search);
             if (params.get('openAssign') === '1') {
-                const cust = decodeURIComponent(params.get('cust') || '');
+                const custName = decodeURIComponent(params.get('cust') || '');
                 const type = params.get('type') || 'delivery';
 
-                // Prefill customer search
-                $('#customerSearch').val(cust).trigger('input');
+                if (custName) {
+                    // Prefill customerSearch text
+                    $('#customerSearch').val(custName).trigger('input');
+                    // Invoke search endpoint directly to obtain matching user(s)
+                    $.get("{{ route('search.customers') }}", {
+                            query: custName
+                        })
+                        .done(function(response) {
+                            if (response.length === 1) {
+                                // Exactly one match → auto-select
+                                const user = response[0];
+                                $('#customerSearch').val(user.first_name + ' ' + user.last_name);
+                                $('#selectedUserId').val(user.id);
+                                // After setting ID, enable button if other fields ok
+                                enableAssignButton();
+                            }
+                            // If multiple or zero matches: leave for manual selection
+                        });
+                }
 
-                // Delay the assignment type and modal show to ensure search fires
+                // Delay setting assignment type and showing modal
                 setTimeout(() => {
                     // Select assignment type
                     if (type === 'delivery') {
@@ -453,13 +477,19 @@
                     } else {
                         $('#pickupOption').prop('checked', true).trigger('change');
                     }
-
-                    // Show modal after inputs are set
-                    $('#assignCylinderModal').modal('show');
-                }, 300);
+                    // Show modal using BS5 API
+                    assignModal.show();
+                    // Ensure button enabled if userId was set
+                    enableAssignButton();
+                    // Clear URL params so modal logic only runs once
+                    if (window.history && window.history.replaceState) {
+                        const cleanUrl = window.location.origin + window.location.pathname;
+                        window.history.replaceState({}, document.title, cleanUrl);
+                    }
+                }, 500);
             }
 
-            // ── ASSIGNMENT LOGIC (unchanged) ─────────────────────
+            // ── ASSIGNMENT LOGIC ─────────────────────────────────
             function enableAssignButton() {
                 let isCustomerSelected = $('#selectedUserId').val()?.length > 0;
                 let isAssignmentTypeSelected = $('input[name="assignmentType"]:checked').length > 0;
@@ -477,6 +507,8 @@
                     let dropdown = $(dropdownSelector);
                     if (!query) {
                         dropdown.hide();
+                        $('#' + hiddenInputSelector.replace('#', '')).val(''); // clear hidden if any
+                        enableAssignButton();
                         return;
                     }
                     $.ajax({
@@ -526,7 +558,7 @@
                 enableAssignButton();
             });
 
-            $('#assignCylinderBtn').on('click', function() {
+            $('#assignCylinderBtn').off('click').on('click', function() {
                 let userId = $('#selectedUserId').val().trim();
                 if (!userId) {
                     alert("Please select a customer before assigning the cylinder.");
@@ -546,13 +578,16 @@
                 }
 
                 $.post("{{ route('cylinders.assign') }}", {
-                        _token: "{{ csrf_token() }}",
+                        _token: '{{ csrf_token() }}',
                         user_id: userId,
                         cylinder_id: cylinderId,
                         assignment_type: assignmentType
                     })
                     .done(function() {
-                        alert("Cylinder assignment successful.");
+                        // Hide the modal via BS5 API
+                        assignModal.hide();
+
+                        // Continue with secondary POST
                         let postData = {
                             _token: "{{ csrf_token() }}",
                             cylinder_id: cylinderId,
@@ -581,6 +616,7 @@
                 e.preventDefault();
                 let wh = $('#warehouseSelect').val();
                 $('#returnWarehouseInput').val(wh);
+                // Hide/show via BS5 API if desired, or retain data-bs-dismiss attributes
                 $('#returnWarehouseModal').modal('hide');
                 $('#returnWarningModal').modal('show');
             });
@@ -620,4 +656,4 @@
             });
         });
     </script>
-@endsection
+@endpush

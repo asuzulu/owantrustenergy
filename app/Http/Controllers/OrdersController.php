@@ -10,6 +10,7 @@ use App\Models\Warehouse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+
 class OrdersController extends Controller
 {
     public function placeOrder(Request $request)
@@ -110,7 +111,7 @@ class OrdersController extends Controller
 
         // Get a random cylinder matching size (case-insensitive) and warehouse location
         $cylinder = Cylinder::whereIn('location', $warehouseNames)
-            ->whereRaw('LOWER(size) = ?', [strtolower($order->cylinder_size)])
+            ->whereRaw('LOWER(size) = LOWER(?)', [$order->cylinder_size])
             ->inRandomOrder()
             ->firstOrFail();
 
