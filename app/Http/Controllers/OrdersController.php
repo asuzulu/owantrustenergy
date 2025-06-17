@@ -101,6 +101,23 @@ class OrdersController extends Controller
         return response()->json($user);
     }
 
+    // ajax: check if any cylinder is available to assign
+    public function checkAvailability(Order $order)
+    {
+        // pull the list of warehouse names
+        $warehouseNames = Warehouse::pluck('name');
+
+        // do any matching cylinder exist?
+        $available = Cylinder::whereIn('location', $warehouseNames)
+            ->whereRaw('LOWER(size) = LOWER(?)', [$order->cylinder_size])
+            ->exists();
+
+        return response()->json([
+            'available'   => $available,
+            'size'        => $order->cylinder_size,
+        ]);
+    }
+
     /**
      * Find a random cylinder whose location is a warehouse name,
      * then redirect to its show page.
@@ -119,12 +136,40 @@ class OrdersController extends Controller
         $assignType = $order->retrieval;
 
         return redirect()->to(
-            route('cylinders.show', $cylinder->id) . "?openAssign=1&cust={$custName}&type={$assignType}"
+            route('cylinders.show', $cylinder->id)
+                . "?openAssign=1&cust={$custName}&type={$assignType}"
+                . "&order={$order->id}"
         );
     }
 
     public function pickup()
     {
         return view('orders.pickup');
+    }
+
+    public function destroyMatching(Request $request)
+    {
+        $request->validate([
+            'cust_fullname' => 'required|string',
+            'retrieval' => 'required|string',
+        ]);
+
+        // Split the customer name into parts
+        $fullname = $request->input('cust_fullname');
+        $retrieval = $request->input('retrieval');
+
+        [$firstName, $lastName] = explode(' ', $fullname, 2);
+
+        // Attempt to delete matching orders
+        $deleted = Order::where('first_name', $firstName)
+            ->where('last_name', $lastName)
+            ->where('retrieval', $retrieval)
+            ->delete();
+
+        if ($deleted) {
+            return response()->json(['message' => 'Order deleted successfully.'], 200);
+        }
+
+        return response()->json(['message' => 'No matching order found.'], 404);
     }
 }

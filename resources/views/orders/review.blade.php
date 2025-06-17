@@ -112,6 +112,28 @@
         </div>
     </div>
 
+    {{-- No‑Cylinders Available Modal --}}
+    <div class="modal fade" id="noCylindersModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-success">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">No Cylinders Available</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Sorry, there are currently <strong>no</strong> cylinders of size
+                        <em>{{ $order->cylinder_size }}</em> available in our warehouses. Please check back later.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Styles --}}
     <style>
         .tm-table-striped-even th,
@@ -129,26 +151,38 @@
             width: 70%;
         }
     </style>
+@endsection
 
-    {{-- Scripts --}}
-    @push('scripts')
-        <script>
-            $(function() {
-                // Contact Customer
-                $('#contactCustomerBtn').click(function() {
-                    $.getJSON("{{ route('orders.contactCustomer', $order->id) }}", function(user) {
-                        $('#custName').text(user.first_name + ' ' + user.last_name);
-                        $('#custPhone').text(user.phone_number);
-                        $('#custEmail').text(user.email);
-                        $('#contactCustomerModal').modal('show');
-                    });
-                });
-
-                // Approve Order → redirect via the approve route
-                $('#approveOrderBtn').on('click', function() {
-                    window.location = "{{ route('orders.approveOrder', $order->id) }}";
+{{-- Scripts --}}
+@push('scripts')
+    <script>
+        $(function() {
+            // Contact Customer (unchanged)
+            $('#contactCustomerBtn').click(function() {
+                $.getJSON("{{ route('orders.contactCustomer', $order->id) }}", function(user) {
+                    $('#custName').text(user.first_name + ' ' + user.last_name);
+                    $('#custPhone').text(user.phone_number);
+                    $('#custEmail').text(user.email);
+                    $('#contactCustomerModal').modal('show');
                 });
             });
-        </script>
-    @endpush
-@endsection
+
+            // Approve Order → availability check before redirect
+            $('#approveOrderBtn').on('click', function() {
+                $.get("{{ route('orders.checkAvailability', $order->id) }}")
+                    .done(function(resp) {
+                        if (resp.available) {
+                            // let Laravel pick a cylinder and build the querystring
+                            window.location.href = "{{ route('orders.approveOrder', $order->id) }}";
+                        } else {
+                            $('#noCylindersModal').modal('show');
+                        }
+                    })
+                    .fail(function() {
+                        // fallback to original flow
+                        window.location.href = "{{ route('orders.approveOrder', $order->id) }}";
+                    });
+            });
+        });
+    </script>
+@endpush

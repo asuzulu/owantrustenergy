@@ -23,7 +23,6 @@
                     <table class="table table-hover table-striped tm-table-striped-even mt-3">
                         <thead>
                             <tr class="tm-bg-gray">
-                                <th>ID</th>
                                 <th>First Name</th>
                                 <th>Last Name</th>
                                 <th>Cylinder Size</th>
@@ -36,7 +35,6 @@
                             @forelse($orders as $order)
                                 <tr class="clickable-row" data-href="{{ route('orders.review', $order->id) }}"
                                     style="cursor: pointer;">
-                                    <td>{{ $order->id }}</td>
                                     <td>{{ $order->first_name }}</td>
                                     <td>{{ $order->last_name }}</td>
                                     <td>{{ $order->cylinder_size }}</td>

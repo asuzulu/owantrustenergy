@@ -304,6 +304,24 @@
         </div>
     </div>
 
+    <!-- Error Modal -->
+    <div class="modal fade" id="assignErrorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-danger">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Assignment Failed</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Sorry, something went wrong while assigning this cylinder. Please try again.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Return to Warehouse Modal -->
     <div class="modal fade" id="returnWarehouseModal" tabindex="-1" role="dialog"
         aria-labelledby="returnWarehouseModalLabel" aria-hidden="true">
@@ -431,7 +449,7 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function() {
+        $(function() {
             // ── CSRF SETUP ───────────────────────────────────────
             $.ajaxSetup({
                 headers: {
@@ -439,54 +457,42 @@
                 }
             });
 
-            // Prepare Bootstrap 5 Modal instance for Assign Cylinder
+            // Modal instance
             const assignModalEl = document.getElementById('assignCylinderModal');
             const assignModal = new bootstrap.Modal(assignModalEl);
 
-            // On page load, check query params
+            // extract once
+            let orderCustName;
+            let orderType;
             const params = new URLSearchParams(window.location.search);
             if (params.get('openAssign') === '1') {
-                const custName = decodeURIComponent(params.get('cust') || '');
-                const type = params.get('type') || 'delivery';
+                // ← store for deletion
+                orderCustName = decodeURIComponent(params.get('cust') || '');
+                orderType = params.get('type') || 'delivery';
 
-                if (custName) {
-                    // Prefill customerSearch text
-                    $('#customerSearch').val(custName).trigger('input');
-                    // Invoke search endpoint directly to obtain matching user(s)
+                // prefill search
+                if (orderCustName) {
+                    $('#customerSearch').val(orderCustName).trigger('input');
                     $.get("{{ route('search.customers') }}", {
-                            query: custName
+                            query: orderCustName
                         })
-                        .done(function(response) {
-                            if (response.length === 1) {
-                                // Exactly one match → auto-select
-                                const user = response[0];
-                                $('#customerSearch').val(user.first_name + ' ' + user.last_name);
-                                $('#selectedUserId').val(user.id);
-                                // After setting ID, enable button if other fields ok
+                        .done(resp => {
+                            if (resp.length === 1) {
+                                $('#customerSearch').val(resp[0].first_name + ' ' + resp[0].last_name);
+                                $('#selectedUserId').val(resp[0].id);
                                 enableAssignButton();
                             }
-                            // If multiple or zero matches: leave for manual selection
                         });
                 }
 
-                // Delay setting assignment type and showing modal
                 setTimeout(() => {
-                    // Select assignment type
-                    if (type === 'delivery') {
-                        $('#deliveryOption').prop('checked', true).trigger('change');
-                    } else {
-                        $('#pickupOption').prop('checked', true).trigger('change');
-                    }
-                    // Show modal using BS5 API
+                    // set radio
+                    $('#' + (orderType === 'delivery' ? 'deliveryOption' : 'pickupOption'))
+                        .prop('checked', true).trigger('change');
                     assignModal.show();
-                    // Ensure button enabled if userId was set
                     enableAssignButton();
-                    // Clear URL params so modal logic only runs once
-                    if (window.history && window.history.replaceState) {
-                        const cleanUrl = window.location.origin + window.location.pathname;
-                        window.history.replaceState({}, document.title, cleanUrl);
-                    }
-                }, 500);
+                    history.replaceState({}, document.title, window.location.pathname);
+                }, 300);
             }
 
             // ── ASSIGNMENT LOGIC ─────────────────────────────────
@@ -522,7 +528,9 @@
                             if (!response.length) {
                                 dropdown.append(
                                     '<div class="dropdown-item text-muted">No matches found</div>'
-                                );
+                                    );
+                                $(hiddenInputSelector).val(''); // clear hidden
+                                enableAssignButton();
                             } else {
                                 response.forEach(user => {
                                     let item = $('<div class="dropdown-item"></div>')
@@ -559,24 +567,20 @@
             });
 
             $('#assignCylinderBtn').off('click').on('click', function() {
-                let userId = $('#selectedUserId').val().trim();
+                const userId = $('#selectedUserId').val().trim();
+                const cylinderId = "{{ $paddedId }}";
+                const assignmentType = $('input[name="assignmentType"]:checked').val();
+                const driverId = $('#selectedDriverId').val();
+                const deliveryDate = $('#deliveryDate').val();
+                const deliveryTime = $('#deliveryTime').val();
+                const pickupLocation = $('#pickupLocation').val();
+                const pickupDate = $('#pickupDate').val();
+
                 if (!userId) {
-                    alert("Please select a customer before assigning the cylinder.");
-                    return;
-                }
-                let cylinderId = "{{ $paddedId }}";
-                let assignmentType = $('input[name="assignmentType"]:checked').val();
-                let driverId = $('#selectedDriverId').val() || null;
-                let deliveryDate = $('#deliveryDate').val();
-                let deliveryTime = $('#deliveryTime').val();
-                let pickupLocation = $('#pickupLocation').val();
-                let pickupDate = $('#pickupDate').val();
-
-                if (assignmentType === 'delivery' && !driverId) {
-                    alert("Please select a driver before assigning a delivery.");
-                    return;
+                    return alert("Please select a customer.");
                 }
 
+                // First: assign the cylinder record
                 $.post("{{ route('cylinders.assign') }}", {
                         _token: '{{ csrf_token() }}',
                         user_id: userId,
@@ -584,31 +588,58 @@
                         assignment_type: assignmentType
                     })
                     .done(function() {
-                        // Hide the modal via BS5 API
                         assignModal.hide();
 
-                        // Continue with secondary POST
+                        // Now build the payload for whichever secondary record
                         let postData = {
-                            _token: "{{ csrf_token() }}",
+                            _token: '{{ csrf_token() }}',
                             cylinder_id: cylinderId,
                             customer_id: userId
                         };
+
                         if (assignmentType === 'delivery') {
+                            // **Ensure these three fields are present**:
                             postData.driver_id = driverId;
                             postData.delivery_date = deliveryDate;
                             postData.delivery_time = deliveryTime;
-                            $.post("{{ route('deliveries.store') }}", postData)
-                                .done(() => location.reload())
+
+                            return $.post("{{ route('deliveries.store') }}", postData)
+                                .done(deleteMatchingOrder)
                                 .fail(xhr => alert('Delivery record failed: ' + xhr.responseText));
+
                         } else {
+                            // pickup
                             postData.pickup_location = pickupLocation;
                             postData.pick_up_date = pickupDate;
-                            $.post("{{ route('pickups.store') }}", postData)
-                                .done(() => location.reload())
+
+                            return $.post("{{ route('pickups.store') }}", postData)
+                                .done(deleteMatchingOrder)
                                 .fail(xhr => alert('Pickup record failed: ' + xhr.responseText));
                         }
                     })
                     .fail(xhr => alert('Cylinder assignment failed: ' + xhr.responseText));
+            });
+
+            // helper: delete by matching first_name + last_name AND retrieval type
+            function deleteMatchingOrder() {
+                $.ajax({
+                    url: "{{ route('orders.destroyMatching') }}",
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        cust_fullname: orderCustName,
+                        retrieval: orderType
+                    }
+                }).always(function() {
+                    $('#assignSuccessModal').modal('show');
+                });
+            }
+
+            // ── SUCCESS MODAL “OK” CLICK ─────────────────────────
+            $('#assignSuccessModal').on('click', '.btn-success', function(e) {
+                e.preventDefault();
+                $('#assignSuccessModal').modal('hide');
+                location.reload();
             });
 
             // ── RETURN TO WAREHOUSE FLOW ─────────────────────────
@@ -616,18 +647,17 @@
                 e.preventDefault();
                 let wh = $('#warehouseSelect').val();
                 $('#returnWarehouseInput').val(wh);
-                // Hide/show via BS5 API if desired, or retain data-bs-dismiss attributes
                 $('#returnWarehouseModal').modal('hide');
                 $('#returnWarningModal').modal('show');
             });
 
-            // ── FIXED SNIPPET #1: ONLY “Cancel” IN RETURN/WARNING MODALS ───
+            // ── ONLY “Cancel” BUTTONS ────────────────────────────
             $('#returnWarehouseModal, #returnWarningModal').on('click', '.btn-secondary', function(e) {
                 e.preventDefault();
                 $(this).closest('.modal').modal('hide');
             });
 
-            // ── FIXED SNIPPET #2: “Yes, Proceed” SUBMITS VIA AJAX ────────
+            // ── CONFIRM RETURN ───────────────────────────────────
             $('#submitReturnForm').click(function(e) {
                 e.preventDefault();
                 let url = $('#returnForm').attr('action');
@@ -644,7 +674,7 @@
                     });
             });
 
-            // ── SHOW SUCCESS & WIRE ITS “OK” ────────────────────────────
+            // ── SHOW RETURN SUCCESS IF SESSION FLAG ─────────────
             @if (session('success'))
                 $('#returnSuccessModal').modal('show');
             @endif

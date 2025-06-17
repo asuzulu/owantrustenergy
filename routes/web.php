@@ -130,17 +130,18 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/orders/delete', [OrdersController::class, 'destroy'])->name('orders.destroy');
     Route::delete('/orders', [OrdersController::class, 'destroy'])->name('orders.delete');
     Route::get('/orders/requests', [OrdersController::class, 'requests'])->name('orders.requests');
+    // → Pick a random cylinder & redirect to its show page
+    Route::get('/orders/{order}/approve', [OrdersController::class, 'approveOrder'])->name('orders.approveOrder');
+    // ajax: check if any cylinder is available to assign
+    Route::get('/orders/{order}/check-availability', [OrdersController::class, 'checkAvailability'])->name('orders.checkAvailability');
+    Route::post('/orders/destroy-matching', [OrdersController::class, 'destroyMatching'])->name('orders.destroyMatching');
 });
 
 Route::get('orders/{order}/review', [OrdersController::class, 'review'])->name('orders.review');
 
 // → Fetch customer info for the modal
 Route::get('orders/{order}/contact', [OrdersController::class, 'contactCustomer'])
-     ->name('orders.contactCustomer');
-
-// → Pick a random cylinder & redirect to its show page
-Route::get('/orders/{order}/approve', [OrdersController::class, 'approveOrder'])->name('orders.approveOrder');
-
+    ->name('orders.contactCustomer');
 
 /*
 |--------------------------------------------------------------------------
@@ -366,7 +367,6 @@ Route::middleware(['auth'])->prefix('cylinders')->name('cylinders.')->group(func
 Route::middleware(['auth'])->group(function () {
     Route::post('/pickups/store', [PickupController::class, 'store'])->name('pickups.store');
     Route::get('/orders/pickup', [PickupController::class, 'index'])->name('orders.pickup');
-    Route::post('/orders/update-pickup', [OrdersController::class, 'updatePickup'])->name('orders.updatePickup');
     Route::post('/pickups/update', [PickupController::class, 'updatePickup'])->name('pickups.update');
 });
 
