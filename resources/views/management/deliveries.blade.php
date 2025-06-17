@@ -51,7 +51,6 @@
                     <table class="table table-hover table-striped tm-table-striped-even mt-3">
                         <thead>
                             <tr class="tm-bg-gray">
-                                <th scope="col">ID</th>
                                 <th scope="col">Cylinder</th>
                                 <th scope="col">Size</th>
                                 <th scope="col">Driver</th>
@@ -70,40 +69,68 @@
                         <tbody>
                             @foreach ($deliveries as $delivery)
                                 <tr id="delivery-row-{{ $delivery->id }}">
-                                    <td>{{ $delivery->id }}</td>
-                                    <td class=click style="color: rgb(2, 216, 2)">
+                                    {{-- Cylinder: no change, links to cylinder.show --}}
+                                    <td class="click" style="cursor: pointer; color: rgb(2, 216, 2);">
                                         <a href="{{ route('cylinders.show', $delivery->cylinder) }}"
-                                            style="text-decoration: none; color: inherit;">
+                                            style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
                                             {{ $delivery->cylinder }}
                                         </a>
                                     </td>
-                                    <td>{{ $delivery->size }}</td>
-                                    <td class=click style="color: rgb(2, 216, 2);">
+
+                                    {{-- Size: now links to driver's profile --}}
+                                    <td class="click" style="cursor: pointer;">
                                         <a href="{{ route('drivers.profile', $delivery->driver_id) }}"
-                                            style="text-decoration: none; color: inherit;">
+                                            style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+                                            {{ $delivery->size }}
+                                        </a>
+                                    </td>
+
+                                    {{-- Driver: links to driver --}}
+                                    <td class="click" style="cursor: pointer;">
+                                        <a href="{{ route('drivers.profile', $delivery->driver_id) }}"
+                                            style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
                                             {{ $delivery->driver }}
                                         </a>
                                     </td>
-                                    <td class=click style="color: rgb(2, 216, 2);">
+
+                                    {{-- Customer: no change --}}
+                                    <td class="click" style="cursor: pointer; color: rgb(2, 216, 2);">
                                         @if (isset($delivery->customer_id))
                                             <a href="{{ route('users.profile', $delivery->customer_id) }}"
-                                                style="text-decoration: none; color: inherit;">
+                                                style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
                                                 {{ $delivery->customer }}
                                             </a>
                                         @else
                                             {{ $delivery->customer }}
                                         @endif
                                     </td>
-                                    <td>{{ \Carbon\Carbon::parse($delivery->delivery_date)->format('d-m-Y') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($delivery->delivery_time)->format('h:i A') }}</td>
-                                    <td>{{ $delivery->status }}</td>
 
-                                    {{-- Only render the <td> for Action if:
-                                    1) user is Manager or Employee
-                                    2) this specific $delivery->image_path is NOT null --}}
+                                    {{-- Delivery Date: links to driver --}}
+                                    <td class="click" style="cursor: pointer;">
+                                        <a href="{{ route('drivers.profile', $delivery->driver_id) }}"
+                                            style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+                                            {{ \Carbon\Carbon::parse($delivery->delivery_date)->format('d-m-Y') }}
+                                        </a>
+                                    </td>
+
+                                    {{-- Delivery Time: links to driver --}}
+                                    <td class="click" style="cursor: pointer;">
+                                        <a href="{{ route('drivers.profile', $delivery->driver_id) }}"
+                                            style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+                                            {{ \Carbon\Carbon::parse($delivery->delivery_time)->format('h:i A') }}
+                                        </a>
+                                    </td>
+
+                                    {{-- Tracking: links to driver --}}
+                                    <td class="click" style="cursor: pointer;">
+                                        <a href="{{ route('drivers.profile', $delivery->driver_id) }}"
+                                            style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+                                            {{ $delivery->status }}
+                                        </a>
+                                    </td>
+
                                     @if (in_array(Auth::user()->position, ['Manager', 'Employee']) && !is_null($delivery->image_path))
                                         <td>
-                                            {{-- if delivered, show Approve/Disapprove or archived label --}}
                                             @if ($delivery->date_delivered && !$delivery->approval)
                                                 <form action="{{ route('deliveries.approve', $delivery->id) }}"
                                                     method="POST" style="display:inline-block">
@@ -119,9 +146,9 @@
                                                     </button>
                                                 </form>
                                             @elseif($delivery->approval)
-                                                {{ ucfirst($delivery->approval) }} {{-- Show “Approved” or “Disapproved” --}}
+                                                {{ ucfirst($delivery->approval) }}
                                             @else
-                                                &mdash; 
+                                                &mdash;
                                             @endif
                                         </td>
                                     @endif

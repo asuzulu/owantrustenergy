@@ -90,7 +90,14 @@
                                             <td>
                                                 {{-- 1) If the driver hasn’t picked up yet, still show the passcode --}}
                                                 @if (is_null($d->driver_pickup_date) || is_null($d->driver_pickup_time))
-                                                    {{ $d->passcode }}
+                                                    {{-- Show passcode with copy button --}}
+                                                    <span class="passcode-text">{{ $d->passcode }}</span>
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-outline-secondary copy-passcode-btn"
+                                                        data-passcode="{{ $d->passcode }}" title="Copy passcode"
+                                                        style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.9rem;">
+                                                        <i class="fa fa-copy"></i>
+                                                    </button>
 
                                                     {{-- 2) Driver has picked up but has not yet “started” the delivery --}}
                                                 @elseif (is_null($d->delivery_start))
@@ -163,7 +170,7 @@
                             ->orderBy('delivery_date', 'desc')
                             ->get();
                     @endphp
-                    <form action="{{ route('deliveries.confirm', $user->id) }}" method="POST">
+                    <form id="passcodeForm" action="{{ route('deliveries.confirm', $user->id) }}" method="POST">
                         @csrf
                         <div class="table-responsive">
                             <table class="table table-hover table-striped tm-table-striped-even mt-3">
@@ -279,6 +286,49 @@
                             </div>
                         @endif
                     </form>
+
+                    {{-- Success Modal for Passcode --}}
+                    <div class="modal fade" id="passcodeSuccessModal" tabindex="-1" role="dialog"
+                        aria-labelledby="passcodeSuccessModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-success text-white">
+                                    <h5 class="modal-title" id="passcodeSuccessModalLabel">Success</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Passcode verified successfully.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-success" data-bs-dismiss="modal"
+                                        id="passcodeSuccessOk">OK</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Error Modal for Passcode --}}
+                    <div class="modal fade" id="passcodeErrorModal" tabindex="-1" role="dialog"
+                        aria-labelledby="passcodeErrorModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-danger text-white">
+                                    <h5 class="modal-title" id="passcodeErrorModalLabel">Error</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body" id="passcodeErrorMessage">
+                                    Incorrect passcode. Please try again.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         @else
@@ -389,11 +439,17 @@
             });
         });
     </script>
+
+    {{-- Radio button selection controls --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const selectAll = document.getElementById('select_all_deliveries');
             if (selectAll) {
                 const cbs = document.querySelectorAll('input[name="selected_deliveries[]"]');
+                // Clear all checkboxes on load:
+                cbs.forEach(cb => cb.checked = false);
+                selectAll.checked = false;
+
                 cbs.forEach(cb => cb.addEventListener('click', e => e.stopPropagation()));
                 selectAll.addEventListener('change', function() {
                     cbs.forEach(cb => cb.checked = this.checked);
@@ -401,6 +457,156 @@
             }
         });
     </script>
+
+    {{-- Driver copy passcode button --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Attach copy logic to each copy-passcode-btn
+            document.querySelectorAll('.copy-passcode-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    // Prevent any unintended side effects
+                    e.stopPropagation();
+
+                    const code = this.getAttribute('data-passcode') || '';
+                    if (!navigator.clipboard) {
+                        // Fallback if Clipboard API not available
+                        const tempInput = document.createElement('input');
+                        tempInput.value = code;
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        try {
+                            document.execCommand('copy');
+                            alert('Passcode copied to clipboard');
+                        } catch (err) {
+                            console.error('Fallback: copy command failed', err);
+                            alert('Unable to copy');
+                        }
+                        document.body.removeChild(tempInput);
+                    } else {
+                        navigator.clipboard.writeText(code).then(() => {
+                            alert('Passcode copied to clipboard');
+                        }).catch(err => {
+                            console.error('Could not copy text: ', err);
+                            alert('Unable to copy');
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+    {{-- ── AJAX for Passcode confirmation ─────────────────────────────────── --}}
+    @if (in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const form = document.getElementById('passcodeForm');
+                if (!form) return;
+
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    // Collect selected deliveries
+                    const checked = form.querySelectorAll('input[name="selected_deliveries[]"]:checked');
+                    if (checked.length === 0) {
+                        // No rows selected
+                        // Show error modal with message
+                        const errMsgEl = document.getElementById('passcodeErrorMessage');
+                        if (errMsgEl) {
+                            errMsgEl.textContent = 'Please select at least one delivery.';
+                        }
+                        const errModal = new bootstrap.Modal(document.getElementById('passcodeErrorModal'));
+                        errModal.show();
+                        return;
+                    }
+
+                    const selectedIds = Array.from(checked).map(cb => cb.value);
+                    const passcodeInput = document.getElementById('passcode');
+                    const passcode = passcodeInput ? passcodeInput.value.trim() : '';
+
+                    if (!passcode) {
+                        // Show error modal
+                        const errMsgEl = document.getElementById('passcodeErrorMessage');
+                        if (errMsgEl) {
+                            errMsgEl.textContent = 'Passcode is required.';
+                        }
+                        const errModal = new bootstrap.Modal(document.getElementById('passcodeErrorModal'));
+                        errModal.show();
+                        return;
+                    }
+
+                    // Build FormData
+                    const formData = new FormData();
+                    selectedIds.forEach(id => formData.append('selected_deliveries[]', id));
+                    formData.append('passcode', passcode);
+                    // Add CSRF token
+                    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    formData.append('_token', token);
+
+                    // Send AJAX POST
+                    fetch(form.action, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                            },
+                            body: formData,
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                return response.json();
+                            } else {
+                                // 422 or other error
+                                return response.json().then(json => {
+                                    throw json;
+                                });
+                            }
+                        })
+                        .then(json => {
+                            if (json.success) {
+                                // Show success modal
+                                const successModalEl = document.getElementById('passcodeSuccessModal');
+                                const successModal = new bootstrap.Modal(successModalEl);
+                                successModal.show();
+
+                                // When OK clicked: reload page
+                                const okBtn = document.getElementById('passcodeSuccessOk');
+                                if (okBtn) {
+                                    okBtn.addEventListener('click', function() {
+                                        // After modal hides, reload
+                                        location.reload();
+                                    }, {
+                                        once: true
+                                    });
+                                }
+                            } else {
+                                // Show error modal with message from JSON
+                                const errMsgEl = document.getElementById('passcodeErrorMessage');
+                                if (errMsgEl) {
+                                    errMsgEl.textContent = json.message ||
+                                        'Incorrect passcode. Please try again.';
+                                }
+                                const errModal = new bootstrap.Modal(document.getElementById(
+                                    'passcodeErrorModal'));
+                                errModal.show();
+                            }
+                        })
+                        .catch(errorJson => {
+                            // Could be network error or JSON with message
+                            let msg = 'An error occurred. Please try again.';
+                            if (errorJson && typeof errorJson === 'object' && errorJson.message) {
+                                msg = errorJson.message;
+                            }
+                            const errMsgEl = document.getElementById('passcodeErrorMessage');
+                            if (errMsgEl) {
+                                errMsgEl.textContent = msg;
+                            }
+                            const errModal = new bootstrap.Modal(document.getElementById(
+                                'passcodeErrorModal'));
+                            errModal.show();
+                        });
+                });
+            });
+        </script>
+    @endif
 
     {{-- ── ADDED: Manager/Employee Disapprove JS (same as in Deliveries page) --}}
     @if (in_array(Auth::user()->position, ['Manager', 'Employee']))

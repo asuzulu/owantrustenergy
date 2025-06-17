@@ -120,7 +120,13 @@
                             @if ($delivery)
                                 <tr>
                                     <td><strong>Driver</strong></td>
-                                    <td>{{ $delivery->driver }}</td>
+                                    <td class="click" style="cursor: pointer;">
+                                        {{-- Wrap driver name in a link to their profile --}}
+                                        <a href="{{ route('drivers.profile', $delivery->driver_id) }}"
+                                            style="text-decoration: none; color: inherit;">
+                                            {{ $delivery->driver }}
+                                        </a>
+                                    </td>
                                 </tr>
                             @endif
 
@@ -528,7 +534,7 @@
                             if (!response.length) {
                                 dropdown.append(
                                     '<div class="dropdown-item text-muted">No matches found</div>'
-                                    );
+                                );
                                 $(hiddenInputSelector).val(''); // clear hidden
                                 enableAssignButton();
                             } else {

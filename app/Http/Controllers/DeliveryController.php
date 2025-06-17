@@ -227,18 +227,42 @@ class DeliveryController extends Controller
             'passcode' => 'required|string',
         ]);
 
+        // Check each delivery's passcode first
         foreach ($data['selected_deliveries'] as $deliveryId) {
             $delivery = Delivery::findOrFail($deliveryId);
             if ($delivery->passcode !== $data['passcode']) {
+                // If AJAX: return JSON error
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Incorrect passcode for one or more selections.',
+                    ], 422);
+                }
+                // Otherwise redirect back with error
                 return back()->withErrors(['passcode' => 'Incorrect passcode for one or more selections.']);
             }
+        }
+
+        // All passcodes matched: update each delivery
+        foreach ($data['selected_deliveries'] as $deliveryId) {
+            $delivery = Delivery::findOrFail($deliveryId);
             $delivery->driver_pickup_date = Carbon::today()->toDateString();
             $delivery->driver_pickup_time = Carbon::now()->format('H:i:s');
             $delivery->save();
         }
 
+        // If AJAX: return JSON success
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Deliveries confirmed successfully.',
+            ]);
+        }
+
+        // Fallback: regular redirect
         return redirect()->back()->with('success', 'Deliveries confirmed successfully.');
     }
+
 
     public function start($id)
     {

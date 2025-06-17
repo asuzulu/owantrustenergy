@@ -40,7 +40,15 @@
                                     <td>{{ $delivery->customer }}</td>
                                     <td>{{ \Carbon\Carbon::parse($delivery->delivery_date)->format('d-m-Y') ?? 'N/A' }}</td>
                                     <td>{{ \Carbon\Carbon::parse($delivery->delivery_time)->format('H:i') ?? 'N/A' }}</td>
-                                    <td>{{ $delivery->passcode }}</td>
+                                    {{-- Passcode cell: stop row click, show passcode + copy icon --}}
+                                    <td onclick="event.stopPropagation();" style="position: relative; white-space: nowrap;">
+                                        <span class="passcode-text">{{ $delivery->passcode }}</span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary copy-passcode"
+                                            data-passcode="{{ $delivery->passcode }}" title="Copy passcode"
+                                            style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.9rem;">
+                                            <i class="fa fa-copy"></i>
+                                        </button>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
@@ -60,4 +68,44 @@
             @endif
         </div>
     </div>
+@endsection
+
+@section('scripts')
+    {{-- If your layouts.drivers-dashboard already includes jQuery, this will work. --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delegate click on copy-passcode buttons
+            document.querySelectorAll('.copy-passcode').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    // Prevent row onclick
+                    e.stopPropagation();
+                    // Copy to clipboard
+                    const code = this.getAttribute('data-passcode') || '';
+                    if (!navigator.clipboard) {
+                        // Fallback: select and execCommand if needed
+                        const tempInput = document.createElement('input');
+                        tempInput.value = code;
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        try {
+                            document.execCommand('copy');
+                            alert('Passcode copied to clipboard');
+                        } catch (err) {
+                            console.error('Fallback: copy command failed', err);
+                            alert('Unable to copy');
+                        }
+                        document.body.removeChild(tempInput);
+                    } else {
+                        navigator.clipboard.writeText(code).then(() => {
+                            // You may replace alert with a nicer tooltip/notification
+                            alert('Passcode copied to clipboard');
+                        }).catch(err => {
+                            console.error('Could not copy text: ', err);
+                            alert('Unable to copy');
+                        });
+                    }
+                });
+            });
+        });
+    </script>
 @endsection

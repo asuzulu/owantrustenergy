@@ -26,6 +26,11 @@
                                 </form>
 
                                 <div class="ml-auto d-flex">
+                                    <a href="{{ route('management.deliveries') }}" class="btn btn-primary mx-2 mb-2"
+                                        style="height: 100%;">
+                                        Deliveries
+                                    </a>
+
                                     <a href="{{ route('delivery.approval') }}" class="btn btn-primary mx-2 mb-2"
                                         style="height: 100%;">
                                         Delivery Approval

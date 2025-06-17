@@ -81,6 +81,9 @@
                     <button id="contactCustomerBtn" class="btn btn-info mr-2">
                         Contact Customer
                     </button>
+                    <button id="disapproveOrderBtn" class="btn btn-danger mr-2">
+                        Disapprove
+                    </button>
                     <button id="approveOrderBtn" class="btn btn-success">
                         Approve & Assign
                     </button>
@@ -134,6 +137,25 @@
         </div>
     </div>
 
+    {{-- Disapprove Confirmation Modal --}}
+    <div class="modal fade" id="disapproveModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">Confirm Disapproval</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this order request?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Keep</button>
+                    <button type="button" id="confirmDisapproveBtn" class="btn btn-danger">Yes, Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Styles --}}
     <style>
         .tm-table-striped-even th,
@@ -182,6 +204,29 @@
                         // fallback to original flow
                         window.location.href = "{{ route('orders.approveOrder', $order->id) }}";
                     });
+            });
+
+            // Show Disapprove modal
+            $('#disapproveOrderBtn').click(function() {
+                $('#disapproveModal').modal('show');
+            });
+
+            // On confirm, call destroyMatching
+            $('#confirmDisapproveBtn').click(function() {
+                $.ajax({
+                    url: "{{ route('orders.destroyMatching') }}",
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        cust_fullname: "{{ $order->first_name }} {{ $order->last_name }}",
+                        retrieval: "{{ $order->retrieval }}",
+                        order_id: "{{ $order->id }}"
+                    }
+                }).done(function() {
+                    location.href = "{{ route('orders.requests') }}"; // redirect back to list
+                }).fail(function() {
+                    alert('Failed to delete order.');
+                });
             });
         });
     </script>
