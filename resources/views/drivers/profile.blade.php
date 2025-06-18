@@ -17,13 +17,16 @@
                                 City: {{ $user->city }}<br>
                                 State: {{ $user->state }}<br>
                                 Age: {{ $user->dob ? \Carbon\Carbon::parse($user->dob)->age : 'N/A' }}<br>
-                                <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary mt-3">Edit Profile</a>
-                                @if (Auth::user()->position === 'Manager' || !$user->photo_id)
-                                    <button class="btn btn-secondary mt-3" data-bs-toggle="modal"
-                                        data-bs-target="#uploadNinModal">
-                                        Upload NIN
-                                    </button>
-                                @endif
+                                {{-- Only show to Manager, Employee or Agent --}}
+                                @if (in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
+                                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary mt-3">Edit
+                                        Profile</a>
+                                    @endif @if (Auth::user()->position === 'Manager' || !$user->photo_id)
+                                        <button class="btn btn-secondary mt-3" data-bs-toggle="modal"
+                                            data-bs-target="#uploadNinModal">
+                                            Upload NIN
+                                        </button>
+                                    @endif
                             </div>
                         </div>
                     </div>

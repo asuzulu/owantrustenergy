@@ -1,4 +1,4 @@
-@if (Auth::user()->position === 'Customer' || Auth::user()->position === 'Agent')
+@if (Auth::user()->position === 'Customer' || Auth::user()->position === 'Agent' || Auth::user()->position === 'Driver')
     <script>
         window.location.href = "{{ route('dashboard.profile') }}";
     </script>

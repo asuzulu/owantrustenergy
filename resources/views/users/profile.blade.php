@@ -34,7 +34,8 @@
                             City: {{ $user->city }}<br>
                             State: {{ $user->state }}<br>
                             Age: {{ $user->dob ? \Carbon\Carbon::parse($user->dob)->age : 'N/A' }}<br>
-                            @if (!(Auth::user()->position === 'Employee' && $user->position === 'Employee'))
+                            {{-- Only show to Manager, Employee or Agent --}}
+                            @if (in_array(Auth::user()->position, ['Manager', 'Employee', 'Agent']))
                                 <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary mt-3">Edit Profile</a>
                             @endif
                             @if (Auth::user()->position === 'Manager' || !$user->photo_id)
@@ -240,20 +241,20 @@
         @endif
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const selectAllCheckbox = document.getElementById('select_all');
             const cylinderCheckboxes = document.querySelectorAll('input[name="selected_cylinders[]"]');
 
             // Prevent checkbox clicks from triggering the row link
             cylinderCheckboxes.forEach(cb => {
-                cb.addEventListener('click', function (event) {
+                cb.addEventListener('click', function(event) {
                     event.stopPropagation();
                 });
             });
 
             // Select/Deselect all checkboxes when "Select All" is toggled
             if (selectAllCheckbox) {
-                selectAllCheckbox.addEventListener('change', function () {
+                selectAllCheckbox.addEventListener('change', function() {
                     cylinderCheckboxes.forEach(cb => {
                         cb.checked = this.checked;
                     });
