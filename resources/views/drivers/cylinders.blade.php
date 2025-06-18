@@ -42,13 +42,16 @@
                                     <td>{{ \Carbon\Carbon::parse($delivery->delivery_time)->format('H:i') ?? 'N/A' }}</td>
                                     {{-- Passcode cell: stop row click, show passcode + copy icon --}}
                                     <td onclick="event.stopPropagation();" style="position: relative; white-space: nowrap;">
-                                        <span class="passcode-text">{{ $delivery->passcode }}</span>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary copy-passcode"
-                                            data-passcode="{{ $delivery->passcode }}" title="Copy passcode"
-                                            style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.9rem;">
-                                            <i class="fa fa-copy"></i>
-                                        </button>
+                                        @if (!is_null($delivery->delivery_start))
+                                            <span class="text-primary font-weight-bold">Being Delivered</span>
+                                        @elseif ($delivery->driver_pickup_date && $delivery->driver_pickup_time)
+                                            <span class="text-success font-weight-bold">With Driver</span>
+                                        @else
+                                            <span class="passcode-text">{{ $delivery->passcode }}</span>
+                                            <!-- copy button -->
+                                        @endif
                                     </td>
+
                                 </tr>
                             @empty
                                 <tr>

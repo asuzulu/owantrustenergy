@@ -38,7 +38,7 @@
                                         ->orderByRaw("LPAD(cylinder, 9, '0')")
                                         ->paginate(10);
                                 } else {
-                                    // SQLite fallback (no LPAD, just order normally or cast as integer if needed)
+                                    // SQLite fallback
                                     $disapproved = \App\Models\Delivery::where('approval', 'disapproved')
                                         ->orderByRaw('CAST(cylinder AS INTEGER)')
                                         ->paginate(10);
@@ -76,10 +76,15 @@
                                     <td>{{ optional($d->date_delivered)->format('d-m-Y') }}</td>
                                     <td>{{ optional($d->time_delivered)->format('H:i') }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-info" data-toggle="modal"
-                                            data-target="#deliveryImageModal" data-img="{{ $d->image_path }}">
-                                            View
-                                        </button>
+                                        @if (!empty($d->image_path))
+                                            <button type="button" class="btn btn-info btn-sm view-image-btn"
+                                                data-image="{{ asset('storage/' . $d->image_path) }}" data-toggle="modal"
+                                                data-target="#deliveryImageModal">
+                                                View
+                                            </button>
+                                        @else
+                                            N/A
+                                        @endif
                                     </td>
                                     <td>
                                         @if ($d->disapproval_reason)
@@ -93,13 +98,13 @@
                                     </td>
                                     <td>
                                         <button class="btn btn-sm btn-secondary" data-toggle="modal"
-                                            data-target="#contactCustomerModal" data-customer="{{ $d->customer }}">
+                                            data-target="#contactCustomerModal" data-delivery-id="{{ $d->id }}">
                                             Contact
                                         </button>
                                     </td>
                                     <td>
                                         <button class="btn btn-sm btn-secondary" data-toggle="modal"
-                                            data-target="#contactDriverModal" data-driver="{{ $d->driver }}">
+                                            data-target="#contactDriverModal" data-delivery-id="{{ $d->id }}">
                                             Contact
                                         </button>
                                     </td>
@@ -114,7 +119,9 @@
                                 </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="12" class="text-center">No disapproved deliveries found.</td>
+                                        <td colspan="12" class="text-center">
+                                            No disapproved deliveries found.
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -141,7 +148,9 @@
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body text-center">
-                        <img src="" id="deliveryImage" class="img-fluid" alt="Delivery Image">
+                        {{-- added id="deliveryImage" so script can target it --}}
+                        <img id="deliveryImage" src="{{ asset('storage/' . $delivery->image_path) }}" class="img-fluid"
+                            alt="Delivery Image">
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -150,25 +159,29 @@
             </div>
         </div>
 
-        <!-- Disapproval Reason Modal for Delivery ID: {{ $d->id }} -->
-        <div class="modal fade" id="disapprovalReasonModal{{ $d->id }}" tabindex="-1" role="dialog"
-            aria-labelledby="disapprovalReasonLabel{{ $d->id }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 id="disapprovalReasonLabel{{ $d->id }}" class="modal-title">Disapproval Reason for Cylinder
-                            ID {{ str_pad($d->cylinder, 9, '0', STR_PAD_LEFT) }}</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    </div>
-                    <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
-                        <p class="text-justify">{{ $d->disapproval_reason }}</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+        {{-- Disapproval Reason Modals --}}
+        @foreach ($disapproved as $d)
+            <div class="modal fade" id="disapprovalReasonModal{{ $d->id }}" tabindex="-1" role="dialog"
+                aria-labelledby="disapprovalReasonLabel{{ $d->id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 id="disapprovalReasonLabel{{ $d->id }}" class="modal-title">
+                                Disapproval Reason for Cylinder ID
+                                {{ str_pad($d->cylinder, 9, '0', STR_PAD_LEFT) }}
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+                            <p class="text-justify">{{ $d->disapproval_reason }}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        @endforeach
 
         {{-- Was Cylinder Delivered? Modal --}}
         <div class="modal fade" id="wasDeliveredModal" tabindex="-1" role="dialog" aria-labelledby="wasDeliveredLabel"
@@ -179,16 +192,20 @@
                     <input type="hidden" name="delivery_id" id="wasDeliveredId">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 id="wasDeliveredLabel" class="modal-title">Why was the cylinder not delivered?</h5>
+                            <h5 id="wasDeliveredLabel" class="modal-title">
+                                Why was the cylinder not delivered?
+                            </h5>
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
                         </div>
                         <div class="modal-body">
-                            <textarea name="reason" id="wasDeliveredReason" class="form-control" rows="4" placeholder="Please explain..."
-                                required></textarea>
+                            <textarea name="reason" id="wasDeliveredReason" class="form-control" rows="4"
+                                placeholder="Please explain..." required></textarea>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Submit Reason</button>
+                            <button type="submit" class="btn btn-primary">
+                                Submit Reason
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -218,7 +235,9 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Submit Response</button>
+                            <button type="submit" class="btn btn-primary">
+                                Submit Response
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -248,7 +267,9 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Submit Response</button>
+                            <button type="submit" class="btn btn-primary">
+                                Submit Response
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -259,13 +280,13 @@
     @push('scripts')
         <script>
             $(function() {
-                // Delivery Image Modal population
+                // Image modal
                 $('#deliveryImageModal').on('show.bs.modal', function(e) {
-                    let img = $(e.relatedTarget).data('img');
+                    let img = $(e.relatedTarget).data('image');
                     $('#deliveryImage').attr('src', img);
                 });
 
-                // Was Delivered dropdown
+                // Was-delivered select
                 $('.was-delivered-select').change(function() {
                     let val = $(this).val(),
                         id = $(this).data('id');
@@ -273,7 +294,6 @@
                         $('#wasDeliveredId').val(id);
                         $('#wasDeliveredModal').modal('show');
                     } else {
-                        // Mark as delivered without reason
                         $.post("{{ route('deliveries.markDelivered') }}", {
                             _token: "{{ csrf_token() }}",
                             delivery_id: id,
@@ -282,40 +302,45 @@
                     }
                 });
 
-                // Contact Customer Modal
+                // Contact Customer
                 $('#contactCustomerModal').on('show.bs.modal', function(e) {
-                    let cust = $(e.relatedTarget).data('customer');
-                    let deliveryId = $(e.relatedTarget).closest('tr').find('.was-delivered-select').data('id');
-                    $('#contactCustomerId').val(deliveryId);
+                    let id = $(e.relatedTarget).data('delivery-id');
+                    console.log('Contact Customer for delivery:', id);
+                    $('#contactCustomerId').val(id);
 
-                    // fetch user details
                     $.getJSON("{{ route('deliveries.customerInfo') }}", {
-                            customer: cust
+                            delivery_id: id
                         })
                         .done(data => {
                             $('#custName').text(data.name);
                             $('#custEmail').text(data.email);
                             $('#custPhone').text(data.phone);
+                        })
+                        .fail((xhr, status, err) => {
+                            console.error('AJAX error:', status, err, xhr.responseText);
                         });
                 });
 
-                // Contact Driver Modal
+                // Contact Driver
                 $('#contactDriverModal').on('show.bs.modal', function(e) {
-                    let drv = $(e.relatedTarget).data('driver');
-                    let deliveryId = $(e.relatedTarget).closest('tr').find('.was-delivered-select').data('id');
-                    $('#contactDriverId').val(deliveryId);
+                    let id = $(e.relatedTarget).data('delivery-id');
+                    console.log('Contact Driver for delivery:', id);
+                    $('#contactDriverId').val(id);
 
                     $.getJSON("{{ route('deliveries.driverInfo') }}", {
-                            driver: drv
+                            delivery_id: id
                         })
                         .done(data => {
                             $('#drvName').text(data.name);
                             $('#drvEmail').text(data.email);
                             $('#drvPhone').text(data.phone);
+                        })
+                        .fail((xhr, status, err) => {
+                            console.error('AJAX error:', status, err, xhr.responseText);
                         });
                 });
 
-                // Form validations
+                // Validations…
                 $('#wasDeliveredForm').submit(function() {
                     let words = $('#wasDeliveredReason').val().trim().split(/\s+/).length;
                     if (words < 10) {

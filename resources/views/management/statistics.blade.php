@@ -124,7 +124,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         function drawLineChart(chartId, data, labels, label) {
             var ctx = document.getElementById(chartId).getContext('2d');

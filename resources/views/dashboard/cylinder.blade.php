@@ -93,7 +93,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <button class="btn btn-danger mt-3" id="delete-order-btn" disabled data-bs-toggle="modal"
+                    <button class="btn btn-danger mt-3" id="delete-order-btn" disabled data-toggle="modal"
                         data-bs-target="#deleteOrderModal">Delete Order</button>
                 </div>
                 <!-- End Orders Section -->

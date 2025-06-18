@@ -1,4 +1,12 @@
-@if (!Auth::check() || Auth::user()->position === 'Customer')
+<?php
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+?>
+@php
+    $user = Auth::user();
+@endphp
+
+@if (!$user || $user->position === 'Customer')
     <script>
         window.location.href = "{{ route('home') }}";
     </script>
@@ -11,7 +19,16 @@
     </script>
 @endif
 
-@extends(Auth::user()->position === 'Manager' ? 'layouts.management-dashboard' : (Auth::user()->position === 'Employee' ? 'layouts.employee-dashboard' : (Auth::user()->position === 'Agent' ? 'layouts.agent-dashboard' : 'layouts.default-dashboard')))
+@php
+    $layout = match (Auth::user()->position) {
+        'Manager' => 'layouts.management-dashboard',
+        'Employee' => 'layouts.employee-dashboard',
+        'Agent' => 'layouts.agent-dashboard',
+        default => 'layouts.default-dashboard',
+    };
+@endphp
+
+@extends($layout)
 
 @section('content')
     <div class="container" style="margin-top: -6rem;">
@@ -109,16 +126,14 @@
                                     <td class="click" style="cursor: pointer;">
                                         <a href="{{ route('drivers.profile', $delivery->driver_id) }}"
                                             style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
-                                            {{ \Carbon\Carbon::parse($delivery->delivery_date)->format('d-m-Y') }}
-                                        </a>
+                                            {{ Carbon::parse($delivery->delivery_date)->format('d-m-Y') }} </a>
                                     </td>
 
                                     {{-- Delivery Time: links to driver --}}
                                     <td class="click" style="cursor: pointer;">
                                         <a href="{{ route('drivers.profile', $delivery->driver_id) }}"
                                             style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
-                                            {{ \Carbon\Carbon::parse($delivery->delivery_time)->format('h:i A') }}
-                                        </a>
+                                            {{ Carbon::parse($delivery->delivery_time)->format('h:i A') }} </a>
                                     </td>
 
                                     {{-- Tracking: links to driver --}}
@@ -130,23 +145,24 @@
                                     </td>
 
                                     @if (in_array(Auth::user()->position, ['Manager', 'Employee']) && !is_null($delivery->image_path))
-                                        <td>
-                                            @if ($delivery->date_delivered && !$delivery->approval)
-                                                <form action="{{ route('deliveries.approve', $delivery->id) }}"
-                                                    method="POST" style="display:inline-block">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
-                                                </form>
-                                                <form action="{{ route('deliveries.disapprove', $delivery->id) }}"
-                                                    method="POST" style="display:inline-block">
-                                                    @csrf
-                                                    <button type="button" class="btn btn-warning btn-sm disapprove-btn"
-                                                        data-id="{{ $delivery->id }}">
-                                                        Disapprove
-                                                    </button>
-                                                </form>
-                                            @elseif($delivery->approval)
-                                                {{ ucfirst($delivery->approval) }}
+                                        <td class="text-center">
+                                            @php $isDelivered = !empty($delivery->date_delivered); @endphp
+
+                                            @if ($isDelivered && !$delivery->approval)
+                                                <button type="button" class="btn btn-sm btn-blue ms-2"
+                                                    data-bs-toggle="modal" data-bs-target="#imageModal{{ $delivery->id }}">
+                                                    View Image
+                                                </button>
+                                            @elseif ($delivery->approval)
+                                                @if ($delivery->approval === 'disapproved')
+                                                    <span class="text-danger font-weight-bold">Disapproved</span>
+                                                    <a href="{{ route('deliveries.review', $delivery->id) }}"
+                                                        class="btn btn-sm btn-warning ms-2">Review</a>
+                                                @elseif ($delivery->approval === 'approved')
+                                                    <span class="text-success font-weight-bold">Approved</span>
+                                                @else
+                                                    {{ ucfirst($delivery->approval) }}
+                                                @endif
                                             @else
                                                 &mdash;
                                             @endif
@@ -168,18 +184,57 @@
         </div>
     </div>
 
-    <!-- Disapprove Delivery Modal -->
-    <div class="modal fade" id="disapproveModal" tabindex="-1" role="dialog" aria-labelledby="disapproveModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    {{-- Image Modals for each delivery --}}
+    @foreach ($deliveries as $delivery)
+        @php
+            $isDelivered = !empty($delivery->date_delivered);
+        @endphp
+        @if ($isDelivered && !is_null($delivery->image_path) && is_null($delivery->approval))
+            {{-- Image Modal --}}
+            <div class="modal fade" id="imageModal{{ $delivery->id }}" tabindex="-1"
+                aria-labelledby="imageModalLabel{{ $delivery->id }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="imageModalLabel{{ $delivery->id }}">Delivery Image</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img src="{{ asset('storage/' . $delivery->image_path) }}" class="img-fluid"
+                                alt="Delivery Image">
+                            <div class="mt-3">
+                                @if (is_null($delivery->approval))
+                                    {{-- Approve --}}
+                                    <form action="{{ route('deliveries.approve', $delivery->id) }}" method="POST"
+                                        style="display:inline-block;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-success">Approve</button>
+                                    </form>
+                                    {{-- Disapprove --}}
+                                    <button type="button" class="btn btn-warning disapprove-btn-in-modal"
+                                        data-id="{{ $delivery->id }}">
+                                        Disapprove
+                                    </button>
+                                @else
+                                    {{ ucfirst($delivery->approval) }}
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endforeach
+
+    {{-- SINGLE Disapprove Modal (outside loop) --}}
+    <div class="modal fade" id="disapproveModal" tabindex="-1" aria-labelledby="disapproveModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
             <form id="disapproveForm" method="POST" action="{{ route('deliveries.disapprove', 0) }}">
                 @csrf
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="disapproveModalLabel">Disapprove Delivery</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
@@ -200,6 +255,16 @@
     <style>
         .click:hover {
             font-weight: 800;
+        }
+
+        .btn-blue {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+
+        .btn-blue:hover {
+            background-color: #0069d9;
         }
     </style>
 @endsection
@@ -234,19 +299,29 @@
                     });
                 });
                 // === Disapprove Delivery modal trigger ===
-                $('.disapprove-btn').click(function() {
-                    let deliveryId = $(this).data('id');
-                    // Update form action to include correct delivery ID
-                    let form = $('#disapproveForm');
-                    let baseAction = form.attr('action'); // e.g., "/deliveries/0/disapprove"
-                    let newAction = baseAction.replace(/\/0(?!.*\/0)/, '/' + deliveryId);
-                    form.attr('action', newAction);
+                document.querySelectorAll('.disapprove-btn-in-modal').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        const deliveryId = this.dataset.id;
+                        // 1) Hide the image modal properly
+                        const imgModalEl = document.getElementById('imageModal' + deliveryId);
+                        const imgModal = bootstrap.Modal.getInstance(imgModalEl) || new bootstrap.Modal(
+                            imgModalEl);
+                        imgModal.hide();
 
-                    // Clear any previous reason text
-                    $('#disapproveReason').val('');
+                        // 2) Update form action
+                        const form = document.getElementById('disapproveForm');
+                        let baseAction = form.getAttribute('action'); // e.g. "/deliveries/0/disapprove"
+                        let newAction = baseAction.replace(/\/0(?!.*\/0)/, '/' + deliveryId);
+                        form.setAttribute('action', newAction);
 
-                    // Show the modal
-                    $('#disapproveModal').modal('show');
+                        // 3) Clear textarea
+                        document.getElementById('disapproveReason').value = '';
+
+                        // 4) Show Disapprove modal
+                        const disEl = document.getElementById('disapproveModal');
+                        const disModal = bootstrap.Modal.getOrCreateInstance(disEl);
+                        disModal.show();
+                    });
                 });
 
                 // === Disapprove form validation ===

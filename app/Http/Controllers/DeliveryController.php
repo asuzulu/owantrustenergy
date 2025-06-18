@@ -263,7 +263,6 @@ class DeliveryController extends Controller
         return redirect()->back()->with('success', 'Deliveries confirmed successfully.');
     }
 
-
     public function start($id)
     {
         $delivery = Delivery::findOrFail($id);
@@ -281,6 +280,39 @@ class DeliveryController extends Controller
         $delivery->delivery_start = Carbon::now();
         $delivery->save();
 
-        return redirect()->back()->with('success', 'Delivery started.');
+        // Use a distinct session key so we don’t trigger the “return to warehouse” success modal
+        return redirect()->back()->with('delivery_started', 'Delivery has been started.');
+    }
+
+    /**
+     * AJAX: Return details of the customer for the Contact‑Customer modal.
+     */
+    public function customerInfo(Request $request)
+    {
+        $request->validate(['delivery_id' => 'required|exists:deliveries,id']);
+        $delivery = Delivery::findOrFail($request->delivery_id);
+        $user     = $delivery->customerUser;
+
+        return response()->json([
+            'name'  => "{$user->first_name} {$user->last_name}",
+            'email' => $user->email,
+            'phone' => $user->phone,
+        ]);
+    }
+
+    /**
+     * AJAX: Return details of the driver for the Contact‑Driver modal.
+     */
+    public function driverInfo(Request $request)
+    {
+        $request->validate(['delivery_id' => 'required|exists:deliveries,id']);
+        $delivery = Delivery::findOrFail($request->delivery_id);
+        $user     = $delivery->driverUser;
+
+        return response()->json([
+            'name'  => "{$user->first_name} {$user->last_name}",
+            'email' => $user->email,
+            'phone' => $user->phone,
+        ]);
     }
 }

@@ -437,13 +437,14 @@ Route::post('/deliveries/contact-customer', [DeliveryController::class, 'contact
 Route::post('/deliveries/contact-driver', [DeliveryController::class, 'contactDriver'])
     ->name('deliveries.contactDriver');
 
-// Return JSON with customer contact info
+// AJAX endpoints for contact info
 Route::get('/deliveries/customer-info', [DeliveryController::class, 'customerInfo'])
     ->name('deliveries.customerInfo');
-
-// Return JSON with driver contact info
-Route::get('/deliveries/driver-info', [DeliveryController::class, 'driverInfo'])
+Route::get('/deliveries/driver-info',   [DeliveryController::class, 'driverInfo'])
     ->name('deliveries.driverInfo');
+
+Route::post('/deliveries/mark-delivered', [DeliveryController::class, 'markDelivered'])
+    ->name('deliveries.markDelivered');
 
 /*
 |--------------------------------------------------------------------------

@@ -1,3 +1,7 @@
+<?php
+use Illuminate\Support\Carbon;
+?>
+
 @extends(auth()->check() && auth()->user()->position === 'Manager' ? 'layouts.management-dashboard' : (auth()->check() && auth()->user()->position === 'Employee' ? 'layouts.employee-dashboard' : (auth()->check() && auth()->user()->position === 'Driver' ? 'layouts.drivers-dashboard' : 'layouts.default-dashboard')))
 
 @php
@@ -55,16 +59,25 @@
                             <tbody>
                                 @forelse($deliveries as $d)
                                     @php
-                                        $pickup = $d->driver_pickup_date
-                                            ? $d->driver_pickup_date->format('F j, Y') .
-                                                ' at ' .
-                                                $d->driver_pickup_time->format('H:i')
-                                            : '-';
+                                        $pickupDate = $d->driver_pickup_date
+                                            ? Carbon::parse($d->driver_pickup_date)
+                                            : null;
+                                        $pickupTime = $d->driver_pickup_time
+                                            ? Carbon::parse($d->driver_pickup_time)
+                                            : null;
+
+                                        $pickup =
+                                            $pickupDate && $pickupTime
+                                                ? $pickupDate->format('F j, Y') . ' at ' . $pickupTime->format('H:i')
+                                                : '-';
+
+                                        $schedDate = $d->scheduled_date ? Carbon::parse($d->scheduled_date) : null;
+                                        $schedTime = $d->scheduled_time ? Carbon::parse($d->scheduled_time) : null;
 
                                         $sched =
-                                            $d->delivery_date->format('F j, Y') .
-                                            ' at ' .
-                                            $d->delivery_time->format('H:i');
+                                            $schedDate && $schedTime
+                                                ? $schedDate->format('F j, Y') . ' at ' . $schedTime->format('H:i')
+                                                : '-';
 
                                         if (!$d->driver_pickup_date) {
                                             $status = 'Pending';

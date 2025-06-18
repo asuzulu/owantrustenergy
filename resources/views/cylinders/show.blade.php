@@ -378,7 +378,7 @@
         </div>
     </div>
 
-    <!-- Success Modal -->
+    <!-- Rwturn Success Modal -->
     <div class="modal fade" id="returnSuccessModal" tabindex="-1" role="dialog"
         aria-labelledby="returnSuccessModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -426,6 +426,25 @@
                             Yes, Delete
                         </button>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Delivery Success Modal (NEW) -->
+    <div class="modal fade" id="startDeliverySuccessModal" tabindex="-1" role="dialog"
+        aria-labelledby="startDeliverySuccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 id="startDeliverySuccessModalLabel" class="modal-title">Success</h5>
+                    <button class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>You have started delivery successfully.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" data-dismiss="modal">OK</button>
                 </div>
             </div>
         </div>
@@ -688,6 +707,17 @@
             $('#returnSuccessModal').on('click', '.btn-success', function(e) {
                 e.preventDefault();
                 $('#returnSuccessModal').modal('hide');
+                setTimeout(() => location.reload(), 200);
+            });
+
+            // ── SHOW START DELIVERY SUCCESS IF session('delivery_started') ─────────────
+            @if (session('delivery_started'))
+                $('#startDeliverySuccessModal').modal('show');
+            @endif
+
+            $('#startDeliverySuccessModal').on('click', '.btn-success', function(e) {
+                e.preventDefault();
+                $('#startDeliverySuccessModal').modal('hide');
                 setTimeout(() => location.reload(), 200);
             });
         });

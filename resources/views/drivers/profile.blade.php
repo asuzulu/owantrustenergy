@@ -218,34 +218,43 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                {{-- ── ADDED: Show Approve/Disapprove buttons if image_path is set AND approval is null --}}
-                                                @if (!is_null($d->image_path) && is_null($d->approval))
-                                                    <form action="{{ route('deliveries.approve', $d->id) }}" method="POST"
-                                                        style="display:inline-block">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-success btn-sm"
-                                                            formaction="{{ route('deliveries.approve', $d->id) }}">
-                                                            Approve
-                                                        </button>
-                                                    </form>
+                                                @php
+                                                    // Determine if delivered: date_delivered not null
+                                                    $isDelivered = !is_null($d->date_delivered);
+                                                @endphp
 
-                                                    <button type="button" class="btn btn-warning btn-sm disapprove-btn"
-                                                        data-id="{{ $d->id }}">
-                                                        Disapprove
+                                                {{-- If delivered AND image exists AND not yet approved/disapproved → show “View Image” --}}
+                                                @if ($isDelivered && !is_null($d->image_path) && is_null($d->approval))
+                                                    <button type="button" class="btn btn-info btn-sm view-image-btn"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#imageModal{{ $d->id }}">
+                                                        View Image
                                                     </button>
-                                                    {{-- ── If already approved/disapproved, show status --}}
+
+                                                    {{-- If already approved/disapproved → show status --}}
                                                 @elseif(!is_null($d->approval))
-                                                    {{ ucfirst($d->approval) }}
-                                                    {{-- If not delivered yet (both date_delivered & time_delivered null), show “Not delivered yet” --}}
+                                                    {{-- NEW: if disapproved, show Review button next to text --}}
+                                                    @if ($d->approval === 'disapproved')
+                                                        <span class="text-danger font-weight-bold">Disapproved</span>
+                                                        <a href="{{ route('deliveries.review', $d->id) }}"
+                                                            class="btn btn-sm btn-warning ms-2">Review</a>
+                                                    @elseif ($d->approval === 'approved')
+                                                        <span class="text-success font-weight-bold">Approved</span>
+                                                    @else
+                                                        {{-- fallback for unexpected statuses --}}
+                                                        {{ ucfirst($d->approval) }}
+                                                    @endif
+
+                                                    {{-- Not delivered yet --}}
                                                 @elseif (is_null($d->date_delivered) && is_null($d->time_delivered))
                                                     Not delivered yet
 
-                                                    {{-- ── OTHERWISE if image is missing but no approval and already delivered), show a dash --}}
+                                                    {{-- Delivered but missing image or other fallback --}}
                                                 @else
-                                                    &mdash; {{-- no action until delivered or image missing --}}
+                                                    &mdash;
                                                 @endif
 
-                                                {{-- Driver-specific “Start/Close Delivery” logic --}}
+                                                {{-- Driver-specific Start/Close Delivery logic remains unchanged below --}}
                                                 @if (Auth::user()->position === 'Driver' && is_null($d->date_delivered))
                                                     {{-- Show Start Delivery button only if driver_pickup_date and driver_pickup_time are NOT NULL AND delivery_start IS NULL --}}
                                                     @if (!is_null($d->driver_pickup_date) && !is_null($d->driver_pickup_time) && is_null($d->delivery_start))
@@ -335,6 +344,48 @@
             <p class="text-center">No deliveries to confirm for this driver.</p>
         @endif
     </div>
+
+    {{-- Image Modals for each delivered delivery with image --}}
+    @foreach ($drvDeliveries as $d)
+        @php
+            $isDelivered = !is_null($d->date_delivered);
+        @endphp
+        @if ($isDelivered && !is_null($d->image_path))
+            <div class="modal fade" id="imageModal{{ $d->id }}" tabindex="-1" role="dialog"
+                aria-labelledby="imageModalLabel{{ $d->id }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="imageModalLabel{{ $d->id }}">Delivery Image</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img src="{{ asset('storage/' . $d->image_path) }}" alt="Delivery Image" class="img-fluid">
+                            <div class="mt-3">
+                                @if (is_null($d->approval))
+                                    {{-- Approve --}}
+                                    <form action="{{ route('deliveries.approve', $d->id) }}" method="POST"
+                                        style="display:inline-block;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-success">Approve</button>
+                                    </form>
+                                    {{-- Disapprove --}}
+                                    <button type="button" class="btn btn-warning disapprove-btn-in-modal"
+                                        data-id="{{ $d->id }}">
+                                        Disapprove
+                                    </button>
+                                @else
+                                    {{-- Already approved/disapproved --}}
+                                    {{ ucfirst($d->approval) }}
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endforeach
 
     <!-- Disapprove Delivery Modal (copied from “Deliveries” page) -->
     <div class="modal fade" id="disapproveModal" tabindex="-1" role="dialog" aria-labelledby="disapproveModalLabel"
@@ -613,7 +664,7 @@
         <script>
             $(document).ready(function() {
                 // When “Disapprove” button is clicked, show the modal and update form action
-                $('.disapprove-btn').click(function() {
+                $('.disapprove-btn-in-modal').click(function() {
                     let deliveryId = $(this).data('id');
                     let form = $('#disapproveForm');
                     let baseAction = form.attr('action'); // e.g., "/deliveries/0/disapprove"

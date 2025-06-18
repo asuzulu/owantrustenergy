@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-
+use Carbon\Carbon;
 
 class Delivery extends Model
 {
@@ -78,6 +78,15 @@ class Delivery extends Model
      */
     public function getStatusAttribute()
     {
+        // ===== If disapproved, immediately return 'Disapproved' =====
+        if ($this->approval === 'disapproved' && $this->date_delivered && $this->time_delivered) {
+            // Format date_delivered and time_delivered
+            $dateStr = Carbon::parse($this->date_delivered)->format('d-m-Y');
+            $timeStr = Carbon::parse($this->time_delivered)->format('H:i');
+            return "Delivered on {$dateStr} at {$timeStr}";
+        }
+        // ================================================================
+
         // Fetch cylinder record
         $cyl = DB::table('cylinders')->where('id', $this->cylinder)->first();
         $loc = $cyl->location ?? null;
